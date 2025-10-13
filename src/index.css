@@ -19,3 +19,115 @@ body {
 #root {
   width: 100%;
 }
+
+/* Hide scrollbar for carousel */
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Fade in animation */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fadeIn {
+  animation: fadeIn 0.3s ease-out;
+}
+
+/* Lumo Mascot Animations */
+@keyframes lumo-tail-flash {
+  0%, 100% { filter: brightness(2) drop-shadow(0 0 20px #FFE16B); }
+  50% { filter: brightness(3) drop-shadow(0 0 30px #FFE16B); }
+}
+
+@keyframes lumo-tail-sparkle {
+  0%, 100% { filter: brightness(1.25) drop-shadow(0 0 10px #FFE16B); }
+  50% { filter: brightness(1.5) drop-shadow(0 0 15px #FFE16B); }
+}
+
+@keyframes lumo-tail-warm {
+  0%, 100% { filter: brightness(1.1); }
+  50% { filter: brightness(1.15); }
+}
+
+@keyframes lumo-tail-fade {
+  0%, 100% { filter: brightness(0.4) opacity(0.5); }
+  50% { filter: brightness(0.3) opacity(0.4); }
+}
+
+@keyframes lumo-tail-steady {
+  0%, 100% { filter: brightness(1.5); }
+}
+
+@keyframes lumo-sleepy-sway {
+  0%, 100% { transform: translateY(5px) rotate(-2deg); }
+  50% { transform: translateY(8px) rotate(2deg); }
+}
+
+@keyframes lumo-gentle-nod {
+  0%, 100% { transform: translateY(-2px); }
+  50% { transform: translateY(0px); }
+}
+
+@keyframes lumo-figure-eight {
+  0% { transform: translate(0, 0) rotate(0deg); }
+  25% { transform: translate(8px, -5px) rotate(10deg); }
+  50% { transform: translate(0, -8px) rotate(0deg); }
+  75% { transform: translate(-8px, -5px) rotate(-10deg); }
+  100% { transform: translate(0, 0) rotate(0deg); }
+}
+
+@keyframes lumo-confident-puff {
+  0%, 100% { transform: scale(1.08) translateY(-3px); }
+  50% { transform: scale(1.1) translateY(-5px); }
+}
+
+@keyframes lumo-wing-flutter {
+  0%, 100% { transform: rotate(var(--rotation)) scaleY(1); }
+  25% { transform: rotate(calc(var(--rotation) - 10deg)) scaleY(1.1); }
+  50% { transform: rotate(var(--rotation)) scaleY(0.95); }
+  75% { transform: rotate(calc(var(--rotation) + 10deg)) scaleY(1.1); }
+}
+
+@keyframes lumo-wing-twitch {
+  0%, 100% { transform: rotate(var(--rotation)) translateX(0); }
+  25% { transform: rotate(calc(var(--rotation) + 5deg)) translateX(2px); }
+  50% { transform: rotate(var(--rotation)) translateX(0); }
+  75% { transform: rotate(calc(var(--rotation) - 5deg)) translateX(-2px); }
+}
+
+@keyframes lumo-antenna-listen {
+  0%, 100% { transform: rotate(-5deg); }
+  50% { transform: rotate(5deg); }
+}
+
+@keyframes lumo-swirl-confused {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.lumo-tail-flash { animation: lumo-tail-flash 0.6s ease-in-out infinite; }
+.lumo-tail-sparkle { animation: lumo-tail-sparkle 1.5s ease-in-out infinite; }
+.lumo-tail-warm { animation: lumo-tail-warm 2s ease-in-out infinite; }
+.lumo-tail-fade { animation: lumo-tail-fade 3s ease-in-out infinite; }
+.lumo-tail-steady { animation: lumo-tail-steady 1s ease-in-out; }
+.lumo-sleepy-sway { animation: lumo-sleepy-sway 3s ease-in-out infinite; }
+.lumo-gentle-nod { animation: lumo-gentle-nod 1.5s ease-in-out infinite; }
+.lumo-figure-eight { animation: lumo-figure-eight 3s ease-in-out infinite; }
+.lumo-confident-puff { animation: lumo-confident-puff 2s ease-in-out infinite; }
+.lumo-wing-flutter { animation: lumo-wing-flutter 0.4s ease-in-out infinite; }
+.lumo-wing-twitch { animation: lumo-wing-twitch 0.8s ease-in-out infinite; }
+.lumo-antenna-listen { animation: lumo-antenna-listen 1s ease-in-out infinite; }
+.lumo-swirl-confused { animation: lumo-swirl-confused 2s linear infinite; transform-origin: center; }

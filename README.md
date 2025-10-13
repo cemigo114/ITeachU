@@ -42,22 +42,16 @@ npm install
 
 3. Configure API key
 
-**IMPORTANT**: The current implementation includes the API key directly in the frontend code (line 58-72 in `src/App.jsx`). For security:
+**REQUIRED**: Add your Anthropic API key to the `.env` file:
 
-**Option A - Quick Test (Not Secure)**:
-- Add your API key directly in `src/App.jsx` at line 61:
-```javascript
-headers: {
-  'Content-Type': 'application/json',
-  'x-api-key': 'YOUR_API_KEY_HERE', // Add this line
-  'anthropic-version': '2023-06-01'  // Add this line
-},
+```bash
+# Edit .env file and replace 'your_api_key_here' with your actual API key
+VITE_ANTHROPIC_API_KEY=sk-ant-xxxxx
 ```
 
-**Option B - Production (Recommended)**:
-- Set up a backend proxy server that securely handles API calls
-- Update the fetch URL to point to your backend endpoint
-- Never commit API keys to version control
+Get your API key from: https://console.anthropic.com/
+
+⚠️ **Security Note**: The `.env` file is gitignored and won't be committed. For production use, implement a backend proxy server instead of exposing API keys in the frontend.
 
 4. Start the development server
 ```bash
