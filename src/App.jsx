@@ -19,6 +19,7 @@ const TASKS = {
     title: 'Stack of Cups Challenge',
     grade: 'Grade 8',
     standard: 'CCSS.MATH.8.F.B.4',
+    standardId: '28113b79-f2b9-44d2-8c78-2aad73303646',
     description: 'Teach AI to understand linear patterns in stacked cups',
     imageUrl: "data:image/svg+xml,%3Csvg width='400' height='200' xmlns='http://www.w3.org/2000/svg'%3E%3Crect fill='%23f3f4f6' width='400' height='200'/%3E%3Ctext x='50%25' y='30%25' text-anchor='middle' fill='%23374151' font-size='14'%3E2 cups = 16 cm%3C/text%3E%3Ctext x='50%25' y='50%25' text-anchor='middle' fill='%23374151' font-size='14'%3E4 cups = 20 cm%3C/text%3E%3Ctext x='50%25' y='70%25' text-anchor='middle' fill='%23374151' font-size='14'%3E8 cups = 28 cm%3C/text%3E%3C/svg%3E",
     systemPrompt: `You are Zippy, a curious and humble AI learner. A student will teach you the Stack of Cups problem.

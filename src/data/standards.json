@@ -1,0 +1,24 @@
+{
+  "standards": [
+    {
+      "id": "28113b79-f2b9-44d2-8c78-2aad73303646",
+      "code": "8.F.B.4",
+      "description": "Construct a function to model a linear relationship between two quantities. Determine the rate of change and initial value of the function from a description of a relationship or from two (x, y) values, including reading these from a table or from a graph. Interpret the rate of change and initial value of a linear function in terms of the situation it models and in terms of its graph or a table of values.",
+      "grade": "8",
+      "subject": "Mathematics",
+      "jurisdiction": "CCSS",
+      "domain": "Functions",
+      "cluster": "Use functions to model relationships between quantities"
+    },
+    {
+      "id": "a78d4aa3-fb10-4526-b649-ba3e8695e9db",
+      "code": "6.RP.A.3",
+      "description": "Use ratio and rate reasoning to solve real-world and mathematical problems, by reasoning about tables of equivalent ratios, tape diagrams, double number line diagrams, or equations.",
+      "grade": "6",
+      "subject": "Mathematics",
+      "jurisdiction": "CCSS",
+      "domain": "Ratios and Proportional Relationships",
+      "cluster": "Understand ratio concepts and use ratio reasoning to solve problems"
+    }
+  ]
+}

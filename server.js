@@ -144,9 +144,39 @@ app.get('/api/collections', (req, res) => {
   }
 });
 
+// Get educational standards
+app.get('/api/standards', (req, res) => {
+  try {
+    const standards = require('./src/data/standards.json');
+    res.json(standards);
+  } catch (error) {
+    console.error('Standards fetch error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Get standard by ID
+app.get('/api/standards/:id', (req, res) => {
+  try {
+    const { id } = req.params;
+    const standards = require('./src/data/standards.json');
+    const standard = standards.standards.find(s => s.id === id || s.code === id);
+
+    if (!standard) {
+      return res.status(404).json({ error: 'Standard not found' });
+    }
+
+    res.json(standard);
+  } catch (error) {
+    console.error('Standard fetch error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
 app.listen(PORT, () => {
   console.log(`🚀 Proxy server running on http://localhost:${PORT}`);
   console.log(`📊 Backend assessment enabled - logs hidden from frontend`);
   console.log(`💾 Session persistence enabled`);
   console.log(`📚 Task collections API ready`);
+  console.log(`🎯 Standards alignment API ready`);
 });

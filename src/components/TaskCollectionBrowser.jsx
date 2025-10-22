@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { BookOpen, ChevronRight, CheckCircle, Lock, Star } from 'lucide-react';
+import StandardBadge from './StandardBadge';
 
 const TaskCollectionBrowser = ({ onSelectTask }) => {
   const [collections, setCollections] = useState([]);
@@ -131,10 +132,14 @@ const TaskCollectionBrowser = ({ onSelectTask }) => {
                     <h3 className="font-semibold text-lg mb-2">{task.title}</h3>
                     <p className="text-sm text-gray-600 mb-3">{task.description}</p>
 
-                    <div className="flex items-center gap-4 text-sm text-gray-500">
+                    <div className="flex items-center gap-3 text-sm text-gray-500">
                       <span>{task.grade}</span>
-                      <span>•</span>
-                      <span>{task.standard}</span>
+                      {task.standardId && (
+                        <>
+                          <span>•</span>
+                          <StandardBadge standardId={task.standardId} standardCode={task.standard} />
+                        </>
+                      )}
                     </div>
                   </div>
 
@@ -164,14 +169,16 @@ const getTaskById = (taskId) => {
       id: 'stack_of_cups',
       title: 'Stack of Cups Challenge',
       grade: 'Grade 8',
-      standard: 'CCSS.MATH.8.F.B.4',
+      standard: '8.F.B.4',
+      standardId: '28113b79-f2b9-44d2-8c78-2aad73303646',
       description: 'Teach AI to understand linear patterns in stacked cups'
     },
     smoothie_recipe: {
       id: 'smoothie_recipe',
       title: 'Smoothie Recipe Ratios',
       grade: 'Grade 6',
-      standard: 'CCSS.MATH.6.RP.A.3',
+      standard: '6.RP.A.3',
+      standardId: 'a78d4aa3-fb10-4526-b649-ba3e8695e9db',
       description: 'Teach AI about ratios and proportional relationships'
     }
   };
