@@ -173,6 +173,24 @@ app.get('/api/standards/:id', (req, res) => {
   }
 });
 
+// Get prerequisite standards for a given standard ID
+app.get('/api/standards/:id/prerequisites', (req, res) => {
+  try {
+    const { id } = req.params;
+    const prereqData = JSON.parse(fs.readFileSync('./src/data/ct-prerequisites.json', 'utf-8'));
+    const prereqs = prereqData.prerequisites[id] || [];
+
+    res.json({
+      standardId: id,
+      prerequisites: prereqs,
+      count: prereqs.length
+    });
+  } catch (error) {
+    console.error('Prerequisites fetch error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
 app.listen(PORT, () => {
   console.log(`🚀 Proxy server running on http://localhost:${PORT}`);
   console.log(`📊 Backend assessment enabled - logs hidden from frontend`);
