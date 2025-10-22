@@ -13,6 +13,9 @@ app.use(express.json());
 // Store for conversation logs (in production, use a database)
 const conversationLogs = [];
 
+// Store for sessions (in production, use a database)
+const sessions = new Map(); // sessionId -> session data
+
 app.post('/api/chat', async (req, res) => {
   try {
     const apiKey = process.env.VITE_ANTHROPIC_API_KEY;
@@ -73,7 +76,77 @@ app.get('/api/teacher/conversations', (req, res) => {
   });
 });
 
+// Session management endpoints
+app.post('/api/sessions', (req, res) => {
+  try {
+    const { sessionId, sessionData } = req.body;
+
+    if (!sessionId || !sessionData) {
+      return res.status(400).json({ error: 'sessionId and sessionData required' });
+    }
+
+    // Store session (in production: save to database)
+    sessions.set(sessionId, {
+      ...sessionData,
+      updatedAt: new Date().toISOString()
+    });
+
+    console.log(`💾 Session saved: ${sessionId} (${sessionData.messages?.length || 0} messages)`);
+
+    res.json({ success: true, sessionId });
+  } catch (error) {
+    console.error('Session save error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.get('/api/sessions/:sessionId', (req, res) => {
+  try {
+    const { sessionId } = req.params;
+
+    const session = sessions.get(sessionId);
+
+    if (!session) {
+      return res.status(404).json({ error: 'Session not found' });
+    }
+
+    res.json(session);
+  } catch (error) {
+    console.error('Session fetch error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.delete('/api/sessions/:sessionId', (req, res) => {
+  try {
+    const { sessionId } = req.params;
+
+    sessions.delete(sessionId);
+    console.log(`🗑️  Session deleted: ${sessionId}`);
+
+    res.json({ success: true });
+  } catch (error) {
+    console.error('Session delete error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Get task collections
+app.get('/api/collections', (req, res) => {
+  try {
+    // In production: Fetch from database
+    // For now: Return from JSON file
+    const collections = require('./src/data/taskCollections.json');
+    res.json(collections);
+  } catch (error) {
+    console.error('Collections fetch error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
 app.listen(PORT, () => {
   console.log(`🚀 Proxy server running on http://localhost:${PORT}`);
   console.log(`📊 Backend assessment enabled - logs hidden from frontend`);
+  console.log(`💾 Session persistence enabled`);
+  console.log(`📚 Task collections API ready`);
 });

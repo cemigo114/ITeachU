@@ -1,0 +1,69 @@
+{
+  "collections": [
+    {
+      "id": "grade-8-stats",
+      "title": "Grade 8 - Statistics & Probability",
+      "description": "Data analysis, scatter plots, and linear models",
+      "type": "unit",
+      "grade": 8,
+      "published": true,
+      "tasks": [
+        {
+          "id": "stack_of_cups",
+          "order": 1,
+          "required": true
+        }
+      ]
+    },
+    {
+      "id": "grade-8-algebra",
+      "title": "Grade 8 - Algebra",
+      "description": "Linear equations, functions, and systems",
+      "type": "unit",
+      "grade": 8,
+      "published": true,
+      "tasks": []
+    },
+    {
+      "id": "grade-6-ratios",
+      "title": "Grade 6 - Ratios & Proportions",
+      "description": "Ratio reasoning and proportional relationships",
+      "type": "unit",
+      "grade": 6,
+      "published": true,
+      "tasks": [
+        {
+          "id": "smoothie_recipe",
+          "order": 1,
+          "required": true
+        }
+      ]
+    }
+  ],
+  "pathways": [
+    {
+      "id": "linear-models",
+      "title": "Linear Models",
+      "description": "Finding patterns in data and creating equations",
+      "type": "pathway",
+      "parentCollection": "grade-8-stats",
+      "published": true,
+      "tasks": [
+        {
+          "id": "stack_of_cups",
+          "order": 1,
+          "required": true
+        }
+      ]
+    },
+    {
+      "id": "data-displays",
+      "title": "Data Displays",
+      "description": "Box plots, histograms, and scatter plots",
+      "type": "pathway",
+      "parentCollection": "grade-8-stats",
+      "published": true,
+      "tasks": []
+    }
+  ]
+}

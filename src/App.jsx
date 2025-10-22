@@ -1,6 +1,16 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Send, Sparkles, Brain, HelpCircle, BarChart3, Home, Users, ChevronRight, CheckCircle, AlertCircle, Clock, ArrowLeft, MessageSquare, Target, Lightbulb, Award, UserCircle, BookOpen, Trophy, TrendingUp } from 'lucide-react';
 import LumoMascot from './components/LumoMascot';
+import {
+  saveSession,
+  loadSession,
+  clearSession,
+  archiveSession,
+  createSession,
+  updateSessionProgress,
+  hasResumableSession,
+  getSessionSummary
+} from './utils/sessionStorage';
 
 // Task configurations
 const TASKS = {
@@ -314,10 +324,21 @@ const ITeachUMVP = () => {
     partD: false
   });
 
+  // Session persistence state
+  const [currentSession, setCurrentSession] = useState(null);
+  const [showResumePrompt, setShowResumePrompt] = useState(false);
+
   // Assignment/feedback state
   const [assignments, setAssignments] = useState(MOCK_ASSIGNMENTS);
   const [selectedAssignmentForReview, setSelectedAssignmentForReview] = useState(null);
   const [selectedStudentForDetail, setSelectedStudentForDetail] = useState(null);
+
+  // Check for resumable session on mount
+  useEffect(() => {
+    if (hasResumableSession() && userRole === 'student') {
+      setShowResumePrompt(true);
+    }
+  }, [userRole]);
 
   // Login handler
   const handleLogin = (role, user) => {
