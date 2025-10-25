@@ -147,7 +147,7 @@ app.get('/api/collections', (req, res) => {
 // Get educational standards (Connecticut Mathematics - 746 standards from Knowledge Graph)
 app.get('/api/standards', (req, res) => {
   try {
-    const standards = require('./src/data/ct-math-standards.json');
+    const standards = JSON.parse(fs.readFileSync('./src/data/ct-math-standards.json', 'utf-8'));
     res.json(standards);
   } catch (error) {
     console.error('Standards fetch error:', error);
@@ -159,7 +159,7 @@ app.get('/api/standards', (req, res) => {
 app.get('/api/standards/:id', (req, res) => {
   try {
     const { id } = req.params;
-    const standards = require('./src/data/ct-math-standards.json');
+    const standards = JSON.parse(fs.readFileSync('./src/data/ct-math-standards.json', 'utf-8'));
     const standard = standards.standards.find(s => s.id === id || s.code === id);
 
     if (!standard) {

@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Send, Sparkles, Brain, HelpCircle, BarChart3, Home, Users, ChevronRight, CheckCircle, AlertCircle, Clock, ArrowLeft, MessageSquare, Target, Lightbulb, Award, UserCircle, BookOpen, Trophy, TrendingUp } from 'lucide-react';
 import LumoMascot from './components/LumoMascot';
+import StandardBadge from './components/StandardBadge';
+import TaskCollectionBrowser from './components/TaskCollectionBrowser';
 import {
   saveSession,
   loadSession,
@@ -19,7 +21,7 @@ const TASKS = {
     title: 'Stack of Cups Challenge',
     grade: 'Grade 8',
     standard: 'CCSS.MATH.8.F.B.4',
-    standardId: '28113b79-f2b9-44d2-8c78-2aad73303646',
+    standardId: '06f7e578-0d65-55d4-a817-77e4cd0a4b05', // CT standard for 8.F.B.4
     description: 'Teach AI to understand linear patterns in stacked cups',
     imageUrl: "data:image/svg+xml,%3Csvg width='400' height='200' xmlns='http://www.w3.org/2000/svg'%3E%3Crect fill='%23f3f4f6' width='400' height='200'/%3E%3Ctext x='50%25' y='30%25' text-anchor='middle' fill='%23374151' font-size='14'%3E2 cups = 16 cm%3C/text%3E%3Ctext x='50%25' y='50%25' text-anchor='middle' fill='%23374151' font-size='14'%3E4 cups = 20 cm%3C/text%3E%3Ctext x='50%25' y='70%25' text-anchor='middle' fill='%23374151' font-size='14'%3E8 cups = 28 cm%3C/text%3E%3C/svg%3E",
     systemPrompt: `You are Zippy, a curious and humble AI learner. A student will teach you the Stack of Cups problem.
@@ -79,6 +81,7 @@ Can you help me figure out what's happening?`
     title: 'Smoothie Recipe Ratios',
     grade: 'Grade 6',
     standard: 'CCSS.MATH.6.RP.A.3',
+    standardId: '62d0029e-9b81-5f08-b0bb-8ae1ddc9e8d0', // CT standard for 6.RP.A.3
     description: 'Teach AI about ratio and proportional reasoning with recipes',
     imageUrl: "data:image/svg+xml,%3Csvg width='400' height='280' xmlns='http://www.w3.org/2000/svg'%3E%3Crect fill='%23fef3c7' width='400' height='280'/%3E%3Ctext x='200' y='30' text-anchor='middle' fill='%23b91c1c' font-size='18' font-weight='bold'%3E🍓 Smoothie Recipe 🥤%3C/text%3E%3Ctext x='200' y='60' text-anchor='middle' fill='%23059669' font-size='14' font-weight='bold'%3EOriginal Recipe%3C/text%3E%3Ctext x='100' y='90' text-anchor='middle' fill='%23dc2626' font-size='32'%3E🍓🍓%3C/text%3E%3Ctext x='100' y='115' text-anchor='middle' fill='%23374151' font-size='12'%3E2 cups%3C/text%3E%3Ctext x='200' y='102' text-anchor='middle' fill='%23374151' font-size='20'%3E:%3C/text%3E%3Ctext x='300' y='90' text-anchor='middle' fill='%2393c5fd' font-size='32'%3E🥛🥛🥛%3C/text%3E%3Ctext x='300' y='115' text-anchor='middle' fill='%23374151' font-size='12'%3E3 cups%3C/text%3E%3Crect x='50' y='130' width='300' height='2' fill='%23d1d5db'/%3E%3Ctext x='200' y='160' text-anchor='middle' fill='%23dc2626' font-size='13' font-weight='bold'%3ERatio: 2 to 3%3C/text%3E%3Ctext x='200' y='185' text-anchor='middle' fill='%23374151' font-size='11'%3ETo double: multiply BOTH by 2%3C/text%3E%3Ctext x='200' y='210' text-anchor='middle' fill='%23374151' font-size='11'%3E🍓🍓 × 2 = 🍓🍓🍓🍓 (4 cups)%3C/text%3E%3Ctext x='200' y='230' text-anchor='middle' fill='%23374151' font-size='11'%3E🥛🥛🥛 × 2 = 🥛🥛🥛🥛🥛🥛 (6 cups)%3C/text%3E%3Ctext x='200' y='260' text-anchor='middle' fill='%236b7280' font-size='10' style='font-style:italic'%3EKeeps the same taste!%3C/text%3E%3C/svg%3E",
     systemPrompt: `You are Zippy, a curious and humble AI learner. A student will teach you about ratios using a smoothie recipe.
@@ -878,7 +881,7 @@ const ITeachUMVP = () => {
                   <p className="text-sm text-gray-600 mb-2">{task.description}</p>
                   <div className="flex items-center gap-2 text-xs text-gray-500">
                     <span className="bg-gray-100 px-2 py-1 rounded">{task.grade}</span>
-                    <span className="bg-gray-100 px-2 py-1 rounded">{task.standard}</span>
+                    <StandardBadge standardId={task.standardId} standardCode={task.standard} />
                   </div>
                 </button>
               ))}
@@ -1292,12 +1295,21 @@ const ITeachUMVP = () => {
               <h1 className="text-2xl font-bold">My Learning Dashboard</h1>
               <p className="text-green-200">Welcome, {currentUser.name}</p>
             </div>
-            <button
-              onClick={() => { setUserRole(null); setView('login'); }}
-              className="px-4 py-2 bg-green-700 rounded-lg hover:bg-green-800"
-            >
-              Logout
-            </button>
+            <div className="flex items-center gap-3">
+              <button
+                onClick={() => setView('browseTasks')}
+                className="px-4 py-2 bg-green-700 rounded-lg hover:bg-green-800 flex items-center gap-2"
+              >
+                <BookOpen className="w-5 h-5" />
+                Browse Tasks
+              </button>
+              <button
+                onClick={() => { setUserRole(null); setView('login'); }}
+                className="px-4 py-2 bg-green-700 rounded-lg hover:bg-green-800"
+              >
+                Logout
+              </button>
+            </div>
           </div>
         </div>
 
@@ -1385,6 +1397,38 @@ const ITeachUMVP = () => {
               ))}
             </div>
           </div>
+        </div>
+      </div>
+    );
+  }
+
+  // BROWSE TASKS VIEW (Student)
+  if (view === 'browseTasks') {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <div className="bg-green-600 text-white p-6">
+          <div className="max-w-7xl mx-auto flex items-center gap-4">
+            <button
+              onClick={() => setView('studentDashboard')}
+              className="p-2 hover:bg-green-700 rounded"
+            >
+              <ArrowLeft className="w-5 h-5" />
+            </button>
+            <div>
+              <h1 className="text-2xl font-bold">Browse Tasks</h1>
+              <p className="text-green-200">Explore available learning tasks</p>
+            </div>
+          </div>
+        </div>
+
+        <div className="max-w-7xl mx-auto p-6">
+          <TaskCollectionBrowser
+            onSelectTask={(task) => {
+              // Handle task selection - could create an assignment or just view details
+              console.log('Selected task:', task);
+              // For now, just log the task. In the future, could create an assignment
+            }}
+          />
         </div>
       </div>
     );

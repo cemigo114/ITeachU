@@ -10,10 +10,16 @@ const StandardBadge = ({ standardId, standardCode }) => {
   const [showTooltip, setShowTooltip] = useState(false);
 
   useEffect(() => {
+    console.log('StandardBadge received standardId:', standardId);
+    console.log('StandardBadge received standardCode:', standardCode);
     if (standardId) {
+      console.log('Fetching standard from API:', `http://localhost:3002/api/standards/${standardId}`);
       fetch(`http://localhost:3002/api/standards/${standardId}`)
         .then(res => res.json())
-        .then(data => setStandard(data))
+        .then(data => {
+          console.log('Standard data received:', data);
+          setStandard(data);
+        })
         .catch(err => console.error('Error fetching standard:', err));
     }
   }, [standardId]);

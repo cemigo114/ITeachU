@@ -170,7 +170,7 @@ const getTaskById = (taskId) => {
       title: 'Stack of Cups Challenge',
       grade: 'Grade 8',
       standard: '8.F.B.4',
-      standardId: '28113b79-f2b9-44d2-8c78-2aad73303646',
+      standardId: '06f7e578-0d65-55d4-a817-77e4cd0a4b05', // CT standard for 8.F.B.4
       description: 'Teach AI to understand linear patterns in stacked cups'
     },
     smoothie_recipe: {
@@ -178,7 +178,7 @@ const getTaskById = (taskId) => {
       title: 'Smoothie Recipe Ratios',
       grade: 'Grade 6',
       standard: '6.RP.A.3',
-      standardId: 'a78d4aa3-fb10-4526-b649-ba3e8695e9db',
+      standardId: '62d0029e-9b81-5f08-b0bb-8ae1ddc9e8d0', // CT standard for 6.RP.A.3
       description: 'Teach AI about ratios and proportional relationships'
     }
   };
