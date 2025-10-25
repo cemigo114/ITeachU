@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Award, Info } from 'lucide-react';
+import { API_ENDPOINTS } from '../config/api';
 
 /**
  * StandardBadge Component
@@ -10,16 +11,10 @@ const StandardBadge = ({ standardId, standardCode }) => {
   const [showTooltip, setShowTooltip] = useState(false);
 
   useEffect(() => {
-    console.log('StandardBadge received standardId:', standardId);
-    console.log('StandardBadge received standardCode:', standardCode);
     if (standardId) {
-      console.log('Fetching standard from API:', `http://localhost:3002/api/standards/${standardId}`);
-      fetch(`http://localhost:3002/api/standards/${standardId}`)
+      fetch(API_ENDPOINTS.standardById(standardId))
         .then(res => res.json())
-        .then(data => {
-          console.log('Standard data received:', data);
-          setStandard(data);
-        })
+        .then(data => setStandard(data))
         .catch(err => console.error('Error fetching standard:', err));
     }
   }, [standardId]);

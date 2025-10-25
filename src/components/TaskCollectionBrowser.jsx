@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { BookOpen, ChevronRight, CheckCircle, Lock, Star } from 'lucide-react';
 import StandardBadge from './StandardBadge';
+import { API_ENDPOINTS } from '../config/api';
 
 const TaskCollectionBrowser = ({ onSelectTask }) => {
   const [collections, setCollections] = useState([]);
@@ -13,7 +14,7 @@ const TaskCollectionBrowser = ({ onSelectTask }) => {
 
   const fetchCollections = async () => {
     try {
-      const response = await fetch('http://localhost:3002/api/collections');
+      const response = await fetch(API_ENDPOINTS.collections);
       const data = await response.json();
       setCollections(data.collections || []);
       setLoading(false);

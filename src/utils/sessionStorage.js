@@ -3,6 +3,8 @@
  * MVP - No encryption, just basic save/restore
  */
 
+import { API_ENDPOINTS } from '../config/api';
+
 const SESSION_KEY = 'iteachu_active_session';
 const SESSIONS_HISTORY_KEY = 'iteachu_sessions_history';
 
@@ -21,7 +23,7 @@ export const saveSession = async (sessionData) => {
 
     // Sync to backend (async, non-blocking)
     try {
-      await fetch('http://localhost:3002/api/sessions', {
+      await fetch(API_ENDPOINTS.sessions, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
