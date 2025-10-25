@@ -1,0 +1,22 @@
+# Netlify Configuration for ITeachU Frontend
+
+[build]
+  # Command to build the frontend
+  command = "npm run build"
+
+  # Directory where Vite outputs the built files
+  publish = "dist"
+
+# Redirect all routes to index.html for React Router (SPA)
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+
+# Optional: Set custom headers for security
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "DENY"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
