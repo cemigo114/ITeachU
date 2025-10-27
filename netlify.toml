@@ -7,6 +7,12 @@
   # Directory where Vite outputs the built files
   publish = "dist"
 
+# Build environment variables
+# Note: VITE_API_URL must also be set in Netlify UI: Site settings → Environment variables
+[build.environment]
+  # This is a placeholder - actual value comes from Netlify environment variables
+  # But defining it here ensures Netlify knows to look for it
+
 # Redirect all routes to index.html for React Router (SPA)
 [[redirects]]
   from = "/*"
