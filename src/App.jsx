@@ -3,6 +3,7 @@ import { Send, Sparkles, Brain, HelpCircle, BarChart3, Home, Users, ChevronRight
 import LumoMascot from './components/LumoMascot';
 import StandardBadge from './components/StandardBadge';
 import TaskCollectionBrowser from './components/TaskCollectionBrowser';
+import { API_ENDPOINTS } from './config/api';
 import {
   saveSession,
   loadSession,
@@ -427,7 +428,7 @@ const ITeachUMVP = () => {
         ...updatedMessages
       ];
 
-      const response = await fetch('http://localhost:3002/api/chat', {
+      const response = await fetch(API_ENDPOINTS.chat, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
