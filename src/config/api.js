@@ -15,7 +15,14 @@
 // Get API base URL from environment variable, fallback to localhost for development
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3002';
 
-console.log('🌐 API Base URL:', API_BASE_URL);
+// Debug: Log all environment variables
+console.log('🔍 Environment Check:', {
+  VITE_API_URL: import.meta.env.VITE_API_URL,
+  MODE: import.meta.env.MODE,
+  PROD: import.meta.env.PROD,
+  DEV: import.meta.env.DEV,
+  'Final API_BASE_URL': API_BASE_URL
+});
 
 /**
  * API Endpoints
