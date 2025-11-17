@@ -754,20 +754,23 @@ I think we both need more help understanding how the cup nesting pattern works. 
               <p className="text-xs text-gray-600">{COGNALITIES[selectedCognality].aiProfile}</p>
             </div>
 
-            <div className="bg-gradient-to-br from-indigo-50 to-purple-50 rounded-lg p-3 border border-indigo-100">
-              <h3 className="text-sm font-bold text-indigo-900 mb-2">📋 The Problem</h3>
-              <div className="space-y-1 text-sm font-medium">
-                <div className="flex items-center justify-between">
-                  <span className="text-gray-700">2 cups</span>
-                  <span className="text-indigo-600">16 cm</span>
+            <div className="bg-gradient-to-br from-purple-500 to-indigo-600 rounded-xl p-5 shadow-lg border-2 border-purple-400">
+              <h3 className="text-lg font-bold text-white mb-3 flex items-center">
+                <span className="text-2xl mr-2">📋</span>
+                The Problem
+              </h3>
+              <div className="space-y-3">
+                <div className="flex items-center justify-between bg-white bg-opacity-20 rounded-lg p-3">
+                  <span className="text-white font-semibold text-base">2 cups</span>
+                  <span className="text-yellow-300 font-bold text-lg">16 cm</span>
                 </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-gray-700">4 cups</span>
-                  <span className="text-indigo-600">20 cm</span>
+                <div className="flex items-center justify-between bg-white bg-opacity-20 rounded-lg p-3">
+                  <span className="text-white font-semibold text-base">4 cups</span>
+                  <span className="text-yellow-300 font-bold text-lg">20 cm</span>
                 </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-gray-700">8 cups</span>
-                  <span className="text-indigo-600">28 cm</span>
+                <div className="flex items-center justify-between bg-white bg-opacity-20 rounded-lg p-3">
+                  <span className="text-white font-semibold text-base">8 cups</span>
+                  <span className="text-yellow-300 font-bold text-lg">28 cm</span>
                 </div>
               </div>
             </div>
@@ -911,16 +914,27 @@ I think we both need more help understanding how the cup nesting pattern works. 
           </div>
 
           {/* Sticky Problem Display - Always Visible */}
-          <div className="hidden md:block bg-gray-50 border-t border-gray-200 p-3">
+          <div className="hidden md:block bg-gradient-to-r from-purple-500 to-indigo-600 border-t-2 border-purple-400 py-4 px-6 shadow-md">
             <div className="max-w-4xl mx-auto flex items-center justify-center space-x-6">
-              <div className="text-center">
-                <div className="text-xs text-gray-500 mb-1">The Problem</div>
-                <div className="flex items-center space-x-4 text-sm font-medium">
-                  <span>2 cups = 16cm</span>
-                  <span className="text-gray-400">•</span>
-                  <span>4 cups = 20cm</span>
-                  <span className="text-gray-400">•</span>
-                  <span>8 cups = 28cm</span>
+              <div className="flex items-center space-x-1">
+                <span className="text-2xl mr-2">📋</span>
+                <span className="text-white font-bold text-base mr-4">The Problem:</span>
+              </div>
+              <div className="flex items-center space-x-6">
+                <div className="flex items-center space-x-2 bg-white bg-opacity-20 rounded-lg px-4 py-2">
+                  <span className="text-white font-semibold">2 cups</span>
+                  <span className="text-yellow-300 font-bold text-lg">=</span>
+                  <span className="text-yellow-300 font-bold text-lg">16cm</span>
+                </div>
+                <div className="flex items-center space-x-2 bg-white bg-opacity-20 rounded-lg px-4 py-2">
+                  <span className="text-white font-semibold">4 cups</span>
+                  <span className="text-yellow-300 font-bold text-lg">=</span>
+                  <span className="text-yellow-300 font-bold text-lg">20cm</span>
+                </div>
+                <div className="flex items-center space-x-2 bg-white bg-opacity-20 rounded-lg px-4 py-2">
+                  <span className="text-white font-semibold">8 cups</span>
+                  <span className="text-yellow-300 font-bold text-lg">=</span>
+                  <span className="text-yellow-300 font-bold text-lg">28cm</span>
                 </div>
               </div>
             </div>
