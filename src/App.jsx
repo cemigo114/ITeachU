@@ -3,6 +3,7 @@ import { Send, Sparkles, Brain, HelpCircle, BarChart3, Home, Users, ChevronRight
 import LumoMascot from './components/LumoMascot';
 import StandardBadge from './components/StandardBadge';
 import TaskCollectionBrowser from './components/TaskCollectionBrowser';
+import ITeachUV2 from './components/ITeachUV2';
 import { API_ENDPOINTS } from './config/api';
 import {
   saveSession,
@@ -298,7 +299,20 @@ const MOCK_ASSIGNMENTS = [
   }
 ];
 
-const ITeachUMVP = () => {
+// Main App component with version toggle
+const App = () => {
+  const [version, setVersion] = useState('v1'); // 'v1' or 'v2'
+
+  // If V2 is selected, render V2 component
+  if (version === 'v2') {
+    return <ITeachUV2 />;
+  }
+
+  // Otherwise render V1 with version prop
+  return <ITeachUMVP setVersion={setVersion} />;
+};
+
+const ITeachUMVP = ({ setVersion }) => {
   // Authentication state
   const [userRole, setUserRole] = useState(null); // 'teacher', 'parent', 'student'
   const [currentUser, setCurrentUser] = useState(null);
@@ -585,7 +599,7 @@ const ITeachUMVP = () => {
               </p>
 
               {/* CTA Buttons */}
-              <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-20">
+              <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-8">
                 <button
                   onClick={() => {
                     setView('login');
@@ -612,6 +626,16 @@ const ITeachUMVP = () => {
                   className="w-64 px-8 py-4 bg-purple-600 text-white rounded-xl font-semibold text-lg hover:bg-purple-700 transition transform hover:scale-105 shadow-lg"
                 >
                   I'm a Parent
+                </button>
+              </div>
+
+              {/* V2 Preview Button */}
+              <div className="mb-20">
+                <button
+                  onClick={() => setVersion('v2')}
+                  className="px-6 py-3 bg-gradient-to-r from-pink-500 to-purple-600 text-white rounded-xl font-semibold hover:shadow-lg transition transform hover:scale-105"
+                >
+                  Try ITeachU V2 - Cognality Edition
                 </button>
               </div>
             </div>
@@ -1829,4 +1853,4 @@ const ITeachUMVP = () => {
   return null;
 };
 
-export default ITeachUMVP;
+export default App;
