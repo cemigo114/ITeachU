@@ -912,33 +912,6 @@ I think we both need more help understanding how the cup nesting pattern works. 
               </button>
             </div>
           </div>
-
-          {/* Sticky Problem Display - Always Visible */}
-          <div className="hidden md:block bg-gradient-to-r from-purple-500 to-indigo-600 border-t-2 border-purple-400 py-4 px-6 shadow-md">
-            <div className="max-w-4xl mx-auto flex items-center justify-center space-x-6">
-              <div className="flex items-center space-x-1">
-                <span className="text-2xl mr-2">📋</span>
-                <span className="text-white font-bold text-base mr-4">The Problem:</span>
-              </div>
-              <div className="flex items-center space-x-6">
-                <div className="flex items-center space-x-2 bg-white bg-opacity-20 rounded-lg px-4 py-2">
-                  <span className="text-white font-semibold">2 cups</span>
-                  <span className="text-yellow-300 font-bold text-lg">=</span>
-                  <span className="text-yellow-300 font-bold text-lg">16cm</span>
-                </div>
-                <div className="flex items-center space-x-2 bg-white bg-opacity-20 rounded-lg px-4 py-2">
-                  <span className="text-white font-semibold">4 cups</span>
-                  <span className="text-yellow-300 font-bold text-lg">=</span>
-                  <span className="text-yellow-300 font-bold text-lg">20cm</span>
-                </div>
-                <div className="flex items-center space-x-2 bg-white bg-opacity-20 rounded-lg px-4 py-2">
-                  <span className="text-white font-semibold">8 cups</span>
-                  <span className="text-yellow-300 font-bold text-lg">=</span>
-                  <span className="text-yellow-300 font-bold text-lg">28cm</span>
-                </div>
-              </div>
-            </div>
-          </div>
         </div>
 
         {/* Chat messages area */}
