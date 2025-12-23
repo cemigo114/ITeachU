@@ -1,11 +1,11 @@
-# Netlify Configuration for ITeachU Frontend
+# Netlify Configuration for Cognality Learning Website + ITeachU App
 
 [build]
-  # Command to build the frontend
-  command = "npm run build"
+  # Command to build the app and copy to website/app
+  command = "npm run build && mkdir -p website/app && cp -r dist/* website/app/"
 
-  # Directory where Vite outputs the built files
-  publish = "dist"
+  # Publish from website directory (contains main site + /app subdirectory)
+  publish = "website"
 
 # Build environment variables
 # Note: VITE_API_URL must also be set in Netlify UI: Site settings → Environment variables
@@ -13,10 +13,10 @@
   # This is a placeholder - actual value comes from Netlify environment variables
   # But defining it here ensures Netlify knows to look for it
 
-# Redirect all routes to index.html for React Router (SPA)
+# Redirect app routes to app/index.html for React Router (SPA)
 [[redirects]]
-  from = "/*"
-  to = "/index.html"
+  from = "/app/*"
+  to = "/app/index.html"
   status = 200
 
 # Optional: Set custom headers for security
