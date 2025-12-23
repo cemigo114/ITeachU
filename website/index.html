@@ -1,0 +1,878 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cognality Learning - Let Students Show What They Truly Know</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            /* Brand Colors */
+            --primary-blue: #0A4d8c;
+            --primary-light: #f8fafc;
+            --accent-teal: #00a896;
+            --accent-coral: #ff6b4a;
+            --neutral-white: #ffffff;
+            --neutral-dark: #212b36;
+            --gray-light: #f3f4f6;
+            --gray-medium: #9ca3af;
+            --gray-dark: #4b5563;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            --shadow-lg: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Inter', sans-serif;
+            background: var(--primary-light);
+            color: var(--neutral-dark);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        /* Navigation */
+        nav {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            background: var(--neutral-white);
+            box-shadow: var(--shadow);
+            z-index: 1000;
+            transition: all 0.3s ease;
+        }
+
+        .nav-container {
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--primary-blue);
+        }
+
+        .logo-icon {
+            width: 192px;
+            height: 192px;
+            border-radius: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            background: transparent;
+        }
+
+        .logo-icon img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            background: transparent;
+            mix-blend-mode: darken;
+        }
+
+        nav ul {
+            display: flex;
+            list-style: none;
+            gap: 2rem;
+            align-items: center;
+        }
+
+        nav a {
+            color: var(--gray-dark);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s;
+            position: relative;
+        }
+
+        nav a:hover {
+            color: var(--primary-blue);
+        }
+
+        .nav-cta {
+            background: var(--accent-coral);
+            color: white !important;
+            padding: 10px 24px;
+            border-radius: 8px;
+            transition: all 0.3s;
+        }
+
+        .nav-cta:hover {
+            background: #e55a3a;
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        /* Hero Section */
+        .hero {
+            padding: 120px 2rem 80px;
+            background: linear-gradient(135deg, var(--primary-light) 0%, rgba(10, 77, 140, 0.05) 100%);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-container {
+            max-width: 1280px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 4rem;
+            align-items: center;
+        }
+
+        .hero-content h1 {
+            font-size: clamp(2.5rem, 4vw, 3.5rem);
+            font-weight: 800;
+            color: var(--neutral-dark);
+            margin-bottom: 1.5rem;
+            line-height: 1.2;
+        }
+
+        .hero-content .tagline {
+            font-size: 1.5rem;
+            color: var(--primary-blue);
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+
+        .hero-content .subhead {
+            font-size: 1.125rem;
+            color: var(--gray-dark);
+            margin-bottom: 2rem;
+            line-height: 1.8;
+        }
+
+        .hero-buttons {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 14px 32px;
+            border-radius: 8px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: var(--primary-blue);
+            color: white;
+            box-shadow: var(--shadow);
+        }
+
+        .btn-primary:hover {
+            background: #083e6f;
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .btn-secondary {
+            background: white;
+            color: var(--primary-blue);
+            border: 2px solid var(--primary-blue);
+        }
+
+        .btn-secondary:hover {
+            background: var(--primary-blue);
+            color: white;
+        }
+
+        /* Hero Visual */
+        .hero-visual {
+            position: relative;
+            height: 500px;
+        }
+
+        .assessment-flow {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .flow-container {
+            position: relative;
+            width: 400px;
+            height: 400px;
+        }
+
+        /* Central Student Node */
+        .student-node {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 120px;
+            height: 120px;
+            background: linear-gradient(135deg, var(--accent-teal), var(--primary-blue));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            box-shadow: 0 0 40px rgba(0, 168, 150, 0.3);
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: translate(-50%, -50%) scale(1); }
+            50% { transform: translate(-50%, -50%) scale(1.05); }
+        }
+
+        /* Orbiting Elements */
+        .orbit-item {
+            position: absolute;
+            width: 80px;
+            height: 80px;
+            background: white;
+            border-radius: 50%;
+            box-shadow: var(--shadow-lg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            text-align: center;
+            padding: 10px;
+        }
+
+        .orbit-1 {
+            animation: orbit 20s linear infinite;
+        }
+
+        .orbit-2 {
+            animation: orbit 25s linear infinite reverse;
+            animation-delay: 5s;
+        }
+
+        .orbit-3 {
+            animation: orbit 30s linear infinite;
+            animation-delay: 10s;
+        }
+
+        @keyframes orbit {
+            from {
+                transform: rotate(0deg) translateX(150px) rotate(0deg);
+            }
+            to {
+                transform: rotate(360deg) translateX(150px) rotate(-360deg);
+            }
+        }
+
+        /* Connection Lines */
+        .connection-line {
+            position: absolute;
+            width: 2px;
+            height: 150px;
+            background: linear-gradient(180deg, transparent, var(--accent-teal), transparent);
+            top: 50%;
+            left: 50%;
+            transform-origin: top;
+            opacity: 0.3;
+            animation: rotate 15s linear infinite;
+        }
+
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        /* Features Section */
+        .features {
+            padding: 80px 2rem;
+            background: white;
+        }
+
+        .features-container {
+            max-width: 1280px;
+            margin: 0 auto;
+        }
+
+        .section-header {
+            text-align: center;
+            margin-bottom: 4rem;
+        }
+
+        .section-header h2 {
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: var(--neutral-dark);
+            margin-bottom: 1rem;
+        }
+
+        .section-header p {
+            font-size: 1.125rem;
+            color: var(--gray-dark);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 2rem;
+        }
+
+        .feature-card {
+            background: var(--primary-light);
+            border-radius: 16px;
+            padding: 2rem;
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .feature-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background: linear-gradient(180deg, var(--accent-coral), var(--accent-teal));
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .feature-card:hover::before {
+            opacity: 1;
+        }
+
+        .feature-icon {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, var(--accent-teal), var(--primary-blue));
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1.5rem;
+            color: white;
+            font-size: 24px;
+        }
+
+        .feature-card h3 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--neutral-dark);
+            margin-bottom: 1rem;
+        }
+
+        .feature-card p {
+            color: var(--gray-dark);
+            line-height: 1.7;
+        }
+
+        /* How It Works */
+        .how-it-works {
+            padding: 80px 2rem;
+            background: linear-gradient(180deg, white 0%, var(--primary-light) 100%);
+        }
+
+        .process-steps {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            margin-top: 3rem;
+            position: relative;
+        }
+
+        .process-steps::before {
+            content: '';
+            position: absolute;
+            top: 60px;
+            left: 10%;
+            right: 10%;
+            height: 2px;
+            background: linear-gradient(90deg, var(--accent-coral), var(--accent-teal), var(--primary-blue));
+            z-index: 0;
+        }
+
+        .step {
+            text-align: center;
+            position: relative;
+            z-index: 1;
+        }
+
+        .step-number {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 1.5rem;
+            background: white;
+            border: 3px solid var(--primary-blue);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--primary-blue);
+            position: relative;
+        }
+
+        .step-number::after {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background: var(--primary-blue);
+            opacity: 0.1;
+            transform: scale(1.3);
+            animation: pulse-ring 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse-ring {
+            0%, 100% { transform: scale(1.3); opacity: 0.1; }
+            50% { transform: scale(1.5); opacity: 0; }
+        }
+
+        .step h3 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--neutral-dark);
+            margin-bottom: 0.5rem;
+        }
+
+        .step p {
+            color: var(--gray-dark);
+        }
+
+        /* Vision & Mission */
+        .vision-mission {
+            padding: 80px 2rem;
+            background: white;
+        }
+
+        .vm-container {
+            max-width: 1280px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 3rem;
+        }
+
+        .vm-card {
+            padding: 2.5rem;
+            border-radius: 16px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .vision-card {
+            background: linear-gradient(135deg, rgba(0, 168, 150, 0.1), rgba(10, 77, 140, 0.1));
+            border: 2px solid var(--accent-teal);
+        }
+
+        .mission-card {
+            background: linear-gradient(135deg, rgba(255, 107, 74, 0.1), rgba(10, 77, 140, 0.1));
+            border: 2px solid var(--accent-coral);
+        }
+
+        .vm-card h3 {
+            font-size: 1.75rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            color: var(--neutral-dark);
+        }
+
+        .vm-card p {
+            color: var(--gray-dark);
+            line-height: 1.8;
+        }
+
+        /* CTA Section */
+        .cta {
+            padding: 100px 2rem;
+            background: linear-gradient(135deg, var(--primary-blue), var(--accent-teal));
+            text-align: center;
+            color: white;
+        }
+
+        .cta h2 {
+            font-size: 2.5rem;
+            font-weight: 800;
+            margin-bottom: 1.5rem;
+        }
+
+        .cta p {
+            font-size: 1.25rem;
+            margin-bottom: 2rem;
+            opacity: 0.95;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .cta-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .cta .btn {
+            background: white;
+            color: var(--primary-blue);
+        }
+
+        .cta .btn:hover {
+            background: var(--primary-light);
+            transform: translateY(-2px);
+        }
+
+        /* Footer */
+        footer {
+            background: var(--neutral-dark);
+            color: white;
+            padding: 3rem 2rem;
+        }
+
+        .footer-container {
+            max-width: 1280px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 1fr;
+            gap: 2rem;
+        }
+
+        .footer-brand h3 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            color: var(--accent-teal);
+        }
+
+        .footer-brand p {
+            color: var(--gray-medium);
+            line-height: 1.6;
+        }
+
+        .footer-column h4 {
+            margin-bottom: 1rem;
+            color: white;
+        }
+
+        .footer-column ul {
+            list-style: none;
+        }
+
+        .footer-column a {
+            color: var(--gray-medium);
+            text-decoration: none;
+            line-height: 2;
+            transition: color 0.3s;
+        }
+
+        .footer-column a:hover {
+            color: var(--accent-teal);
+        }
+
+        .footer-bottom {
+            margin-top: 3rem;
+            padding-top: 2rem;
+            border-top: 1px solid #374151;
+            text-align: center;
+            color: var(--gray-medium);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            nav ul {
+                display: none;
+            }
+
+            .hero-container {
+                grid-template-columns: 1fr;
+            }
+
+            .hero-visual {
+                height: 300px;
+            }
+
+            .flow-container {
+                width: 300px;
+                height: 300px;
+            }
+
+            .vm-container {
+                grid-template-columns: 1fr;
+            }
+
+            .footer-container {
+                grid-template-columns: 1fr;
+                text-align: center;
+            }
+
+            .process-steps::before {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <div class="nav-container">
+            <div class="logo">
+                <div class="logo-icon">
+                    <img src="logo_transparent.png" alt="Cognality Learning Logo">
+                </div>
+                Cognality Learning
+            </div>
+            <ul>
+                <li><a href="#features">Features</a></li>
+                <li><a href="#how-it-works">How It Works</a></li>
+                <li><a href="#vision">Vision</a></li>
+                <li><a href="#resources">Resources</a></li>
+                <li><a href="#demo" class="nav-cta">Request Demo</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <section class="hero">
+        <div class="hero-container">
+            <div class="hero-content">
+                <div class="tagline">Let Students Show What They Truly Know</div>
+                <h1>A New Class of Assessment for the AI Era</h1>
+                <p class="subhead">
+                    Cognality Learning is building assessment that looks beyond answers and scores to understand how students think.
+                    Through authentic tasks and structured interaction, students explain their reasoning by teaching an AI protégé,
+                    making their understanding visible and providing educators with a clearer, more defensible view of learning.
+                </p>
+                <div class="hero-buttons">
+                    <a href="#demo" class="btn btn-primary">Get Started →</a>
+                    <a href="#learn-more" class="btn btn-secondary">Watch Demo</a>
+                </div>
+            </div>
+            <div class="hero-visual">
+                <div class="assessment-flow">
+                    <div class="flow-container">
+                        <div class="student-node">Student</div>
+                        <div class="orbit-item orbit-1">Teaching AI</div>
+                        <div class="orbit-item orbit-2">Reasoning</div>
+                        <div class="orbit-item orbit-3">Evidence</div>
+                        <div class="connection-line"></div>
+                        <div class="connection-line" style="transform: rotate(120deg);"></div>
+                        <div class="connection-line" style="transform: rotate(240deg);"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="features" id="features">
+        <div class="features-container">
+            <div class="section-header">
+                <h2>Transform Assessment Through Teaching</h2>
+                <p>Students demonstrate understanding by guiding AI through problems, making their thinking visible and measurable</p>
+            </div>
+            <div class="feature-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">🧠</div>
+                    <h3>Reasoning Made Visible</h3>
+                    <p>Capture not just what students know, but how they think. Every explanation reveals cognitive patterns that traditional tests miss.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🎯</div>
+                    <h3>Evidence-Centered Design</h3>
+                    <p>Built on rigorous pedagogical foundations, every interaction generates authentic evidence of understanding aligned to learning objectives.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🤝</div>
+                    <h3>AI as Learning Partner</h3>
+                    <p>Students teach confused AI protégés, transforming assessment from performance to authentic demonstration of mastery.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">📊</div>
+                    <h3>Actionable Insights</h3>
+                    <p>Rich analytics reveal learning progressions, misconceptions, and growth opportunities invisible in traditional assessments.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🔒</div>
+                    <h3>Trust & Transparency</h3>
+                    <p>Every assessment decision is explainable, evidence-based, and aligned to educational standards, building stakeholder confidence.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">⚡</div>
+                    <h3>Real-Time Feedback</h3>
+                    <p>Immediate insights into student thinking enable timely interventions and personalized learning pathways.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="how-it-works" id="how-it-works">
+        <div class="features-container">
+            <div class="section-header">
+                <h2>How Cognality Works</h2>
+                <p>A simple yet powerful process that transforms teaching into assessment</p>
+            </div>
+            <div class="process-steps">
+                <div class="step">
+                    <div class="step-number">1</div>
+                    <h3>Authentic Task</h3>
+                    <p>Students receive real-world problems aligned to curriculum standards</p>
+                </div>
+                <div class="step">
+                    <div class="step-number">2</div>
+                    <h3>Teach the AI</h3>
+                    <p>Students explain concepts to a confused AI learner, revealing their thinking</p>
+                </div>
+                <div class="step">
+                    <div class="step-number">3</div>
+                    <h3>Evidence Capture</h3>
+                    <p>System analyzes dialogue for reasoning patterns and conceptual understanding</p>
+                </div>
+                <div class="step">
+                    <div class="step-number">4</div>
+                    <h3>Insight Generation</h3>
+                    <p>Educators receive detailed reports on student thinking and growth</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="vision-mission" id="vision">
+        <div class="vm-container">
+            <div class="vm-card vision-card">
+                <h3>Our Vision</h3>
+                <p>A learning environment where students show how they think, educators trust what they see, and evidence of understanding guides growth. We envision classrooms where assessment enhances learning rather than interrupting it, where every student's unique thinking process is valued and understood.</p>
+            </div>
+            <div class="vm-card mission-card">
+                <h3>Our Mission</h3>
+                <p>To build trust and transparency in AI-mediated learning by making students' reasoning visible, supporting learner agency, and enabling educators to make informed decisions using authentic evidence of understanding. We're committed to creating assessment tools that celebrate thinking over memorization.</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="cta">
+        <h2>Ready to Transform Your Assessment?</h2>
+        <p>Join forward-thinking educators who are redefining what it means to understand student learning</p>
+        <div class="cta-buttons">
+            <a href="#demo" class="btn">Schedule a Demo</a>
+            <a href="#pilot" class="btn">Join Pilot Program</a>
+        </div>
+    </section>
+
+    <footer>
+        <div class="footer-container">
+            <div class="footer-brand">
+                <h3>Cognality Learning</h3>
+                <p>Building a new class of assessment for the AI era, one that looks beyond answers to understand how students think.</p>
+            </div>
+            <div class="footer-column">
+                <h4>Product</h4>
+                <ul>
+                    <li><a href="#features">Features</a></li>
+                    <li><a href="#how">How It Works</a></li>
+                    <li><a href="#pricing">Pricing</a></li>
+                    <li><a href="#demo">Demo</a></li>
+                </ul>
+            </div>
+            <div class="footer-column">
+                <h4>Resources</h4>
+                <ul>
+                    <li><a href="#research">Research</a></li>
+                    <li><a href="#blog">Blog</a></li>
+                    <li><a href="#case-studies">Case Studies</a></li>
+                    <li><a href="#support">Support</a></li>
+                </ul>
+            </div>
+            <div class="footer-column">
+                <h4>Company</h4>
+                <ul>
+                    <li><a href="#about">About Us</a></li>
+                    <li><a href="#careers">Careers</a></li>
+                    <li><a href="#contact">Contact</a></li>
+                    <li><a href="#privacy">Privacy</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>© 2025 Cognality Learning. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script>
+        // Smooth scroll
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            });
+        });
+
+        // Navbar scroll effect
+        let lastScroll = 0;
+        window.addEventListener('scroll', () => {
+            const nav = document.querySelector('nav');
+            const currentScroll = window.pageYOffset;
+
+            if (currentScroll > 50) {
+                nav.style.boxShadow = '0 4px 20px rgba(0,0,0,0.1)';
+            } else {
+                nav.style.boxShadow = '0 4px 6px -1px rgba(0,0,0,0.1)';
+            }
+
+            lastScroll = currentScroll;
+        });
+
+        // Intersection Observer for animations
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
+                }
+            });
+        }, observerOptions);
+
+        // Apply to feature cards
+        document.querySelectorAll('.feature-card').forEach(card => {
+            card.style.opacity = '0';
+            card.style.transform = 'translateY(20px)';
+            card.style.transition = 'all 0.6s ease';
+            observer.observe(card);
+        });
+
+        // Apply to steps
+        document.querySelectorAll('.step').forEach((step, index) => {
+            step.style.opacity = '0';
+            step.style.transform = 'translateY(20px)';
+            step.style.transition = `all 0.6s ease ${index * 0.1}s`;
+            observer.observe(step);
+        });
+    </script>
+</body>
+</html>
