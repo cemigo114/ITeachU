@@ -354,7 +354,7 @@ const ITeachUV2 = () => {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          model: 'claude-sonnet-4-20250514',
+          model: 'claude-sonnet-4-5-20250929',
           max_tokens: 300,
           system: generateSystemPrompt(selectedCognality),
           messages: updatedMessages.map(m => ({
