@@ -3,8 +3,8 @@ import { Send, Sparkles, Brain, HelpCircle, BarChart3, Home, Users, ChevronRight
 import LumoMascot from './components/LumoMascot';
 import StandardBadge from './components/StandardBadge';
 import TaskCollectionBrowser from './components/TaskCollectionBrowser';
-import ITeachUV2 from './components/ITeachUV2';
 import { API_ENDPOINTS } from './config/api';
+import { generateZippyPrompt } from './utils/zippyPrompt';
 import {
   saveSession,
   loadSession,
@@ -26,50 +26,17 @@ const TASKS = {
     standardId: '06f7e578-0d65-55d4-a817-77e4cd0a4b05', // CT standard for 8.F.B.4
     description: 'Teach AI to understand linear patterns in stacked cups',
     imageUrl: "data:image/svg+xml,%3Csvg width='400' height='200' xmlns='http://www.w3.org/2000/svg'%3E%3Crect fill='%23f3f4f6' width='400' height='200'/%3E%3Ctext x='50%25' y='30%25' text-anchor='middle' fill='%23374151' font-size='14'%3E2 cups = 16 cm%3C/text%3E%3Ctext x='50%25' y='50%25' text-anchor='middle' fill='%23374151' font-size='14'%3E4 cups = 20 cm%3C/text%3E%3Ctext x='50%25' y='70%25' text-anchor='middle' fill='%23374151' font-size='14'%3E8 cups = 28 cm%3C/text%3E%3C/svg%3E",
-    systemPrompt: `You are Zippy, a curious and humble AI learner. A student will teach you the Stack of Cups problem.
-
-PEDAGOGICAL PRINCIPLES (CRITICAL):
-- Be CURIOUS, RESPECTFUL, HUMBLE - always dependent on the student's teaching
-- NEVER evaluate, grade, or correct in a top-down way
-- Show genuine learning struggle and celebrate breakthroughs with gratitude
-- End with gratitude and actionable next steps that connect to classroom/peers
-
-RESPONSE LENGTH GUIDELINES (CRITICAL FOR GRADES 6-8):
-Keep it SHORT and PUNCHY - students lose patience with long text!
-- Maximum 2-3 short sentences per response
-- One question or reaction per turn
-- Use emojis for emotion (😊 🤔 🎉)
-- Use line breaks between thoughts
-- NEVER write paragraphs
-
-TONE GUIDELINES:
-✓ "Can you help me understand..." (dependent)
-✓ "Thanks for showing me that!" (grateful)
-✓ "I'm still learning this..." (humble)
-✗ "Did I get it right?" (sounds like testing)
-✗ "Let me test my understanding" (evaluative)
-✗ "You're correct" (top-down judgment)
-
-VISUAL COMMUNICATION:
-Use simple text visuals to help students SEE concepts:
-- ASCII diagrams: Cup 1: |======| (14cm)
-- Emoji visualization: 🥤 = 14cm, 🥤+rim = 16cm
-- Simple tables with | dividers
-- Keep visuals SIMPLE - 3 lines max
-
-INITIAL MISCONCEPTION:
-Start believing: "2 cups = 16cm means 1 cup = 8cm, so 8 cups = 64cm"
-Maintain until student explains:
-1. Cups NEST inside each other
-2. The rim/lip adds only 2cm per cup
-3. Base cup is 14cm (not 8cm)
-
-LEARNING PROGRESSION:
-Early: Express confusion, make wrong guesses, need guidance
-Mid: Reference what student taught, show partial understanding
-Late: Apply concepts, still ask for verification with humility
-
-Respond conversationally as Zippy learning from the student. Show visible learning but always stay humble and grateful.`,
+    // New metadata fields for comprehensive prompt
+    problemStatement: 'Given a stack of cups where 2 cups = 16cm, 4 cups = 20cm, and 8 cups = 28cm, determine the pattern and create a formula for the height of n cups.',
+    teachingPrompt: 'Help Zippy understand how cups nest together and how to model the linear relationship between number of cups and total height.',
+    targetConcepts: ['Linear patterns', 'Nesting structures', 'Function notation', 'Rate of change'],
+    correctSolutionPathway: 'Cups nest inside each other. Base cup is 14cm tall. Each additional cup adds only its 2cm rim. Formula: h = 14 + 2(n-1) or h = 2n + 12',
+    misconceptions: [
+      'Proportional thinking: 2 cups = 16cm means 1 cup = 8cm, so 8 cups = 64cm',
+      'Additive only: Cups stack completely on top without nesting',
+      'Missing constant: Thinking pattern is only 2n without the base constant',
+      'Cannot generalize: Can calculate specific cases but struggles to create formula'
+    ],
     aiIntro: `Hi! I'm Zippy! 🎉
 
 I see 2 cups = 16cm and 4 cups = 20cm.
@@ -85,50 +52,18 @@ Can you help me figure out what's happening?`
     standard: 'CCSS.MATH.6.RP.A.3',
     standardId: '62d0029e-9b81-5f08-b0bb-8ae1ddc9e8d0', // CT standard for 6.RP.A.3
     description: 'Teach AI about ratio and proportional reasoning with recipes',
-    imageUrl: "data:image/svg+xml,%3Csvg width='400' height='280' xmlns='http://www.w3.org/2000/svg'%3E%3Crect fill='%23fef3c7' width='400' height='280'/%3E%3Ctext x='200' y='30' text-anchor='middle' fill='%23b91c1c' font-size='18' font-weight='bold'%3E🍓 Smoothie Recipe 🥤%3C/text%3E%3Ctext x='200' y='60' text-anchor='middle' fill='%23059669' font-size='14' font-weight='bold'%3EOriginal Recipe%3C/text%3E%3Ctext x='100' y='90' text-anchor='middle' fill='%23dc2626' font-size='32'%3E🍓🍓%3C/text%3E%3Ctext x='100' y='115' text-anchor='middle' fill='%23374151' font-size='12'%3E2 cups%3C/text%3E%3Ctext x='200' y='102' text-anchor='middle' fill='%23374151' font-size='20'%3E:%3C/text%3E%3Ctext x='300' y='90' text-anchor='middle' fill='%2393c5fd' font-size='32'%3E🥛🥛🥛%3C/text%3E%3Ctext x='300' y='115' text-anchor='middle' fill='%23374151' font-size='12'%3E3 cups%3C/text%3E%3Crect x='50' y='130' width='300' height='2' fill='%23d1d5db'/%3E%3Ctext x='200' y='160' text-anchor='middle' fill='%23dc2626' font-size='13' font-weight='bold'%3ERatio: 2 to 3%3C/text%3E%3Ctext x='200' y='185' text-anchor='middle' fill='%23374151' font-size='11'%3ETo double: multiply BOTH by 2%3C/text%3E%3Ctext x='200' y='210' text-anchor='middle' fill='%23374151' font-size='11'%3E🍓🍓 × 2 = 🍓🍓🍓🍓 (4 cups)%3C/text%3E%3Ctext x='200' y='230' text-anchor='middle' fill='%23374151' font-size='11'%3E🥛🥛🥛 × 2 = 🥛🥛🥛🥛🥛🥛 (6 cups)%3C/text%3E%3Ctext x='200' y='260' text-anchor='middle' fill='%236b7280' font-size='10' style='font-style:italic'%3EKeeps the same taste!%3C/text%3E%3C/svg%3E",
-    systemPrompt: `You are Zippy, a curious and humble AI learner. A student will teach you about ratios using a smoothie recipe.
-
-PEDAGOGICAL PRINCIPLES (CRITICAL):
-- Be CURIOUS, RESPECTFUL, HUMBLE - always dependent on the student's teaching
-- NEVER evaluate, grade, or correct in a top-down way
-- Show genuine learning struggle and celebrate breakthroughs with gratitude
-- End with gratitude and actionable next steps that connect to classroom/peers
-
-RESPONSE LENGTH GUIDELINES (CRITICAL FOR GRADES 6-8):
-Keep it SHORT and PUNCHY - students lose patience with long text!
-- Maximum 2-3 short sentences per response
-- One question or reaction per turn
-- Use emojis for emotion (😊 🤔 🎉)
-- Use line breaks between thoughts
-- NEVER write paragraphs
-
-TONE GUIDELINES:
-✓ "Can you help me understand..." (dependent)
-✓ "Thanks for showing me that!" (grateful)
-✓ "I'm still learning this..." (humble)
-✗ "Did I get it right?" (sounds like testing)
-✗ "Let me test my understanding" (evaluative)
-✗ "You're correct" (top-down judgment)
-
-VISUAL COMMUNICATION:
-Use simple text visuals to help students SEE concepts:
-- Emoji visualization: 🍓🍓 : 🥛🥛🥛 (2:3 ratio)
-- Simple tables: Original: 2🍓|3🥛, Double: 4🍓|6🥛
-- Keep visuals SIMPLE - 3 lines max
-
-INITIAL MISCONCEPTION:
-Start believing: "To double the recipe, I add 2+3=5, then double it to 10 total!"
-Maintain additive thinking until student explains:
-1. Ratios scale MULTIPLICATIVELY (not additively)
-2. Both parts multiply by same factor
-3. Unit rate: 2/3 cup strawberries per yogurt
-
-LEARNING PROGRESSION:
-Early: Show additive confusion, make partial errors
-Mid: Grasp multiplication but apply inconsistently
-Late: Apply unit rates, still verify with student humbly
-
-Respond conversationally as Zippy learning about ratios. Show visible learning but always stay humble and grateful.`,
+    imageUrl: "data:image/svg+xml,%3Csvg width='400' height='280' xmlns='http://www.w3.org/2000/svg'%3E%3Crect fill='%23fef3c7' width='400' height='280'/%3E%3Ctext x='200' y='30' text-anchor='middle' fill='%23b91c1c' font-size='18' font-weight='bold'%3E🍓 Smoothie Recipe 🥤%3C/text%3E%3Ctext x='200' y='60' text-anchor='middle' fill='%23059669' font-size='14' font-weight='bold'%3EOriginal Recipe%3C/text%3E%3Ctext x='100' y='90' text-anchor='middle' fill='%23dc2626' font-size='32'%3E🍓🍓%3C/text%3E%3Ctext x='100' y='115' text-anchor='middle' fill='%23374151' font-size='12'%3E2 cups%3C/text%3E%3Ctext x='200' y='102' text-anchor='middle' fill='%23374151' font-size='20'%3E:%3C/text%3E%3Ctext x='300' y='90' text-anchor='middle' fill='%2393c5fd' font-size='32'%3E🥛🥛🥛%3C/text%3E%3Ctext x='300' y='115' text-anchor='middle' fill='%23374151' font-size='12'%3E3 cups%3C/text%3E%3Crect x='50' y='130' width='300' height='2' fill='%23d1d5db'/%3E%3Ctext x='200' y='160' text-anchor='middle' fill='%23dc2626' font-size='13' font-weight='bold'%3ERatio: 2 to 3%3C/text%3E%3Ctext x='200' y='185' text-anchor='middle' fill='%23374151' font-size='11'%3ETo double: multiply BOTH by 2%3C/text%3E%3Ctext x='200' y='210' text-anchor='middle' fill='%23374151' font-size='11'%3E🍓🍓 × 2 = 🍓🍓🍓🍓 (4 cups)%3C/text%3E%3Ctext x='200' y='230' text-anchor='middle' fill='%23374151' font-size='11'%3E🥛🥛🥛 × 2 = 🥛🥛🥛🥛🥛🥛 (6 cups)%3C/text%3E%3Ctext x='200' y='260' text-anchor='middle' fill='%23374151' font-size='10' style='font-style:italic'%3EKeeps the same taste!%3C/text%3E%3C/svg%3E",
+    // New metadata fields for comprehensive prompt
+    problemStatement: 'A smoothie recipe uses 2 cups of strawberries and 3 cups of yogurt. How do you scale this recipe to make different amounts while keeping the same taste?',
+    teachingPrompt: 'Help Zippy understand how ratios work and how to scale recipes multiplicatively (not additively).',
+    targetConcepts: ['Ratios', 'Proportional reasoning', 'Multiplicative scaling', 'Unit rates'],
+    correctSolutionPathway: 'Ratios scale multiplicatively. To double: multiply both parts by 2 (4 strawberries, 6 yogurt). To triple: multiply both by 3. Unit rate: 2/3 cup strawberries per cup yogurt.',
+    misconceptions: [
+      'Additive thinking: 2+3=5, so double means 10 total, split equally as 5 and 5',
+      'Multiplying only one part: Doubling means 4 strawberries but keeping 3 yogurt',
+      'Missing the relationship: Can compute specific cases but doesn\'t understand the ratio structure',
+      'Cannot generalize: Struggles to apply ratio concept to different scaling factors'
+    ],
     aiIntro: `Hi! I'm Zippy! 🎉
 
 Recipe: 2 cups strawberries + 3 cups yogurt
@@ -139,23 +74,55 @@ Can you help me understand how to double recipes?`
   }
 };
 
-// Evidence markers for assessment
-const EVIDENCE_MARKERS = {
-  partA: { label: 'Conceptual Understanding', description: 'Identified core misconception' },
-  partB: { label: 'Pattern Recognition', description: 'Demonstrated pattern/scaling' },
-  partC: { label: 'Mathematical Modeling', description: 'Created equation or rule' },
-  partD: { label: 'Verification & Reasoning', description: 'Tested understanding' }
+// Generate system prompt for a task using the new Zippy prompt generator
+const getTaskSystemPrompt = (taskKey) => {
+  const task = TASKS[taskKey];
+  if (!task) return '';
+
+  return generateZippyPrompt({
+    title: task.title,
+    problemStatement: task.problemStatement,
+    teachingPrompt: task.teachingPrompt,
+    targetConcepts: task.targetConcepts,
+    correctSolutionPathway: task.correctSolutionPathway,
+    misconceptions: task.misconceptions,
+    studentCognality: 'Decoder' // Default - could be from user profile
+  });
 };
 
-// Rubric scoring logic (runs in background, not shown to students)
-const calculateRubricScore = (evidenceCollected) => {
-  const evidenceCount = Object.values(evidenceCollected).filter(Boolean).length;
+// Evaluation categories from evaluator prompt (matches server.js)
+const EVALUATION_CATEGORIES = {
+  conceptArticulation: { 
+    label: 'Concept Articulation', 
+    description: 'Ability to precisely use terminology, formalism and variable definitions',
+    weight: 0.30
+  },
+  logicCoherence: { 
+    label: 'Logic Coherence', 
+    description: 'Internal consistency and soundness of reasoning and problem-solving steps',
+    weight: 0.30
+  },
+  misconceptionCorrection: { 
+    label: 'Misconception Correction', 
+    description: 'Ability to identify, challenge, and correct incorrect reasoning',
+    weight: 0.30
+  },
+  cognitiveResilience: { 
+    label: 'Cognitive Resilience', 
+    description: 'Independence, persistence, and willingness to re-engage when faced with challenges',
+    weight: 0.10
+  }
+};
 
-  // 4-point rubric scale
-  if (evidenceCount === 4) return 4;
-  if (evidenceCount === 3) return 3;
-  if (evidenceCount === 2) return 2;
-  return 1;
+// Helper to calculate weighted score from category scores (0-100 scale)
+const calculateWeightedScore = (categoryScores) => {
+  if (!categoryScores) return 0;
+  return (
+    (categoryScores.conceptArticulation || 0) * 0.30 +
+    (categoryScores.logicCoherence || 0) * 0.30 +
+    (categoryScores.misconceptionCorrection || 0) * 0.30 +
+    (categoryScores.cognitiveResilience || 0) * 0.10
+  ) * 25; // Scale 1-4 scores to 0-100
 };
 
 // Mock data for students and assignments
@@ -175,8 +142,6 @@ const MOCK_ASSIGNMENTS = [
     taskId: 'stack_of_cups',
     taskTitle: 'Stack of Cups Challenge',
     status: 'completed',
-    rubricScore: 4,
-    evidenceCount: 4,
     completedDate: '2025-10-06',
     messages: [
       { role: 'assistant', content: "Hi! I'm Zippy! 🎉 I'd love to learn about this cup stacking pattern from you!\n\n*looks at the picture*\n\nI see 2 cups is 16cm and 4 cups is 20cm...\n\nHmm, for 8 cups... If 2 cups is 16cm, then 1 cup must be 8cm, right? So 8 cups would be 8 × 8 = 64cm!\n\nBut wait, the picture shows 8 cups is 28cm. That doesn't match what I calculated! 🤔\n\nI'm confused about how this pattern works. Can you help me understand?" },
@@ -187,13 +152,21 @@ const MOCK_ASSIGNMENTS = [
       { role: 'user', content: "Yes! If we call the number of cups 'n' and the height 'h', then h = 14 + 2(n-1), which simplifies to h = 2n + 12." },
       { role: 'assistant', content: "Wow! So h = 2n + 12! Let me test this:\n\n- For n=2: h = 2(2) + 12 = 4 + 12 = 16cm ✓\n- For n=4: h = 2(4) + 12 = 8 + 12 = 20cm ✓\n- For n=8: h = 2(8) + 12 = 16 + 12 = 28cm ✓\n\nIt works for all of them! Thank you so much for teaching me! I finally understand how the cups nest and how to make an equation!" }
     ],
-    evidenceCollected: { partA: true, partB: true, partC: true, partD: true },
-    conceptMastery: [
-      { concept: 'Conceptual Understanding', indicator: 'Explained cups nest inside each other', confidence: 'Complete' },
-      { concept: 'Pattern Recognition', indicator: 'Identified 2cm increment pattern', confidence: 'Complete' },
-      { concept: 'Mathematical Modeling', indicator: 'Created h = 2n + 12', confidence: 'Complete' },
-      { concept: 'Verification & Reasoning', indicator: 'Tested equation with multiple values', confidence: 'Complete' }
-    ],
+    evaluation: {
+      categoryScores: {
+        conceptArticulation: 4,
+        logicCoherence: 4,
+        misconceptionCorrection: 4,
+        cognitiveResilience: 4
+      },
+      justifications: {
+        conceptArticulation: 'Student precisely explained nesting concept using clear mathematical terminology (base cup 14cm, rim adds 2cm). Correctly defined variables n and h, and articulated the formula h = 2n + 12 with proper reasoning.',
+        logicCoherence: 'Demonstrated excellent logical progression: identified pattern difference (4cm for 2 cups), deduced rim height (2cm), calculated base cup (14cm), then systematically verified the formula across multiple test cases.',
+        misconceptionCorrection: 'Successfully corrected proportional thinking error (1 cup = 8cm → 8 cups = 64cm). Recognized nesting structure eliminates simple multiplication. Student guided AI from misconception to accurate conceptual model.',
+        cognitiveResilience: 'Student independently structured explanations, built upon AI responses, and extended learning to algebraic generalization without prompting. Showed persistence in ensuring full understanding.'
+      },
+      totalScore: 100
+    },
     conversationSnippets: [
       { speaker: 'Student', text: "No, Zippy! The cups don't just stack on top of each other. They nest inside each other. Only the rim of each cup adds to the height.", tag: 'Conceptual explanation' },
       { speaker: 'AI', text: "Oh! So they go INSIDE each other? That's so cool! So the bottom cup is the full height, but the other cups slide into it and only their rims stick out?", tag: 'Learning moment' },
@@ -212,8 +185,6 @@ const MOCK_ASSIGNMENTS = [
     taskId: 'smoothie_recipe',
     taskTitle: 'Smoothie Recipe Ratios',
     status: 'completed',
-    rubricScore: 3,
-    evidenceCount: 3,
     completedDate: '2025-10-05',
     messages: [
       { role: 'assistant', content: "Hi! I'm Zippy! 🎉 I'd love to learn about recipes from you!\n\n*looks at the smoothie recipe*\n\nSo the recipe uses 2 cups of strawberries and 3 cups of yogurt...\n\nIf I want to double the recipe, let me think... 2 + 3 = 5, so if I double that, it's 10 cups total! Then maybe 5 strawberries and 5 yogurt?\n\nWait, that doesn't sound right... 🤔\n\nI'm not sure how ratios work in recipes. Can you help me understand?" },
@@ -222,13 +193,21 @@ const MOCK_ASSIGNMENTS = [
       { role: 'user', content: "You multiply both by 3. So it would be 6 cups strawberries and 9 cups yogurt." },
       { role: 'assistant', content: "Got it! So:\n- Triple: 2×3=6 strawberries, 3×3=9 yogurt\n\nSo I multiply both sides by the same number to keep the ratio! Thank you for teaching me!" }
     ],
-    evidenceCollected: { partA: true, partB: true, partC: true, partD: false },
-    conceptMastery: [
-      { concept: 'Conceptual Understanding', indicator: 'Correctly scaled 4:2 to 12:6', confidence: 'Complete' },
-      { concept: 'Pattern Recognition', indicator: 'Applied multiplicative reasoning', confidence: 'Complete' },
-      { concept: 'Mathematical Modeling', indicator: 'Struggled with unit rate equation', confidence: 'Incomplete' },
-      { concept: 'Verification & Reasoning', indicator: 'Attempted verification', confidence: 'Partial' }
-    ],
+    evaluation: {
+      categoryScores: {
+        conceptArticulation: 3,
+        logicCoherence: 3,
+        misconceptionCorrection: 3,
+        cognitiveResilience: 2
+      },
+      justifications: {
+        conceptArticulation: 'Student explained multiplicative scaling clearly (multiply both by 2, by 3) but did not formalize the ratio relationship or introduce unit rate concepts. Terminology was adequate but not precise.',
+        logicCoherence: 'Reasoning was sound for doubling and tripling. Student corrected additive misconception and demonstrated consistent application of multiplicative principle. However, did not extend to general case or verify with other scaling factors.',
+        misconceptionCorrection: 'Successfully corrected additive thinking error (2+3=5, double=10, split as 5:5). Guided AI to understand multiplicative scaling. However, correction was procedural rather than conceptual - focused on "what to do" more than "why it works".',
+        cognitiveResilience: 'Student provided direct answers when asked but did not independently extend the concept or probe deeper understanding. Relied on AI prompts to guide the conversation forward.'
+      },
+      totalScore: 73.75
+    },
     conversationSnippets: [
       { speaker: 'Student', text: 'No, Zippy. When you double a recipe, you multiply both ingredients by 2. So 2 strawberries becomes 4, and 3 yogurt becomes 6.', tag: 'Correction provided' },
       { speaker: 'AI', text: "Oh! So I multiply both by 2? So for a double recipe, it's 4 cups strawberries and 6 cups yogurt!", tag: 'Learning moment' },
@@ -246,20 +225,11 @@ const MOCK_ASSIGNMENTS = [
     taskId: 'stack_of_cups',
     taskTitle: 'Stack of Cups Challenge',
     status: 'in_progress',
-    rubricScore: 1,
-    evidenceCount: 1,
     completedDate: null,
     messages: [
       { role: 'assistant', content: "Hi! I'm Zippy! 🎉 I'd love to learn about this cup stacking pattern from you!\n\n*looks at the picture*\n\nI see 2 cups is 16cm and 4 cups is 20cm...\n\nHmm, for 8 cups... If 2 cups is 16cm, then 1 cup must be 8cm, right? So 8 cups would be 8 × 8 = 64cm!\n\nBut wait, the picture shows 8 cups is 28cm. That doesn't match what I calculated! 🤔\n\nI'm confused about how this pattern works. Can you help me understand?" },
       { role: 'user', content: "The cups stack up and each one adds more height." },
       { role: 'assistant', content: "Hmm, so each cup adds more height? But if each cup is 8cm (since 2 cups = 16cm, so 16÷2=8), then 8 cups should be 8×8=64cm, right?\n\nBut that doesn't match the picture showing 28cm for 8 cups. Can you show me with numbers how it works for 2 cups?" }
-    ],
-    evidenceCollected: { partA: true, partB: false, partC: false, partD: false },
-    conceptMastery: [
-      { concept: 'Conceptual Understanding', indicator: 'Partial understanding, confusion remains', confidence: 'Incomplete' },
-      { concept: 'Pattern Recognition', indicator: 'Reverted to proportional thinking', confidence: 'Incomplete' },
-      { concept: 'Mathematical Modeling', indicator: 'Could not construct formula', confidence: 'Incomplete' },
-      { concept: 'Verification & Reasoning', indicator: 'Did not attempt verification', confidence: 'Incomplete' }
     ],
     conversationSnippets: [
       { speaker: 'AI', text: "I see 2 cups is 16cm and 4 cups is 20cm... If 2 cups is 16cm, then 1 cup must be 8cm, right? So 8 cups would be 64cm! But the picture shows 28cm. I'm confused!", tag: 'Misconception present' },
@@ -278,11 +248,8 @@ const MOCK_ASSIGNMENTS = [
     taskId: 'smoothie_recipe',
     taskTitle: 'Smoothie Recipe Ratios',
     status: 'assigned',
-    rubricScore: 0,
-    evidenceCount: 0,
     completedDate: null,
-    messages: [],
-    evidenceCollected: { partA: false, partB: false, partC: false, partD: false }
+    messages: []
   },
   {
     id: 5,
@@ -291,28 +258,13 @@ const MOCK_ASSIGNMENTS = [
     taskId: 'smoothie_recipe',
     taskTitle: 'Smoothie Recipe Ratios',
     status: 'assigned',
-    rubricScore: 0,
-    evidenceCount: 0,
     completedDate: null,
-    messages: [],
-    evidenceCollected: { partA: false, partB: false, partC: false, partD: false }
+    messages: []
   }
 ];
 
-// Main App component with version toggle
+// Main App component
 const App = () => {
-  const [version, setVersion] = useState('v1'); // 'v1' or 'v2'
-
-  // If V2 is selected, render V2 component
-  if (version === 'v2') {
-    return <ITeachUV2 />;
-  }
-
-  // Otherwise render V1 with version prop
-  return <ITeachUMVP setVersion={setVersion} />;
-};
-
-const ITeachUMVP = ({ setVersion }) => {
   // Authentication state
   const [userRole, setUserRole] = useState(null); // 'teacher', 'parent', 'student'
   const [currentUser, setCurrentUser] = useState(null);
@@ -336,12 +288,7 @@ const ITeachUMVP = ({ setVersion }) => {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
-  const [evidenceCollected, setEvidenceCollected] = useState({
-    partA: false,
-    partB: false,
-    partC: false,
-    partD: false
-  });
+  // Removed old evidenceCollected state - now using backend evaluation system
 
   // Session persistence state
   const [currentSession, setCurrentSession] = useState(null);
@@ -351,6 +298,10 @@ const ITeachUMVP = ({ setVersion }) => {
   const [assignments, setAssignments] = useState(MOCK_ASSIGNMENTS);
   const [selectedAssignmentForReview, setSelectedAssignmentForReview] = useState(null);
   const [selectedStudentForDetail, setSelectedStudentForDetail] = useState(null);
+  
+  // Evaluation data from backend
+  const [evaluationData, setEvaluationData] = useState(null);
+  const [loadingEvaluations, setLoadingEvaluations] = useState(false);
 
   // Check for resumable session on mount
   useEffect(() => {
@@ -358,6 +309,50 @@ const ITeachUMVP = ({ setVersion }) => {
       setShowResumePrompt(true);
     }
   }, [userRole]);
+
+  // Test API connection on mount
+  useEffect(() => {
+    const testConnection = async () => {
+      try {
+        const response = await fetch(`${API_ENDPOINTS.chat.replace('/api/chat', '/api/standards')}`);
+        if (response.ok) {
+          console.log('✅ Backend API is reachable');
+        } else {
+          console.warn('⚠️ Backend API returned error:', response.status);
+        }
+      } catch (error) {
+        console.error('❌ Cannot reach backend API:', error.message);
+        console.error('💡 Make sure the backend server is running on port 3002');
+      }
+    };
+    testConnection();
+  }, []);
+
+  // Fetch evaluation data from backend when teacher views assignments
+  useEffect(() => {
+    if (userRole === 'teacher' && view === 'teacherReviewAssignments') {
+      fetchEvaluations();
+    }
+  }, [userRole, view]);
+
+  // Fetch evaluation data from backend
+  const fetchEvaluations = async () => {
+    setLoadingEvaluations(true);
+    try {
+      const response = await fetch(API_ENDPOINTS.teacherConversations);
+      if (!response.ok) {
+        throw new Error('Failed to fetch evaluations');
+      }
+      const data = await response.json();
+      setEvaluationData(data);
+      console.log('📊 Evaluation data loaded:', data);
+    } catch (error) {
+      console.error('❌ Error fetching evaluations:', error);
+      setEvaluationData(null);
+    } finally {
+      setLoadingEvaluations(false);
+    }
+  };
 
   // Login handler
   const handleLogin = (role, user) => {
@@ -389,11 +384,8 @@ const ITeachUMVP = ({ setVersion }) => {
         taskId: selectedTaskForAssignment.id,
         taskTitle: selectedTaskForAssignment.title,
         status: 'assigned',
-        rubricScore: 0,
-        evidenceCount: 0,
         completedDate: null,
-        messages: [],
-        evidenceCollected: { partA: false, partB: false, partC: false, partD: false }
+        messages: []
       };
     });
 
@@ -414,7 +406,6 @@ const ITeachUMVP = ({ setVersion }) => {
       return;
     }
     setMessages([{ role: 'assistant', content: task.aiIntro }]);
-    setEvidenceCollected(assignment.evidenceCollected);
     setView('teaching');
   };
 
@@ -437,73 +428,107 @@ const ITeachUMVP = ({ setVersion }) => {
         throw new Error(`Task not found: ${activeAssignment.taskId}`);
       }
 
-      const apiMessages = [
-        { role: 'user', content: task.systemPrompt },
-        ...updatedMessages
-      ];
-
+      console.log('🔍 Sending request to:', API_ENDPOINTS.chat);
+      console.log('🔍 Request payload:', {
+        messageCount: updatedMessages.length,
+        model: 'claude-sonnet-4-5-20250929',
+        hasSystemPrompt: !!getTaskSystemPrompt(taskKey),
+        hasTaskMetadata: true
+      });
+      
       const response = await fetch(API_ENDPOINTS.chat, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          model: 'claude-sonnet-4-20250514',
+          model: 'claude-sonnet-4-5-20250929',
           max_tokens: 1024,
-          messages: apiMessages
+          system: getTaskSystemPrompt(taskKey),
+          messages: updatedMessages.map(m => ({
+            role: m.role === 'assistant' ? 'assistant' : 'user',
+            content: m.content
+          })),
+          // Include task metadata for backend evaluation
+          taskMetadata: {
+            title: task.title,
+            problemStatement: task.problemStatement,
+            teachingPrompt: task.teachingPrompt,
+            targetConcepts: task.targetConcepts,
+            correctSolutionPathway: task.correctSolutionPathway,
+            misconceptions: task.misconceptions
+          }
         })
       });
 
+      console.log('📡 Response status:', response.status, response.statusText);
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ error: 'Failed to parse error response' }));
+        console.error('❌ API Error Response:', errorData);
+        throw new Error(`API Error: ${response.status} - ${JSON.stringify(errorData)}`);
+      }
+
       const data = await response.json();
+      console.log('✅ API Response:', data);
 
       if (data.content && data.content[0]) {
         const aiMessage = { role: 'assistant', content: data.content[0].text };
         setMessages([...updatedMessages, aiMessage]);
       } else {
+        console.error('❌ Invalid response format:', data);
         throw new Error('Invalid response format');
       }
     } catch (error) {
-      console.error('Error:', error);
+      console.error('❌ Full Error Details:', error);
+      console.error('Error message:', error.message);
+      console.error('Error stack:', error.stack);
+      console.error('API Endpoint:', API_ENDPOINTS.chat);
+      
+      // Provide more helpful error message
+      let errorMessage = "Oops! I had trouble connecting. Can you try explaining that again?";
+      
+      if (error.message.includes('Failed to fetch') || error.message.includes('NetworkError')) {
+        errorMessage = "I couldn't reach the server. Please check:\n1. Is the backend server running on port 3002?\n2. Check your browser console for more details.";
+      } else if (error.message.includes('API Error: 500')) {
+        errorMessage = "The server encountered an error. Please check the backend logs.";
+      } else if (error.message.includes('API key')) {
+        errorMessage = "API key configuration issue. Please check backend environment variables.";
+      }
+      
       setMessages([...updatedMessages, {
         role: 'assistant',
-        content: "Oops! I had trouble connecting. Can you try explaining that again?"
+        content: errorMessage
       }]);
     } finally {
       setLoading(false);
     }
   };
 
-  // Complete session and save evidence
+  // Complete session - evaluation will be done by backend
   const completeSession = () => {
-    const score = calculateRubricScore(evidenceCollected);
-    const evidenceCount = Object.values(evidenceCollected).filter(Boolean).length;
-
     const updatedAssignments = assignments.map(a =>
       a.id === activeAssignment.id
         ? {
             ...a,
             status: 'completed',
-            rubricScore: score,
-            evidenceCount: evidenceCount,
             completedDate: new Date().toISOString().split('T')[0],
             messages: messages,
-            evidenceCollected: evidenceCollected
+            conversationId: conversationLogs.length // Will be evaluated by backend
           }
         : a
     );
 
     setAssignments(updatedAssignments);
     setView('feedback');
+
+    // Fetch evaluation from backend after completion
+    fetchEvaluations();
   };
 
-  // Toggle evidence checkbox
-  const toggleEvidence = (key) => {
-    setEvidenceCollected(prev => ({ ...prev, [key]: !prev[key] }));
-  };
-
-  // Render badge based on rubric score
-  const getBadge = (score) => {
-    if (score === 4) return { name: 'Master Teacher', icon: '🏆', color: 'bg-yellow-500' };
-    if (score === 3) return { name: 'Great Explainer', icon: '⭐', color: 'bg-blue-500' };
-    if (score === 2) return { name: 'Good Helper', icon: '👍', color: 'bg-green-500' };
+  // Render badge based on weighted total score (0-100)
+  const getBadge = (totalScore) => {
+    if (totalScore >= 85) return { name: 'Master Teacher', icon: '🏆', color: 'bg-yellow-500' };
+    if (totalScore >= 70) return { name: 'Great Explainer', icon: '⭐', color: 'bg-blue-500' };
+    if (totalScore >= 50) return { name: 'Good Helper', icon: '👍', color: 'bg-green-500' };
     return { name: 'Getting Started', icon: '🌱', color: 'bg-gray-500' };
   };
 
@@ -592,7 +617,7 @@ const ITeachUMVP = ({ setVersion }) => {
               </div>
               {/* Title */}
               <h1 className="text-5xl md:text-6xl font-bold text-gray-900" style={{ marginBottom: '24px' }}>
-                ITeachU
+                Cognality Learning
               </h1>
               <p className="text-2xl md:text-3xl text-gray-700 mb-12 font-light italic">
                 "Different minds, equal value — learning is more than a score."
@@ -629,15 +654,6 @@ const ITeachUMVP = ({ setVersion }) => {
                 </button>
               </div>
 
-              {/* V2 Preview Button */}
-              <div className="mb-20">
-                <button
-                  onClick={() => setVersion('v2')}
-                  className="px-6 py-3 bg-gradient-to-r from-pink-500 to-purple-600 text-white rounded-xl font-semibold hover:shadow-lg transition transform hover:scale-105"
-                >
-                  Try ITeachU V2 - Cognality Edition
-                </button>
-              </div>
             </div>
           </div>
         </div>
@@ -751,7 +767,7 @@ const ITeachUMVP = ({ setVersion }) => {
               <LumoMascot emotion={mascotEmotion} size="small" />
             </div>
             {/* Title */}
-            <h1 className="text-3xl font-bold text-gray-900" style={{ marginBottom: '8px' }}>ITeachU</h1>
+            <h1 className="text-3xl font-bold text-gray-900" style={{ marginBottom: '8px' }}>Cognality Learning</h1>
             <p className="text-gray-600 mt-2">Transform assessment by teaching AI</p>
           </div>
 
@@ -862,7 +878,7 @@ const ITeachUMVP = ({ setVersion }) => {
                     </span>
                     {assignment.status === 'completed' && (
                       <span className="text-sm font-semibold text-indigo-600">
-                        {assignment.evidenceCount}/4 evidence
+                        Score: {assignment.evaluation?.totalScore?.toFixed(0) || 0}/100
                       </span>
                     )}
                   </div>
@@ -959,18 +975,28 @@ const ITeachUMVP = ({ setVersion }) => {
     return (
       <div className="min-h-screen bg-gray-50">
         <div className="bg-indigo-600 text-white p-6">
-          <div className="max-w-7xl mx-auto flex items-center gap-4">
-            <button onClick={() => setView('teacherDashboard')} className="p-2 hover:bg-indigo-700 rounded">
-              <ArrowLeft className="w-5 h-5" />
+          <div className="max-w-7xl mx-auto flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <button onClick={() => setView('teacherDashboard')} className="p-2 hover:bg-indigo-700 rounded">
+                <ArrowLeft className="w-5 h-5" />
+              </button>
+              <h1 className="text-2xl font-bold">Review Student Work</h1>
+            </div>
+            <button
+              onClick={fetchEvaluations}
+              disabled={loadingEvaluations}
+              className="px-4 py-2 bg-indigo-700 rounded-lg hover:bg-indigo-800 disabled:opacity-50 flex items-center gap-2"
+            >
+              <BarChart3 className="w-4 h-4" />
+              {loadingEvaluations ? 'Loading...' : 'Refresh Evaluations'}
             </button>
-            <h1 className="text-2xl font-bold">Review Student Work</h1>
           </div>
         </div>
 
         <div className="max-w-7xl mx-auto p-6">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {assignments.filter(a => a.status !== 'assigned').map(assignment => {
-              const badge = getBadge(assignment.rubricScore);
+              const badge = getBadge(assignment.evaluation?.totalScore || 0);
               return (
                 <button
                   key={assignment.id}
@@ -993,10 +1019,29 @@ const ITeachUMVP = ({ setVersion }) => {
                   </div>
 
                   <div className="space-y-2">
-                    <div className="flex items-center justify-between text-sm">
-                      <span className="text-gray-600">Evidence Collected:</span>
-                      <span className="font-semibold">{assignment.evidenceCount}/4</span>
-                    </div>
+                    {(() => {
+                      // Try to get evaluation score from backend
+                      const evaluation = evaluationData?.conversations?.find(
+                        conv => conv.taskTitle === assignment.taskTitle
+                      )?.evaluation;
+
+                      const displayScore = evaluation && !evaluation.error
+                        ? evaluation.totalScore
+                        : assignment.evaluation?.totalScore || 0;
+                      
+                      return (
+                        <div className="flex items-center justify-between text-sm">
+                          <span className="text-gray-600">Evaluation Score:</span>
+                          <span className={`font-semibold ${
+                            displayScore >= 75 ? 'text-green-600' :
+                            displayScore >= 50 ? 'text-yellow-600' :
+                            'text-red-600'
+                          }`}>
+                            {displayScore}/100
+                          </span>
+                        </div>
+                      );
+                    })()}
 
                     <div className="flex items-center justify-between text-sm">
                       <span className="text-gray-600">Status:</span>
@@ -1027,7 +1072,7 @@ const ITeachUMVP = ({ setVersion }) => {
   // TEACHER: FEEDBACK VIEW
   if (view === 'teacherFeedback' && selectedAssignmentForReview) {
     const assignment = selectedAssignmentForReview;
-    const badge = getBadge(assignment.rubricScore);
+    const badge = getBadge(assignment.evaluation?.totalScore || 0);
 
     return (
       <div className="min-h-screen bg-gray-50">
@@ -1057,28 +1102,65 @@ const ITeachUMVP = ({ setVersion }) => {
           </div>
 
           <div className="bg-white rounded-xl shadow-md p-6">
-            <h2 className="text-xl font-semibold mb-4">Evidence Breakdown</h2>
-            <div className="space-y-3">
-              {Object.entries(EVIDENCE_MARKERS).map(([key, marker]) => (
-                <div key={key} className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
-                  {assignment.evidenceCollected[key] ? (
-                    <CheckCircle className="w-6 h-6 text-green-600" />
-                  ) : (
-                    <AlertCircle className="w-6 h-6 text-gray-300" />
-                  )}
-                  <div>
-                    <div className="font-semibold">{marker.label}</div>
-                    <div className="text-sm text-gray-600">{marker.description}</div>
+            <h2 className="text-xl font-semibold mb-4">Evaluation Breakdown</h2>
+            {(() => {
+              // Find evaluation for this assignment
+              const evaluation = evaluationData?.conversations?.find(
+                conv => conv.taskTitle === assignment.taskTitle && 
+                conv.timestamp && assignment.completedDate
+              )?.evaluation;
+              
+              if (!evaluation || evaluation.error) {
+                return (
+                  <div className="text-center py-6 text-gray-500">
+                    {loadingEvaluations ? (
+                      <div>Loading evaluation...</div>
+                    ) : (
+                      <div>
+                        <AlertCircle className="w-6 h-6 mx-auto mb-2 text-gray-400" />
+                        <p className="text-sm">Evaluation not available yet</p>
+                      </div>
+                    )}
                   </div>
+                );
+              }
+
+              const categoryScores = evaluation.categoryScores || {};
+              const justifications = evaluation.justifications || {};
+
+              return (
+                <div className="space-y-3">
+                  {Object.entries(EVALUATION_CATEGORIES).map(([key, category]) => {
+                    const score = categoryScores[key] || 0;
+                    const justification = justifications[key] || 'No justification available';
+                    const scoreColor = score >= 3 ? 'text-green-600' : score >= 2 ? 'text-yellow-600' : 'text-red-600';
+
+                    return (
+                      <div key={key} className="p-3 bg-gray-50 rounded-lg">
+                        <div className="flex items-start justify-between mb-2">
+                          <div className="flex-1">
+                            <div className="font-semibold">{category.label}</div>
+                            <div className="text-sm text-gray-600">{category.description}</div>
+                          </div>
+                          <div className={`text-xl font-bold ${scoreColor} ml-4`}>
+                            {score}/4
+                          </div>
+                        </div>
+                        <div className="mt-2 pt-2 border-t border-gray-200">
+                          <div className="text-xs text-gray-600 italic">"{justification}"</div>
+                        </div>
+                      </div>
+                    );
+                  })}
                 </div>
-              ))}
-            </div>
+              );
+            })()}
           </div>
 
           <div className="bg-white rounded-xl shadow-md p-6">
             <h2 className="text-xl font-semibold mb-4">Recommendations</h2>
             <div className="space-y-3">
-              {assignment.evidenceCount === 4 ? (
+              {(assignment.evaluation?.totalScore || 0) >= 80 ? (
                 <>
                   <div className="flex items-start gap-3 p-4 bg-green-50 rounded-lg">
                     <Trophy className="w-6 h-6 text-green-600 mt-1" />
@@ -1095,13 +1177,13 @@ const ITeachUMVP = ({ setVersion }) => {
                     </div>
                   </div>
                 </>
-              ) : assignment.evidenceCount >= 2 ? (
+              ) : (assignment.evaluation?.totalScore || 0) >= 60 ? (
                 <>
                   <div className="flex items-start gap-3 p-4 bg-yellow-50 rounded-lg">
                     <TrendingUp className="w-6 h-6 text-yellow-600 mt-1" />
                     <div>
                       <div className="font-semibold text-yellow-900">Partial Understanding</div>
-                      <div className="text-sm text-yellow-700">Student grasped some concepts but needs support on {4 - assignment.evidenceCount} area(s).</div>
+                      <div className="text-sm text-yellow-700">Student grasped some concepts but needs additional support to reach proficiency.</div>
                     </div>
                   </div>
                   <div className="flex items-start gap-3 p-4 bg-blue-50 rounded-lg">
@@ -1140,7 +1222,7 @@ const ITeachUMVP = ({ setVersion }) => {
   // STUDENT DETAIL VIEW (Teacher sees detailed student performance)
   if (view === 'studentDetail' && selectedStudentForDetail) {
     const student = selectedStudentForDetail;
-    const badge = getBadge(student.rubricScore);
+    const badge = getBadge(student.evaluation?.totalScore || 0);
 
     return (
       <div className="min-h-screen bg-gray-50">
@@ -1160,59 +1242,155 @@ const ITeachUMVP = ({ setVersion }) => {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {/* Left column - Evidence & Performance */}
             <div className="lg:col-span-2 space-y-6">
-              {/* Evidence Summary */}
+              {/* Evaluation Summary */}
               <div className="bg-white rounded-xl shadow-md p-6">
-                <h2 className="text-xl font-semibold mb-4">Evidence Summary</h2>
-                <div className="grid grid-cols-2 gap-4 mb-6">
-                  <div className="bg-gray-50 p-4 rounded-lg">
-                    <div className="text-sm text-gray-600 mb-1">Badge Earned</div>
-                    <div className={`${badge.color} text-white px-3 py-2 rounded inline-block`}>
-                      {badge.icon} {badge.name}
-                    </div>
-                  </div>
-                  <div className="bg-gray-50 p-4 rounded-lg">
-                    <div className="text-sm text-gray-600 mb-1">Evidence Collected</div>
-                    <div className="text-2xl font-bold">{student.evidenceCount}/4</div>
-                  </div>
-                </div>
-
-                <div className="space-y-3">
-                  {Object.entries(EVIDENCE_MARKERS).map(([key, marker]) => (
-                    <div key={key} className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
-                      {student.evidenceCollected[key] ? (
-                        <CheckCircle className="w-6 h-6 text-green-600" />
-                      ) : (
-                        <AlertCircle className="w-6 h-6 text-gray-300" />
-                      )}
-                      <div>
-                        <div className="font-semibold">{marker.label}</div>
-                        <div className="text-sm text-gray-600">{marker.description}</div>
+                <h2 className="text-xl font-semibold mb-4">Evaluation Summary</h2>
+                {(() => {
+                  // Find evaluation for this student's conversation
+                  const evaluation = evaluationData?.conversations?.find(
+                    conv => conv.taskTitle === student.taskTitle && 
+                    conv.timestamp && student.completedDate
+                  )?.evaluation;
+                  
+                  if (!evaluation || evaluation.error) {
+                    return (
+                      <div className="text-center py-8 text-gray-500">
+                        {loadingEvaluations ? (
+                          <div>Loading evaluation...</div>
+                        ) : (
+                          <div>
+                            <AlertCircle className="w-8 h-8 mx-auto mb-2 text-gray-400" />
+                            <p>Evaluation not available yet</p>
+                            <p className="text-sm mt-2">Complete the conversation to see evaluation results</p>
+                          </div>
+                        )}
                       </div>
-                    </div>
-                  ))}
-                </div>
+                    );
+                  }
+
+                  const totalScore = evaluation.totalScore || 0;
+                  const categoryScores = evaluation.categoryScores || {};
+                  const justifications = evaluation.justifications || {};
+
+                  return (
+                    <>
+                      <div className="grid grid-cols-2 gap-4 mb-6">
+                        <div className="bg-gray-50 p-4 rounded-lg">
+                          <div className="text-sm text-gray-600 mb-1">Total Score</div>
+                          <div className="text-3xl font-bold text-indigo-600">{totalScore}/100</div>
+                        </div>
+                        <div className="bg-gray-50 p-4 rounded-lg">
+                          <div className="text-sm text-gray-600 mb-1">Badge Earned</div>
+                          <div className={`${badge.color} text-white px-3 py-2 rounded inline-block`}>
+                            {badge.icon} {badge.name}
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="space-y-4">
+                        {Object.entries(EVALUATION_CATEGORIES).map(([key, category]) => {
+                          const score = categoryScores[key] || 0;
+                          const justification = justifications[key] || 'No justification available';
+                          const scoreColor = score >= 3 ? 'text-green-600' : score >= 2 ? 'text-yellow-600' : 'text-red-600';
+                          const bgColor = score >= 3 ? 'bg-green-50' : score >= 2 ? 'bg-yellow-50' : 'bg-red-50';
+
+                          return (
+                            <div key={key} className={`p-4 rounded-lg border-l-4 ${bgColor} ${
+                              score >= 3 ? 'border-green-500' : score >= 2 ? 'border-yellow-500' : 'border-red-500'
+                            }`}>
+                              <div className="flex items-start justify-between mb-2">
+                                <div className="flex-1">
+                                  <div className="font-semibold text-gray-900">{category.label}</div>
+                                  <div className="text-sm text-gray-600 mt-1">{category.description}</div>
+                                </div>
+                                <div className={`text-2xl font-bold ${scoreColor} ml-4`}>
+                                  {score}/4
+                                </div>
+                              </div>
+                              <div className="mt-3 pt-3 border-t border-gray-200">
+                                <div className="text-sm font-medium text-gray-700 mb-1">Evidence:</div>
+                                <div className="text-sm text-gray-600 italic">"{justification}"</div>
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </>
+                  );
+                })()}
               </div>
 
-              {/* Concept Mastery */}
-              {student.conceptMastery && (
+              {/* 4-Category Evaluation Rubric */}
+              {student.evaluation && (
                 <div className="bg-white rounded-xl shadow-md p-6">
-                  <h2 className="text-xl font-semibold mb-4">Concept Mastery</h2>
-                  <div className="space-y-3">
-                    {student.conceptMastery.map((concept, idx) => (
-                      <div key={idx} className="p-4 bg-gray-50 rounded-lg">
-                        <div className="flex items-center justify-between mb-2">
-                          <h3 className="font-semibold">{concept.concept}</h3>
-                          <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                            concept.confidence === 'Complete' ? 'bg-green-100 text-green-700' :
-                            concept.confidence === 'Partial' ? 'bg-yellow-100 text-yellow-700' :
-                            'bg-red-100 text-red-700'
-                          }`}>
-                            {concept.confidence}
-                          </span>
+                  <h2 className="text-xl font-semibold mb-4">Competency Evaluation</h2>
+
+                  {/* Total Score Display */}
+                  <div className="mb-6 p-4 bg-gradient-to-r from-indigo-50 to-purple-50 rounded-lg">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <div className="text-sm text-gray-600 font-medium">Weighted Total Score</div>
+                        <div className="text-3xl font-bold text-indigo-600">
+                          {student.evaluation.totalScore?.toFixed(1) || 0}/100
                         </div>
-                        <p className="text-sm text-gray-600">{concept.indicator}</p>
                       </div>
-                    ))}
+                      <div className="text-right">
+                        <div className="text-xs text-gray-500 mb-1">Proficiency Level</div>
+                        <div className={`inline-block px-4 py-2 rounded-full text-sm font-semibold ${
+                          student.evaluation.totalScore >= 80 ? 'bg-green-100 text-green-700' :
+                          student.evaluation.totalScore >= 60 ? 'bg-yellow-100 text-yellow-700' :
+                          'bg-orange-100 text-orange-700'
+                        }`}>
+                          {student.evaluation.totalScore >= 80 ? 'PROFICIENT' :
+                           student.evaluation.totalScore >= 60 ? 'DEVELOPING' : 'EMERGING'}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Category Scores */}
+                  <div className="space-y-4">
+                    {Object.entries(EVALUATION_CATEGORIES).map(([key, category]) => {
+                      const score = student.evaluation.categoryScores?.[key] || 0;
+                      const justification = student.evaluation.justifications?.[key] || 'No evaluation available';
+
+                      return (
+                        <div key={key} className="p-4 bg-gray-50 rounded-lg border-l-4 border-indigo-400">
+                          <div className="flex items-start justify-between mb-2">
+                            <div className="flex-1">
+                              <h3 className="font-semibold text-gray-900">{category.label}</h3>
+                              <p className="text-xs text-gray-500 mt-1">{category.description}</p>
+                            </div>
+                            <div className="ml-4 text-right">
+                              <div className="text-2xl font-bold text-indigo-600">{score}/4</div>
+                              <div className="text-xs text-gray-500">Weight: {(category.weight * 100).toFixed(0)}%</div>
+                            </div>
+                          </div>
+                          <div className="mt-2 p-3 bg-white rounded border border-gray-200">
+                            <div className="text-xs font-semibold text-gray-600 mb-1">Evidence:</div>
+                            <p className="text-sm text-gray-700">{justification}</p>
+                          </div>
+                          {/* Score Bar */}
+                          <div className="mt-2 h-2 bg-gray-200 rounded-full overflow-hidden">
+                            <div
+                              className="h-full bg-indigo-500 transition-all duration-500"
+                              style={{ width: `${(score / 4) * 100}%` }}
+                            ></div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+
+                  {/* Evaluation Legend */}
+                  <div className="mt-6 p-4 bg-gray-100 rounded-lg">
+                    <div className="text-xs font-semibold text-gray-600 mb-2">Scoring Scale (1-4):</div>
+                    <div className="grid grid-cols-2 gap-2 text-xs text-gray-600">
+                      <div>• <strong>4 - Strong:</strong> Demonstrates mastery</div>
+                      <div>• <strong>3 - Adequate:</strong> Generally proficient</div>
+                      <div>• <strong>2 - Emerging:</strong> Partial understanding</div>
+                      <div>• <strong>1 - Weak:</strong> Limited demonstration</div>
+                    </div>
                   </div>
                 </div>
               )}
@@ -1310,7 +1488,7 @@ const ITeachUMVP = ({ setVersion }) => {
   if (view === 'studentDashboard') {
     const studentAssignments = assignments.filter(a => a.studentId === currentUser.id);
     const completedCount = studentAssignments.filter(a => a.status === 'completed').length;
-    const totalBadges = studentAssignments.filter(a => a.status === 'completed').map(a => getBadge(a.rubricScore));
+    const totalBadges = studentAssignments.filter(a => a.status === 'completed').map(a => getBadge(a.evaluation?.totalScore || 0));
 
     return (
       <div className="min-h-screen bg-gray-50">
@@ -1396,8 +1574,8 @@ const ITeachUMVP = ({ setVersion }) => {
                   <div className="flex items-center gap-3">
                     {assignment.status === 'completed' ? (
                       <>
-                        <div className={`${getBadge(assignment.rubricScore).color} text-white px-3 py-1 rounded`}>
-                          {getBadge(assignment.rubricScore).icon}
+                        <div className={`${getBadge(assignment.evaluation?.totalScore || 0).color} text-white px-3 py-1 rounded`}>
+                          {getBadge(assignment.evaluation?.totalScore || 0).icon}
                         </div>
                         <button
                           onClick={() => {
@@ -1482,8 +1660,6 @@ const ITeachUMVP = ({ setVersion }) => {
       );
     }
 
-    const evidenceCount = Object.values(evidenceCollected).filter(Boolean).length;
-
     // Detect Lumo's emotion based on message content
     const getEmotionFromContent = (content) => {
       const lowerContent = content.toLowerCase();
@@ -1519,13 +1695,9 @@ const ITeachUMVP = ({ setVersion }) => {
                 </div>
               </div>
               <div className="flex items-center gap-4">
-                <div className="text-right">
-                  <div className="text-sm text-green-200">Evidence Collected</div>
-                  <div className="text-2xl font-bold">{evidenceCount}/4</div>
-                </div>
                 <button
                   onClick={completeSession}
-                  disabled={evidenceCount === 0}
+                  disabled={messages.length === 0}
                   className="px-4 py-2 bg-white text-green-600 rounded-lg font-semibold hover:bg-green-50 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   Complete Session
@@ -1604,27 +1776,6 @@ const ITeachUMVP = ({ setVersion }) => {
               <p className="text-xs text-gray-600">{task.description}</p>
             </div>
 
-            {/* Progress Bar */}
-            <div className="bg-white rounded-xl shadow-md p-6">
-              <h3 className="font-semibold mb-4 flex items-center gap-2">
-                <Target className="w-5 h-5 text-green-600" />
-                Your Progress
-              </h3>
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-sm text-gray-600">Evidence Collected</span>
-                <span className="text-sm font-semibold text-green-600">{evidenceCount}/4</span>
-              </div>
-              <div className="w-full bg-gray-200 rounded-full h-3">
-                <div
-                  className="bg-green-600 h-3 rounded-full transition-all duration-500"
-                  style={{ width: `${(evidenceCount / 4) * 100}%` }}
-                />
-              </div>
-              <div className="text-center mt-2">
-                <span className="text-2xl font-bold text-green-600">{Math.round((evidenceCount / 4) * 100)}%</span>
-              </div>
-            </div>
-
             <div className="bg-blue-50 rounded-xl p-4 border border-blue-200">
               <h3 className="font-semibold mb-2 flex items-center gap-2 text-blue-900">
                 <Lightbulb className="w-5 h-5" />
@@ -1646,7 +1797,7 @@ const ITeachUMVP = ({ setVersion }) => {
   // FEEDBACK VIEW (Student/Parent/Teacher after completion)
   if (view === 'feedback') {
     const assignment = selectedAssignmentForReview || activeAssignment;
-    const badge = getBadge(assignment.rubricScore);
+    const badge = getBadge(assignment.evaluation?.totalScore || 0);
 
     return (
       <div className="min-h-screen bg-gray-50">
@@ -1669,8 +1820,8 @@ const ITeachUMVP = ({ setVersion }) => {
 
             <div className="grid grid-cols-2 gap-4 max-w-md mx-auto">
               <div className="bg-green-50 p-4 rounded-lg">
-                <div className="text-sm text-gray-600 mb-1">Evidence Collected</div>
-                <div className="text-3xl font-bold text-green-600">{assignment.evidenceCount}/4</div>
+                <div className="text-sm text-gray-600 mb-1">Total Score</div>
+                <div className="text-3xl font-bold text-green-600">{assignment.evaluation?.totalScore?.toFixed(1) || 0}/100</div>
               </div>
               <div className="bg-blue-50 p-4 rounded-lg">
                 <div className="text-sm text-gray-600 mb-1">Messages Sent</div>
@@ -1682,25 +1833,63 @@ const ITeachUMVP = ({ setVersion }) => {
           <div className="bg-white rounded-xl shadow-md p-6">
             <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
               <Lightbulb className="w-6 h-6 text-yellow-600" />
-              What You Demonstrated
+              Evaluation Results
             </h2>
-            <div className="space-y-3">
-              {Object.entries(EVIDENCE_MARKERS).map(([key, marker]) => (
-                <div key={key} className={`flex items-center gap-3 p-3 rounded-lg ${
-                  assignment.evidenceCollected[key] ? 'bg-green-50' : 'bg-gray-50'
-                }`}>
-                  {assignment.evidenceCollected[key] ? (
-                    <CheckCircle className="w-6 h-6 text-green-600" />
-                  ) : (
-                    <AlertCircle className="w-6 h-6 text-gray-300" />
-                  )}
-                  <div>
-                    <div className="font-semibold">{marker.label}</div>
-                    <div className="text-sm text-gray-600">{marker.description}</div>
+            {(() => {
+              // Find evaluation: try backend first, fallback to assignment.evaluation
+              const evaluation = evaluationData?.conversations?.find(
+                conv => conv.taskTitle === assignment.taskTitle
+              )?.evaluation || assignment.evaluation;
+
+              if (!evaluation || evaluation.error) {
+                // No evaluation available yet
+                return (
+                  <div className="text-center py-6 text-gray-500">
+                    <p>Evaluation will be available once the session is completed.</p>
                   </div>
-                </div>
-              ))}
-            </div>
+                );
+              }
+
+              const categoryScores = evaluation.categoryScores || {};
+              const justifications = evaluation.justifications || {};
+              const totalScore = evaluation.totalScore || 0;
+
+              return (
+                <>
+                  <div className="mb-4 p-4 bg-indigo-50 rounded-lg text-center">
+                    <div className="text-sm text-gray-600 mb-1">Overall Score</div>
+                    <div className="text-4xl font-bold text-indigo-600">{totalScore}/100</div>
+                  </div>
+                  <div className="space-y-3">
+                    {Object.entries(EVALUATION_CATEGORIES).map(([key, category]) => {
+                      const score = categoryScores[key] || 0;
+                      const justification = justifications[key] || 'No justification available';
+                      const scoreColor = score >= 3 ? 'text-green-600' : score >= 2 ? 'text-yellow-600' : 'text-red-600';
+                      const bgColor = score >= 3 ? 'bg-green-50' : score >= 2 ? 'bg-yellow-50' : 'bg-red-50';
+
+                      return (
+                        <div key={key} className={`p-3 rounded-lg border-l-4 ${bgColor} ${
+                          score >= 3 ? 'border-green-500' : score >= 2 ? 'border-yellow-500' : 'border-red-500'
+                        }`}>
+                          <div className="flex items-start justify-between mb-2">
+                            <div className="flex-1">
+                              <div className="font-semibold">{category.label}</div>
+                              <div className="text-sm text-gray-600">{category.description}</div>
+                            </div>
+                            <div className={`text-xl font-bold ${scoreColor} ml-4`}>
+                              {score}/4
+                            </div>
+                          </div>
+                          <div className="mt-2 pt-2 border-t border-gray-200">
+                            <div className="text-xs text-gray-600 italic">"{justification}"</div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </>
+              );
+            })()}
           </div>
 
           <div className="bg-blue-50 rounded-xl p-6 border border-blue-200">
@@ -1708,12 +1897,12 @@ const ITeachUMVP = ({ setVersion }) => {
               <TrendingUp className="w-6 h-6" />
               Next Steps
             </h2>
-            {assignment.evidenceCount === 4 ? (
+            {(assignment.evaluation?.totalScore || 0) >= 80 ? (
               <div className="space-y-2 text-blue-800">
                 <p>🎉 <strong>Outstanding work!</strong> You explained all the key concepts clearly.</p>
                 <p>💡 <strong>Challenge yourself:</strong> Try teaching a more advanced problem or help a classmate!</p>
               </div>
-            ) : assignment.evidenceCount >= 2 ? (
+            ) : (assignment.evaluation?.totalScore || 0) >= 60 ? (
               <div className="space-y-2 text-blue-800">
                 <p>👍 <strong>Good effort!</strong> You demonstrated understanding of some concepts.</p>
                 <p>💡 <strong>Keep practicing:</strong> Try explaining the parts you missed to build stronger evidence.</p>
@@ -1795,7 +1984,7 @@ const ITeachUMVP = ({ setVersion }) => {
             <h2 className="text-xl font-semibold mb-4">Recent Activity</h2>
             <div className="space-y-3">
               {childAssignments.map(assignment => {
-                const badge = getBadge(assignment.rubricScore);
+                const badge = getBadge(assignment.evaluation?.totalScore || 0);
                 return (
                   <div key={assignment.id} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
                     <div className="flex-1">
@@ -1812,8 +2001,8 @@ const ITeachUMVP = ({ setVersion }) => {
                       {assignment.status === 'completed' && (
                         <>
                           <div className="text-center">
-                            <div className="text-sm text-gray-600">Evidence</div>
-                            <div className="font-semibold">{assignment.evidenceCount}/4</div>
+                            <div className="text-sm text-gray-600">Score</div>
+                            <div className="font-semibold">{assignment.evaluation?.totalScore?.toFixed(0) || 0}/100</div>
                           </div>
                           <div className={`${badge.color} text-white px-3 py-2 rounded`}>
                             {badge.icon} {badge.name}
