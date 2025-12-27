@@ -3,26 +3,69 @@ import cors from 'cors';
 import 'dotenv/config';
 import fs from 'fs';
 import path from 'path';
+import { generateEvaluatorPrompt } from './src/utils/evaluatorPrompt.js';
 
 const app = express();
 const PORT = 3002;
 
-app.use(cors());
+// CORS configuration - allow requests from Vite dev server (port 3000) and localhost
+app.use(cors({
+  origin: ['http://localhost:3000', 'http://127.0.0.1:3000', 'http://localhost:5173', 'http://127.0.0.1:5173'],
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));
 app.use(express.json());
+
+// Add request logging middleware
+app.use((req, res, next) => {
+  console.log(`📥 ${req.method} ${req.path}`, {
+    origin: req.headers.origin,
+    'content-type': req.headers['content-type']
+  });
+  next();
+});
 
 // Store for conversation logs (in production, use a database)
 const conversationLogs = [];
+
+// Store for evaluations cache (to avoid re-evaluating same conversation)
+const evaluationCache = new Map(); // conversationId -> evaluation result
 
 // Store for sessions (in production, use a database)
 const sessions = new Map(); // sessionId -> session data
 
 app.post('/api/chat', async (req, res) => {
   try {
+    console.log('📨 Received chat request:', {
+      messageCount: req.body.messages?.length || 0,
+      model: req.body.model,
+      hasTaskMetadata: !!req.body.taskMetadata
+    });
+
     const apiKey = process.env.VITE_ANTHROPIC_API_KEY;
 
     if (!apiKey) {
+      console.error('❌ API key not configured');
       return res.status(500).json({ error: 'API key not configured' });
     }
+
+    // Extract taskMetadata before sending to Anthropic (Anthropic doesn't accept custom fields)
+    const { taskMetadata, ...anthropicRequestBody } = req.body;
+
+    // Prepare request body for Anthropic (only standard fields)
+    const anthropicRequest = {
+      model: anthropicRequestBody.model,
+      max_tokens: anthropicRequestBody.max_tokens,
+      system: anthropicRequestBody.system,
+      messages: anthropicRequestBody.messages
+    };
+
+    console.log('📤 Sending to Anthropic:', {
+      model: anthropicRequest.model,
+      messageCount: anthropicRequest.messages?.length || 0,
+      hasSystem: !!anthropicRequest.system
+    });
 
     const response = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
@@ -31,21 +74,29 @@ app.post('/api/chat', async (req, res) => {
         'x-api-key': apiKey,
         'anthropic-version': '2023-06-01'
       },
-      body: JSON.stringify(req.body)
+      body: JSON.stringify(anthropicRequest)
     });
 
     const data = await response.json();
 
     if (!response.ok) {
+      console.error('❌ Anthropic API error:', data);
       return res.status(response.status).json(data);
     }
+
+    console.log('✅ Anthropic API success:', {
+      responseLength: data.content?.[0]?.text?.length || 0,
+      stopReason: data.stop_reason
+    });
 
     // Log conversation for backend assessment (hidden from frontend)
     const conversationLog = {
       timestamp: new Date().toISOString(),
-      messages: req.body.messages,
+      messages: anthropicRequest.messages,
       response: data.content[0].text,
-      model: req.body.model
+      model: anthropicRequest.model,
+      system: anthropicRequest.system, // Store system prompt for context
+      taskMetadata: taskMetadata || {} // Store task metadata if provided (extracted earlier)
     };
 
     conversationLogs.push(conversationLog);
@@ -56,24 +107,177 @@ app.post('/api/chat', async (req, res) => {
 
     res.json(data);
   } catch (error) {
-    console.error('Proxy error:', error);
-    res.status(500).json({ error: error.message });
+    console.error('❌ Proxy error:', error);
+    console.error('Error details:', {
+      message: error.message,
+      stack: error.stack,
+      name: error.name
+    });
+    res.status(500).json({ 
+      error: error.message || 'Internal server error',
+      details: process.env.NODE_ENV === 'development' ? error.stack : undefined
+    });
   }
 });
 
+/**
+ * Evaluate a conversation using the Claude API and the evaluator prompt
+ * @param {Object} conversationLog - The conversation log object
+ * @param {number} conversationId - The ID of the conversation
+ * @returns {Promise<Object>} Evaluation result with scores and justifications
+ */
+async function evaluateConversation(conversationLog, conversationId) {
+  try {
+    // Check cache first
+    if (evaluationCache.has(conversationId)) {
+      console.log(`📋 Using cached evaluation for conversation ${conversationId}`);
+      return evaluationCache.get(conversationId);
+    }
+
+    const apiKey = process.env.VITE_ANTHROPIC_API_KEY;
+    if (!apiKey) {
+      throw new Error('API key not configured');
+    }
+
+    // Format conversation transcript for evaluator
+    const transcript = conversationLog.messages.map((msg, idx) => {
+      const role = msg.role === 'assistant' ? 'AI Protégé (Zippy)' : 'Student';
+      return `${role}: ${msg.content}`;
+    }).join('\n\n');
+
+    // Build the evaluation request
+    const evaluatorPrompt = generateEvaluatorPrompt();
+    const taskMetadata = conversationLog.taskMetadata || {};
+
+    const evaluationRequest = `Please evaluate the following student-AI Protégé conversation.
+
+TASK METADATA:
+- Task: ${taskMetadata.title || 'Unknown'}
+- Target Concepts: ${taskMetadata.targetConcepts ? taskMetadata.targetConcepts.join(', ') : 'Not specified'}
+- Correct Solution: ${taskMetadata.correctSolutionPathway || 'Not specified'}
+- Known Misconceptions: ${taskMetadata.misconceptions ? taskMetadata.misconceptions.join('; ') : 'Not specified'}
+
+CONVERSATION TRANSCRIPT:
+${transcript}
+
+Please provide your evaluation in the specified JSON format.`;
+
+    console.log(`🔍 Evaluating conversation ${conversationId}...`);
+
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': apiKey,
+        'anthropic-version': '2023-06-01'
+      },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-5-20250929',
+        max_tokens: 2048,
+        system: evaluatorPrompt,
+        messages: [
+          {
+            role: 'user',
+            content: evaluationRequest
+          }
+        ]
+      })
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      console.error('❌ Evaluation API error:', data);
+      throw new Error(`Evaluation failed: ${data.error?.message || 'Unknown error'}`);
+    }
+
+    // Parse the evaluation result
+    const evaluationText = data.content[0].text;
+
+    // Try to extract JSON from the response
+    let evaluation;
+    try {
+      // Look for JSON block in the response
+      const jsonMatch = evaluationText.match(/\{[\s\S]*\}/);
+      if (jsonMatch) {
+        evaluation = JSON.parse(jsonMatch[0]);
+      } else {
+        evaluation = JSON.parse(evaluationText);
+      }
+    } catch (parseError) {
+      console.error('❌ Failed to parse evaluation JSON:', evaluationText);
+      throw new Error('Invalid evaluation format from API');
+    }
+
+    // Validate evaluation structure
+    if (!evaluation.categoryScores || !evaluation.justifications || typeof evaluation.totalScore !== 'number') {
+      console.error('❌ Invalid evaluation structure:', evaluation);
+      throw new Error('Evaluation missing required fields');
+    }
+
+    console.log(`✅ Evaluation complete for conversation ${conversationId}: ${evaluation.totalScore}/100`);
+
+    // Cache the result
+    evaluationCache.set(conversationId, evaluation);
+
+    return evaluation;
+  } catch (error) {
+    console.error(`❌ Evaluation error for conversation ${conversationId}:`, error);
+    // Return a fallback evaluation indicating error
+    return {
+      error: true,
+      message: error.message,
+      categoryScores: {
+        conceptArticulation: 0,
+        logicCoherence: 0,
+        misconceptionCorrection: 0,
+        cognitiveResilience: 0
+      },
+      justifications: {
+        conceptArticulation: 'Evaluation failed',
+        logicCoherence: 'Evaluation failed',
+        misconceptionCorrection: 'Evaluation failed',
+        cognitiveResilience: 'Evaluation failed'
+      },
+      totalScore: 0
+    };
+  }
+}
+
 // Teacher-only endpoint to get conversation logs and assessments
-app.get('/api/teacher/conversations', (req, res) => {
-  // In production: Add authentication middleware
-  res.json({
-    count: conversationLogs.length,
-    conversations: conversationLogs.map((log, idx) => ({
-      id: idx,
-      timestamp: log.timestamp,
-      turnCount: log.messages.length,
-      // Assessment logic would go here (analyzing conversation content)
-      // For now, just return metadata
-    }))
-  });
+app.get('/api/teacher/conversations', async (req, res) => {
+  try {
+    // In production: Add authentication middleware
+    console.log(`📊 Teacher dashboard requested: ${conversationLogs.length} conversations to evaluate`);
+
+    // Evaluate all conversations (in parallel for performance)
+    const conversationsWithEvaluations = await Promise.all(
+      conversationLogs.map(async (log, idx) => {
+        const evaluation = await evaluateConversation(log, idx);
+
+        return {
+          id: idx,
+          timestamp: log.timestamp,
+          turnCount: log.messages.length,
+          taskTitle: log.taskMetadata?.title || 'Unknown Task',
+          evaluation: {
+            categoryScores: evaluation.categoryScores,
+            justifications: evaluation.justifications,
+            totalScore: evaluation.totalScore,
+            error: evaluation.error || false
+          }
+        };
+      })
+    );
+
+    res.json({
+      count: conversationLogs.length,
+      conversations: conversationsWithEvaluations
+    });
+  } catch (error) {
+    console.error('❌ Teacher dashboard error:', error);
+    res.status(500).json({ error: error.message });
+  }
 });
 
 // Session management endpoints
