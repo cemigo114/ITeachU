@@ -15,7 +15,9 @@ const allowedOrigins = [
   'http://localhost:5173',
   'http://127.0.0.1:5173',
   'https://cognality.netlify.app',
-  'https://www.cognality.netlify.app'
+  'https://www.cognality.netlify.app',
+  'https://cognalitylearning.com',
+  'https://www.cognalitylearning.com'
 ];
 
 app.use(cors({
@@ -23,7 +25,7 @@ app.use(cors({
     // Allow requests with no origin (like mobile apps or curl requests)
     if (!origin) return callback(null, true);
 
-    if (allowedOrigins.indexOf(origin) !== -1 || origin.endsWith('.netlify.app')) {
+    if (allowedOrigins.indexOf(origin) !== -1 || origin.endsWith('.netlify.app') || origin.endsWith('.cognalitylearning.com')) {
       callback(null, true);
     } else {
       callback(new Error('Not allowed by CORS'));
