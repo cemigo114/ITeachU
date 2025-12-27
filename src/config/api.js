@@ -46,7 +46,7 @@ export const API_ENDPOINTS = {
   deleteSession: (id) => `${API_BASE_URL}/api/sessions/${id}`,
 
   // Teacher endpoints
-  teacherConversations: `${API_BASE_URL}/api/teacher/conversations`,
+  teacherConversations: `${API_BASE_URL}/api/teacher/conversations`
 };
 
 /**

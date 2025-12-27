@@ -1,0 +1,11 @@
+services:
+  - type: web
+    name: iteachu-backend
+    env: node
+    buildCommand: npm install
+    startCommand: node server.js
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: VITE_ANTHROPIC_API_KEY
+        sync: false  # This will need to be set manually in Render dashboard
