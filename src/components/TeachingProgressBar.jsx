@@ -29,73 +29,26 @@ const TeachingProgressBar = ({ turnCount, evidenceCollected }) => {
 
   const estimatedScore = calculateEstimatedScore();
 
-  // Determine proficiency level
-  const getProficiencyLevel = (score) => {
-    if (score >= 80) return { level: 'PROFICIENT', color: 'bg-green-600', textColor: 'text-green-700' };
-    if (score >= 60) return { level: 'DEVELOPING', color: 'bg-yellow-500', textColor: 'text-yellow-700' };
-    return { level: 'EMERGING', color: 'bg-orange-500', textColor: 'text-orange-700' };
+  // Determine proficiency level color
+  const getProgressColor = (score) => {
+    if (score >= 80) return 'bg-green-600';
+    if (score >= 60) return 'bg-yellow-500';
+    return 'bg-orange-500';
   };
 
-  const proficiency = getProficiencyLevel(estimatedScore);
+  const progressColor = getProgressColor(estimatedScore);
 
   return (
     <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 mb-4">
-      <div className="flex items-center justify-between mb-2">
-        <div className="flex items-center gap-2">
-          <span className="text-sm font-semibold text-gray-700">Teaching Progress</span>
-          <span className={`text-xs font-bold px-2 py-1 rounded ${proficiency.textColor} bg-opacity-10 ${proficiency.color.replace('bg-', 'bg-opacity-10 bg-')}`}>
-            {proficiency.level}
-          </span>
-        </div>
-        <span className="text-lg font-bold text-gray-800">{estimatedScore}/100</span>
-      </div>
+      <div className="text-sm font-semibold text-gray-700 mb-3">Progress</div>
 
       {/* Progress Bar */}
       <div className="relative h-3 bg-gray-200 rounded-full overflow-hidden">
-        {/* Threshold markers */}
-        <div className="absolute top-0 left-[60%] w-px h-full bg-gray-400 z-10" title="Developing: 60"></div>
-        <div className="absolute top-0 left-[80%] w-px h-full bg-gray-400 z-10" title="Proficient: 80"></div>
-
         {/* Progress fill */}
         <div
-          className={`h-full transition-all duration-500 ${proficiency.color}`}
+          className={`h-full transition-all duration-500 ${progressColor}`}
           style={{ width: `${estimatedScore}%` }}
         ></div>
-      </div>
-
-      {/* Legend */}
-      <div className="flex justify-between text-xs text-gray-500 mt-2">
-        <span>0 - Emerging</span>
-        <span>60 - Developing</span>
-        <span>80 - Proficient</span>
-      </div>
-
-      {/* Evidence indicators */}
-      {evidenceCollected && (
-        <div className="mt-3 flex flex-wrap gap-2">
-          {Object.entries({
-            usedExamples: 'Used Examples',
-            definedTerms: 'Defined Terms',
-            checkedUnderstanding: 'Checked Understanding',
-            explainedWhy: 'Explained Why'
-          }).map(([key, label]) => (
-            <div
-              key={key}
-              className={`text-xs px-2 py-1 rounded-full ${
-                evidenceCollected[key]
-                  ? 'bg-green-100 text-green-700'
-                  : 'bg-gray-100 text-gray-400'
-              }`}
-            >
-              {evidenceCollected[key] ? '✓' : '○'} {label}
-            </div>
-          ))}
-        </div>
-      )}
-
-      {/* Turn count */}
-      <div className="mt-2 text-xs text-gray-500">
-        Turn {turnCount} {turnCount <= 12 && '• On track for Proficient'}
       </div>
     </div>
   );
