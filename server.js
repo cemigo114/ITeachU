@@ -60,7 +60,8 @@ app.post('/api/chat', async (req, res) => {
     console.log('📨 Received chat request:', {
       messageCount: req.body.messages?.length || 0,
       model: req.body.model,
-      hasTaskMetadata: !!req.body.taskMetadata
+      hasTaskMetadata: !!req.body.taskMetadata,
+      sessionId: req.body.sessionId || 'new'
     });
 
     const apiKey = process.env.VITE_ANTHROPIC_API_KEY;
@@ -70,8 +71,11 @@ app.post('/api/chat', async (req, res) => {
       return res.status(500).json({ error: 'API key not configured' });
     }
 
-    // Extract taskMetadata before sending to Anthropic (Anthropic doesn't accept custom fields)
-    const { taskMetadata, ...anthropicRequestBody } = req.body;
+    // Extract sessionId and taskMetadata before sending to Anthropic (Anthropic doesn't accept custom fields)
+    const { sessionId, taskMetadata, ...anthropicRequestBody } = req.body;
+
+    // Generate or use existing sessionId
+    const currentSessionId = sessionId || `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 
     // Prepare request body for Anthropic (only standard fields)
     const anthropicRequest = {
@@ -109,23 +113,36 @@ app.post('/api/chat', async (req, res) => {
       stopReason: data.stop_reason
     });
 
-    // Log conversation for backend assessment (hidden from frontend)
-    const conversationLog = {
-      timestamp: new Date().toISOString(),
-      messages: anthropicRequest.messages,
-      response: data.content[0].text,
-      model: anthropicRequest.model,
-      system: anthropicRequest.system, // Store system prompt for context
-      taskMetadata: taskMetadata || {} // Store task metadata if provided (extracted earlier)
-    };
+    // Find or create conversation log for this session
+    let conversationLog = conversationLogs.find(log => log.sessionId === currentSessionId);
 
-    conversationLogs.push(conversationLog);
+    if (conversationLog) {
+      // Update existing conversation
+      conversationLog.messages = anthropicRequest.messages;
+      conversationLog.lastResponse = data.content[0].text;
+      conversationLog.updatedAt = new Date().toISOString();
+      console.log(`📝 Updated existing conversation for session ${currentSessionId}`);
+    } else {
+      // Create new conversation log
+      conversationLog = {
+        sessionId: currentSessionId,
+        timestamp: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        messages: anthropicRequest.messages,
+        lastResponse: data.content[0].text,
+        model: anthropicRequest.model,
+        system: anthropicRequest.system, // Store system prompt for context
+        taskMetadata: taskMetadata || {} // Store task metadata if provided (extracted earlier)
+      };
+      conversationLogs.push(conversationLog);
+      console.log(`📊 New conversation created for session ${currentSessionId} (${conversationLogs.length} total)`);
+    }
 
-    // In production: Save to database for teacher dashboard analysis
-    // For now, just log to console that assessment is happening
-    console.log(`📊 Conversation logged for backend assessment (${conversationLogs.length} total)`);
-
-    res.json(data);
+    // Return sessionId with response so frontend can track it
+    res.json({
+      ...data,
+      sessionId: currentSessionId
+    });
   } catch (error) {
     console.error('❌ Proxy error:', error);
     console.error('Error details:', {
@@ -143,15 +160,15 @@ app.post('/api/chat', async (req, res) => {
 /**
  * Evaluate a conversation using the Claude API and the evaluator prompt
  * @param {Object} conversationLog - The conversation log object
- * @param {number} conversationId - The ID of the conversation
+ * @param {string} sessionId - The session ID of the conversation
  * @returns {Promise<Object>} Evaluation result with scores and justifications
  */
-async function evaluateConversation(conversationLog, conversationId) {
+async function evaluateConversation(conversationLog, sessionId) {
   try {
     // Check cache first
-    if (evaluationCache.has(conversationId)) {
-      console.log(`📋 Using cached evaluation for conversation ${conversationId}`);
-      return evaluationCache.get(conversationId);
+    if (evaluationCache.has(sessionId)) {
+      console.log(`📋 Using cached evaluation for session ${sessionId}`);
+      return evaluationCache.get(sessionId);
     }
 
     const apiKey = process.env.VITE_ANTHROPIC_API_KEY;
@@ -182,7 +199,7 @@ ${transcript}
 
 Please provide your evaluation in the specified JSON format.`;
 
-    console.log(`🔍 Evaluating conversation ${conversationId}...`);
+    console.log(`🔍 Evaluating session ${sessionId}...`);
 
     const response = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
@@ -235,14 +252,14 @@ Please provide your evaluation in the specified JSON format.`;
       throw new Error('Evaluation missing required fields');
     }
 
-    console.log(`✅ Evaluation complete for conversation ${conversationId}: ${evaluation.totalScore}/100`);
+    console.log(`✅ Evaluation complete for session ${sessionId}: ${evaluation.totalScore}/100`);
 
     // Cache the result
-    evaluationCache.set(conversationId, evaluation);
+    evaluationCache.set(sessionId, evaluation);
 
     return evaluation;
   } catch (error) {
-    console.error(`❌ Evaluation error for conversation ${conversationId}:`, error);
+    console.error(`❌ Evaluation error for session ${sessionId}:`, error);
     // Return a fallback evaluation indicating error
     return {
       error: true,
@@ -272,12 +289,13 @@ app.get('/api/teacher/conversations', async (req, res) => {
 
     // Evaluate all conversations (in parallel for performance)
     const conversationsWithEvaluations = await Promise.all(
-      conversationLogs.map(async (log, idx) => {
-        const evaluation = await evaluateConversation(log, idx);
+      conversationLogs.map(async (log) => {
+        const evaluation = await evaluateConversation(log, log.sessionId);
 
         return {
-          id: idx,
+          sessionId: log.sessionId,
           timestamp: log.timestamp,
+          updatedAt: log.updatedAt,
           turnCount: log.messages.length,
           taskTitle: log.taskMetadata?.title || 'Unknown Task',
           evaluation: {
@@ -360,7 +378,8 @@ app.get('/api/collections', (req, res) => {
   try {
     // In production: Fetch from database
     // For now: Return from JSON file
-    const collections = require('./src/data/taskCollections.json');
+    const collectionsPath = path.join(process.cwd(), 'src/data/taskCollections.json');
+    const collections = JSON.parse(fs.readFileSync(collectionsPath, 'utf-8'));
     res.json(collections);
   } catch (error) {
     console.error('Collections fetch error:', error);

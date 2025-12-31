@@ -288,6 +288,7 @@ const App = () => {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
+  const [sessionId, setSessionId] = useState(null); // Track backend session ID
   // Removed old evidenceCollected state - now using backend evaluation system
 
   // Session persistence state
@@ -398,6 +399,8 @@ const App = () => {
   // Student: Start teaching session
   const startTeachingSession = (assignment) => {
     setActiveAssignment(assignment);
+    // Reset session tracking for new session
+    setSessionId(null);
     // Convert snake_case to camelCase for TASKS lookup
     const taskKey = assignment.taskId.replace(/_([a-z])/g, (g) => g[1].toUpperCase());
     const task = TASKS[taskKey];
@@ -447,6 +450,8 @@ const App = () => {
             role: m.role === 'assistant' ? 'assistant' : 'user',
             content: m.content
           })),
+          // Include sessionId for backend tracking
+          sessionId: sessionId,
           // Include task metadata for backend evaluation
           taskMetadata: {
             title: task.title,
@@ -469,6 +474,12 @@ const App = () => {
 
       const data = await response.json();
       console.log('✅ API Response:', data);
+
+      // Capture sessionId from backend response
+      if (data.sessionId && !sessionId) {
+        console.log('📝 Session ID received from backend:', data.sessionId);
+        setSessionId(data.sessionId);
+      }
 
       if (data.content && data.content[0]) {
         const aiMessage = { role: 'assistant', content: data.content[0].text };
@@ -505,6 +516,12 @@ const App = () => {
 
   // Complete session - evaluation will be done by backend
   const completeSession = () => {
+    if (!sessionId) {
+      console.error('❌ No session ID available - cannot complete session');
+      alert('Error: Session tracking failed. Please try your last message again.');
+      return;
+    }
+
     const updatedAssignments = assignments.map(a =>
       a.id === activeAssignment.id
         ? {
@@ -512,7 +529,7 @@ const App = () => {
             status: 'completed',
             completedDate: new Date().toISOString().split('T')[0],
             messages: messages,
-            conversationId: conversationLogs.length // Will be evaluated by backend
+            sessionId: sessionId // Use actual backend session ID
           }
         : a
     );
@@ -1020,10 +1037,31 @@ const App = () => {
 
                   <div className="space-y-2">
                     {(() => {
-                      // Try to get evaluation score from backend
-                      const evaluation = evaluationData?.conversations?.find(
-                        conv => conv.taskTitle === assignment.taskTitle
-                      )?.evaluation;
+                      // Find evaluation: match by sessionId first, then fallback to latest by taskTitle
+                      let evaluation = null;
+
+                      if (evaluationData?.conversations) {
+                        // Try sessionId match (most reliable)
+                        if (assignment.sessionId) {
+                          const conv = evaluationData.conversations.find(
+                            c => c.sessionId === assignment.sessionId
+                          );
+                          if (conv) evaluation = conv.evaluation;
+                        }
+
+                        // Fallback: Find by taskTitle, get LATEST one
+                        if (!evaluation) {
+                          const matchingConvs = evaluationData.conversations.filter(
+                            c => c.taskTitle === assignment.taskTitle
+                          );
+                          if (matchingConvs.length > 0) {
+                            const latest = matchingConvs.sort((a, b) =>
+                              new Date(b.updatedAt || b.timestamp) - new Date(a.updatedAt || a.timestamp)
+                            )[0];
+                            evaluation = latest.evaluation;
+                          }
+                        }
+                      }
 
                       const displayScore = evaluation && !evaluation.error
                         ? evaluation.totalScore
@@ -1104,11 +1142,31 @@ const App = () => {
           <div className="bg-white rounded-xl shadow-md p-6">
             <h2 className="text-xl font-semibold mb-4">Evaluation Breakdown</h2>
             {(() => {
-              // Find evaluation for this assignment
-              const evaluation = evaluationData?.conversations?.find(
-                conv => conv.taskTitle === assignment.taskTitle && 
-                conv.timestamp && assignment.completedDate
-              )?.evaluation;
+              // Find evaluation: match by sessionId first, then fallback to latest by taskTitle
+              let evaluation = null;
+
+              if (evaluationData?.conversations) {
+                // Try sessionId match (most reliable)
+                if (assignment.sessionId) {
+                  const conv = evaluationData.conversations.find(
+                    c => c.sessionId === assignment.sessionId
+                  );
+                  if (conv) evaluation = conv.evaluation;
+                }
+
+                // Fallback: Find by taskTitle, get LATEST one
+                if (!evaluation) {
+                  const matchingConvs = evaluationData.conversations.filter(
+                    c => c.taskTitle === assignment.taskTitle
+                  );
+                  if (matchingConvs.length > 0) {
+                    const latest = matchingConvs.sort((a, b) =>
+                      new Date(b.updatedAt || b.timestamp) - new Date(a.updatedAt || a.timestamp)
+                    )[0];
+                    evaluation = latest.evaluation;
+                  }
+                }
+              }
               
               if (!evaluation || evaluation.error) {
                 return (
@@ -1246,11 +1304,31 @@ const App = () => {
               <div className="bg-white rounded-xl shadow-md p-6">
                 <h2 className="text-xl font-semibold mb-4">Evaluation Summary</h2>
                 {(() => {
-                  // Find evaluation for this student's conversation
-                  const evaluation = evaluationData?.conversations?.find(
-                    conv => conv.taskTitle === student.taskTitle && 
-                    conv.timestamp && student.completedDate
-                  )?.evaluation;
+                  // Find evaluation: match by sessionId first, then fallback to latest by taskTitle
+                  let evaluation = null;
+
+                  if (evaluationData?.conversations) {
+                    // Try sessionId match (most reliable)
+                    if (student.sessionId) {
+                      const conv = evaluationData.conversations.find(
+                        c => c.sessionId === student.sessionId
+                      );
+                      if (conv) evaluation = conv.evaluation;
+                    }
+
+                    // Fallback: Find by taskTitle, get LATEST one
+                    if (!evaluation) {
+                      const matchingConvs = evaluationData.conversations.filter(
+                        c => c.taskTitle === student.taskTitle
+                      );
+                      if (matchingConvs.length > 0) {
+                        const latest = matchingConvs.sort((a, b) =>
+                          new Date(b.updatedAt || b.timestamp) - new Date(a.updatedAt || a.timestamp)
+                        )[0];
+                        evaluation = latest.evaluation;
+                      }
+                    }
+                  }
                   
                   if (!evaluation || evaluation.error) {
                     return (
@@ -1836,16 +1914,43 @@ const App = () => {
               Evaluation Results
             </h2>
             {(() => {
-              // Find evaluation: try backend first, fallback to assignment.evaluation
-              const evaluation = evaluationData?.conversations?.find(
-                conv => conv.taskTitle === assignment.taskTitle
-              )?.evaluation || assignment.evaluation;
+              // Find evaluation: match by sessionId if available, fallback to taskTitle
+              let evaluation;
 
-              if (!evaluation || evaluation.error) {
+              if (assignment.sessionId && evaluationData?.conversations) {
+                // Match by sessionId (most reliable)
+                const conv = evaluationData.conversations.find(
+                  c => c.sessionId === assignment.sessionId
+                );
+                evaluation = conv?.evaluation || assignment.evaluation;
+              } else {
+                // Fallback to taskTitle matching (for old data)
+                evaluation = evaluationData?.conversations?.find(
+                  conv => conv.taskTitle === assignment.taskTitle
+                )?.evaluation || assignment.evaluation;
+              }
+
+              if (!evaluation) {
                 // No evaluation available yet
                 return (
                   <div className="text-center py-6 text-gray-500">
-                    <p>Evaluation will be available once the session is completed.</p>
+                    <p>⏳ Evaluation in progress... Please refresh in a moment.</p>
+                    <button
+                      onClick={fetchEvaluations}
+                      className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                    >
+                      Refresh Evaluation
+                    </button>
+                  </div>
+                );
+              }
+
+              if (evaluation.error) {
+                // Evaluation failed
+                return (
+                  <div className="text-center py-6 text-red-600">
+                    <p>❌ Evaluation failed: {evaluation.message || 'Unknown error'}</p>
+                    <p className="text-sm text-gray-600 mt-2">Please contact your teacher.</p>
                   </div>
                 );
               }
