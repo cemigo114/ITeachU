@@ -3,6 +3,7 @@ import { Send, Sparkles, Brain, HelpCircle, BarChart3, Home, Users, ChevronRight
 import LumoMascot from './components/LumoMascot';
 import StandardBadge from './components/StandardBadge';
 import TaskCollectionBrowser from './components/TaskCollectionBrowser';
+import TeachingProgressBar from './components/TeachingProgressBar';
 import { API_ENDPOINTS } from './config/api';
 import { generateZippyPrompt } from './utils/zippyPrompt';
 import {
@@ -88,6 +89,34 @@ const getTaskSystemPrompt = (taskKey) => {
     misconceptions: task.misconceptions,
     studentCognality: 'Decoder' // Default - could be from user profile
   });
+};
+
+// Detect evidence flags from student message content (simple heuristics)
+const detectEvidence = (messageContent, currentEvidence) => {
+  const lower = messageContent.toLowerCase();
+  const newEvidence = {};
+
+  // Check for examples
+  if (!currentEvidence.usedExamples && (lower.includes('example') || lower.includes('for instance') || lower.includes('like when'))) {
+    newEvidence.usedExamples = true;
+  }
+
+  // Check for definitions/terminology
+  if (!currentEvidence.definedTerms && (lower.includes('means') || lower.includes('is when') || lower.includes('defined as') || lower.match(/\b(is|are)\s+(a|an|the)/))) {
+    newEvidence.definedTerms = true;
+  }
+
+  // Check for understanding checks
+  if (!currentEvidence.checkedUnderstanding && (lower.includes('understand') || lower.includes('make sense') || lower.includes('see how') || lower.includes('get it'))) {
+    newEvidence.checkedUnderstanding = true;
+  }
+
+  // Check for explanations of reasoning
+  if (!currentEvidence.explainedWhy && (lower.includes('because') || lower.includes('reason') || lower.includes('why') || lower.includes('that\'s because'))) {
+    newEvidence.explainedWhy = true;
+  }
+
+  return newEvidence;
 };
 
 // Evaluation categories from evaluator prompt (matches server.js)
@@ -289,7 +318,17 @@ const App = () => {
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
   const [sessionId, setSessionId] = useState(null); // Track backend session ID
-  // Removed old evidenceCollected state - now using backend evaluation system
+
+  // Progress tracking for real-time progress bar
+  const [progress, setProgress] = useState({
+    turnCount: 0,
+    evidenceCollected: {
+      usedExamples: false,
+      definedTerms: false,
+      checkedUnderstanding: false,
+      explainedWhy: false
+    }
+  });
 
   // Session persistence state
   const [currentSession, setCurrentSession] = useState(null);
@@ -401,6 +440,16 @@ const App = () => {
     setActiveAssignment(assignment);
     // Reset session tracking for new session
     setSessionId(null);
+    // Reset progress tracking
+    setProgress({
+      turnCount: 0,
+      evidenceCollected: {
+        usedExamples: false,
+        definedTerms: false,
+        checkedUnderstanding: false,
+        explainedWhy: false
+      }
+    });
     // Convert snake_case to camelCase for TASKS lookup
     const taskKey = assignment.taskId.replace(/_([a-z])/g, (g) => g[1].toUpperCase());
     const task = TASKS[taskKey];
@@ -484,6 +533,13 @@ const App = () => {
       if (data.content && data.content[0]) {
         const aiMessage = { role: 'assistant', content: data.content[0].text };
         setMessages([...updatedMessages, aiMessage]);
+
+        // Update progress tracking
+        const newEvidence = detectEvidence(userMessage.content, progress.evidenceCollected);
+        setProgress(prev => ({
+          turnCount: prev.turnCount + 1,
+          evidenceCollected: { ...prev.evidenceCollected, ...newEvidence }
+        }));
       } else {
         console.error('❌ Invalid response format:', data);
         throw new Error('Invalid response format');
@@ -1843,6 +1899,12 @@ const App = () => {
           </div>
 
           <div className="space-y-4">
+            {/* Progress Bar */}
+            <TeachingProgressBar
+              turnCount={progress.turnCount}
+              evidenceCollected={progress.evidenceCollected}
+            />
+
             {/* Task Presentation - Sticky at Top */}
             <div className="bg-white rounded-xl shadow-md p-4 sticky top-4">
               <h3 className="font-semibold mb-3 text-sm text-gray-700">Task</h3>
