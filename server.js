@@ -46,14 +46,52 @@ app.use((req, res, next) => {
   next();
 });
 
-// Store for conversation logs (in production, use a database)
-const conversationLogs = [];
+// File-based persistence paths
+const DATA_DIR = path.join(process.cwd(), 'data');
+const CONVERSATIONS_FILE = path.join(DATA_DIR, 'conversations.json');
+const SESSIONS_FILE = path.join(DATA_DIR, 'sessions.json');
+const EVALUATIONS_FILE = path.join(DATA_DIR, 'evaluations.json');
 
-// Store for evaluations cache (to avoid re-evaluating same conversation)
-const evaluationCache = new Map(); // conversationId -> evaluation result
+// Ensure data directory exists
+if (!fs.existsSync(DATA_DIR)) {
+  fs.mkdirSync(DATA_DIR, { recursive: true });
+}
 
-// Store for sessions (in production, use a database)
-const sessions = new Map(); // sessionId -> session data
+// File-based persistence utilities
+const saveToFile = (filePath, data) => {
+  try {
+    fs.writeFileSync(filePath, JSON.stringify(data, null, 2), 'utf-8');
+    console.log(`💾 Saved to ${path.basename(filePath)}`);
+  } catch (error) {
+    console.error(`❌ Error saving to ${path.basename(filePath)}:`, error.message);
+  }
+};
+
+const loadFromFile = (filePath, defaultValue = []) => {
+  try {
+    if (fs.existsSync(filePath)) {
+      const data = fs.readFileSync(filePath, 'utf-8');
+      console.log(`📂 Loaded from ${path.basename(filePath)}`);
+      return JSON.parse(data);
+    }
+  } catch (error) {
+    console.error(`❌ Error loading from ${path.basename(filePath)}:`, error.message);
+  }
+  return defaultValue;
+};
+
+// Store for conversation logs (with file persistence)
+const conversationLogs = loadFromFile(CONVERSATIONS_FILE, []);
+
+// Store for evaluations cache (with file persistence)
+const evaluationCacheData = loadFromFile(EVALUATIONS_FILE, []);
+const evaluationCache = new Map(evaluationCacheData); // conversationId -> evaluation result
+
+// Store for sessions (with file persistence)
+const sessionsData = loadFromFile(SESSIONS_FILE, []);
+const sessions = new Map(sessionsData); // sessionId -> session data
+
+console.log(`📊 Loaded ${conversationLogs.length} conversations, ${sessions.size} sessions, ${evaluationCache.size} evaluations`);
 
 app.post('/api/chat', async (req, res) => {
   try {
@@ -137,6 +175,9 @@ app.post('/api/chat', async (req, res) => {
       conversationLogs.push(conversationLog);
       console.log(`📊 New conversation created for session ${currentSessionId} (${conversationLogs.length} total)`);
     }
+
+    // Save conversations to file after update
+    saveToFile(CONVERSATIONS_FILE, conversationLogs);
 
     // Return sessionId with response so frontend can track it
     res.json({
@@ -257,6 +298,9 @@ Please provide your evaluation in the specified JSON format.`;
     // Cache the result
     evaluationCache.set(sessionId, evaluation);
 
+    // Save evaluations cache to file
+    saveToFile(EVALUATIONS_FILE, Array.from(evaluationCache.entries()));
+
     return evaluation;
   } catch (error) {
     console.error(`❌ Evaluation error for session ${sessionId}:`, error);
@@ -333,6 +377,9 @@ app.post('/api/sessions', (req, res) => {
       updatedAt: new Date().toISOString()
     });
 
+    // Save sessions to file
+    saveToFile(SESSIONS_FILE, Array.from(sessions.entries()));
+
     console.log(`💾 Session saved: ${sessionId} (${sessionData.messages?.length || 0} messages)`);
 
     res.json({ success: true, sessionId });
@@ -364,6 +411,10 @@ app.delete('/api/sessions/:sessionId', (req, res) => {
     const { sessionId } = req.params;
 
     sessions.delete(sessionId);
+
+    // Save sessions to file after deletion
+    saveToFile(SESSIONS_FILE, Array.from(sessions.entries()));
+
     console.log(`🗑️  Session deleted: ${sessionId}`);
 
     res.json({ success: true });
