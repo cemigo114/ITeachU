@@ -534,12 +534,29 @@ const App = () => {
         const aiMessage = { role: 'assistant', content: data.content[0].text };
         setMessages([...updatedMessages, aiMessage]);
 
-        // Update progress tracking
-        const newEvidence = detectEvidence(userMessage.content, progress.evidenceCollected);
-        setProgress(prev => ({
-          turnCount: prev.turnCount + 1,
-          evidenceCollected: { ...prev.evidenceCollected, ...newEvidence }
-        }));
+        // Check if Zippy is giving final gratitude message (session complete)
+        const isSessionComplete = aiMessage.content.includes('Thanks so much for teaching me today') ||
+                                  aiMessage.content.includes('Thanks for teaching me today');
+
+        if (isSessionComplete) {
+          // Session is complete - set progress to 100%
+          setProgress({
+            turnCount: updatedMessages.length,
+            evidenceCollected: {
+              usedExamples: true,
+              definedTerms: true,
+              checkedUnderstanding: true,
+              explainedWhy: true
+            }
+          });
+        } else {
+          // Update progress tracking normally
+          const newEvidence = detectEvidence(userMessage.content, progress.evidenceCollected);
+          setProgress(prev => ({
+            turnCount: prev.turnCount + 1,
+            evidenceCollected: { ...prev.evidenceCollected, ...newEvidence }
+          }));
+        }
       } else {
         console.error('❌ Invalid response format:', data);
         throw new Error('Invalid response format');
