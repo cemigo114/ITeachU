@@ -298,6 +298,9 @@ const App = () => {
   const [userRole, setUserRole] = useState(null); // 'teacher', 'parent', 'student'
   const [currentUser, setCurrentUser] = useState(null);
 
+  // Language state
+  const [language, setLanguage] = useState('en'); // 'en' or 'es'
+
   // View state
   const [view, setView] = useState('landing');
 
@@ -742,6 +745,18 @@ const App = () => {
                 >
                   I'm a Parent
                 </button>
+              </div>
+
+              {/* Watch Demo Button */}
+              <div className="flex justify-center mb-8">
+                <a
+                  href="https://drive.google.com/file/d/1asoeoDh-9WXbDVQJwv0WMdi0LrC-FWo0/view?usp=sharing"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="px-6 py-3 bg-white text-indigo-600 border-2 border-indigo-600 rounded-xl font-semibold text-lg hover:bg-indigo-50 transition transform hover:scale-105 shadow-md"
+                >
+                  Watch Demo
+                </a>
               </div>
 
             </div>
