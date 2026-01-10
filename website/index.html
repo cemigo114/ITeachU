@@ -116,6 +116,24 @@
             box-shadow: var(--shadow-lg);
         }
 
+        /* Mobile Menu Button */
+        .mobile-menu-btn {
+            display: none;
+            flex-direction: column;
+            gap: 4px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 8px;
+        }
+
+        .mobile-menu-btn span {
+            width: 25px;
+            height: 3px;
+            background: var(--primary-blue);
+            transition: all 0.3s ease;
+        }
+
         /* Hero Section */
         .hero {
             padding: 160px 2rem 80px;
@@ -602,8 +620,35 @@
 
         /* Responsive */
         @media (max-width: 768px) {
+            .mobile-menu-btn {
+                display: flex;
+            }
+
             nav ul {
                 display: none;
+                position: absolute;
+                top: 100%;
+                left: 0;
+                right: 0;
+                background: var(--neutral-white);
+                flex-direction: column;
+                padding: 1rem;
+                box-shadow: var(--shadow-lg);
+                gap: 0.5rem;
+            }
+
+            nav ul.mobile-open {
+                display: flex;
+            }
+
+            nav ul li {
+                width: 100%;
+                text-align: center;
+            }
+
+            .nav-cta {
+                display: block;
+                width: 100%;
             }
 
             .hero-container {
@@ -643,7 +688,12 @@
                 </div>
                 Cognality Learning
             </div>
-            <ul>
+            <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Toggle menu">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+            <ul id="navMenu">
                 <li><a href="#features">Features</a></li>
                 <li><a href="#how-it-works">How It Works</a></li>
                 <li><a href="#vision">Vision</a></li>
@@ -873,6 +923,21 @@
             step.style.transform = 'translateY(20px)';
             step.style.transition = `all 0.6s ease ${index * 0.1}s`;
             observer.observe(step);
+        });
+
+        // Mobile menu toggle
+        const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+        const navMenu = document.getElementById('navMenu');
+
+        mobileMenuBtn.addEventListener('click', () => {
+            navMenu.classList.toggle('mobile-open');
+        });
+
+        // Close mobile menu when clicking a link
+        navMenu.querySelectorAll('a').forEach(link => {
+            link.addEventListener('click', () => {
+                navMenu.classList.remove('mobile-open');
+            });
         });
     </script>
 </body>
