@@ -1,10 +1,11 @@
 import React from 'react';
+import { t } from '../utils/translations';
 
 /**
  * Real-time teaching progress bar showing estimated proficiency
  * Based on weighted_total score (0-100) with EMERGING/DEVELOPING/PROFICIENT thresholds
  */
-const TeachingProgressBar = ({ turnCount, evidenceCollected }) => {
+const TeachingProgressBar = ({ turnCount, evidenceCollected, language = 'en' }) => {
   // Calculate estimated score (0-100) based on real-time evidence
   const calculateEstimatedScore = () => {
     if (!evidenceCollected) return 0;
@@ -40,7 +41,7 @@ const TeachingProgressBar = ({ turnCount, evidenceCollected }) => {
 
   return (
     <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 mb-4">
-      <div className="text-sm font-semibold text-gray-700 mb-3">Progress</div>
+      <div className="text-sm font-semibold text-gray-700 mb-3">{t(language, 'progress')}</div>
 
       {/* Progress Bar */}
       <div className="relative h-3 bg-gray-200 rounded-full overflow-hidden">

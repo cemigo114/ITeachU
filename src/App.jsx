@@ -6,6 +6,9 @@ import TaskCollectionBrowser from './components/TaskCollectionBrowser';
 import TeachingProgressBar from './components/TeachingProgressBar';
 import { API_ENDPOINTS } from './config/api';
 import { generateZippyPrompt } from './utils/zippyPrompt';
+import { generateZippyPromptES } from './utils/zippyPromptES';
+import { t } from './utils/translations';
+import LanguageSelector from './components/LanguageSelector';
 import {
   saveSession,
   loadSession,
@@ -22,10 +25,12 @@ const TASKS = {
   stackOfCups: {
     id: 'stack_of_cups',
     title: 'Stack of Cups Challenge',
+    titleES: 'Desafío de Pila de Vasos',
     grade: 'Grade 8',
     standard: 'CCSS.MATH.8.F.B.4',
     standardId: '06f7e578-0d65-55d4-a817-77e4cd0a4b05', // CT standard for 8.F.B.4
     description: 'Teach AI to understand linear patterns in stacked cups',
+    descriptionES: 'Enseña a la IA a comprender patrones lineales en vasos apilados',
     imageUrl: "data:image/svg+xml,%3Csvg width='400' height='200' xmlns='http://www.w3.org/2000/svg'%3E%3Crect fill='%23f3f4f6' width='400' height='200'/%3E%3Ctext x='50%25' y='30%25' text-anchor='middle' fill='%23374151' font-size='14'%3E2 cups = 16 cm%3C/text%3E%3Ctext x='50%25' y='50%25' text-anchor='middle' fill='%23374151' font-size='14'%3E4 cups = 20 cm%3C/text%3E%3Ctext x='50%25' y='70%25' text-anchor='middle' fill='%23374151' font-size='14'%3E8 cups = 28 cm%3C/text%3E%3C/svg%3E",
     // New metadata fields for comprehensive prompt
     problemStatement: 'Given a stack of cups where 2 cups = 16cm, 4 cups = 20cm, and 8 cups = 28cm, determine the pattern and create a formula for the height of n cups.',
@@ -44,15 +49,24 @@ I see 2 cups = 16cm and 4 cups = 20cm.
 
 If 1 cup = 8cm, then 8 cups = 64cm... but the picture shows 28cm! 🤔
 
-Can you help me figure out what's happening?`
+Can you help me figure out what's happening?`,
+    aiIntroES: `¡Hola! ¡Soy Zippy! 🎉
+
+Veo que 2 vasos = 16cm y 4 vasos = 20cm.
+
+Si 1 vaso = 8cm, entonces 8 vasos = 64cm... ¡pero la imagen muestra 28cm! 🤔
+
+¿Puedes ayudarme a entender qué está pasando?`
   },
   smoothieRecipe: {
     id: 'smoothie_recipe',
     title: 'Smoothie Recipe Ratios',
+    titleES: 'Proporciones de Receta de Batido',
     grade: 'Grade 6',
     standard: 'CCSS.MATH.6.RP.A.3',
     standardId: '62d0029e-9b81-5f08-b0bb-8ae1ddc9e8d0', // CT standard for 6.RP.A.3
     description: 'Teach AI about ratio and proportional reasoning with recipes',
+    descriptionES: 'Enseña a la IA sobre razones y razonamiento proporcional con recetas',
     imageUrl: "data:image/svg+xml,%3Csvg width='400' height='280' xmlns='http://www.w3.org/2000/svg'%3E%3Crect fill='%23fef3c7' width='400' height='280'/%3E%3Ctext x='200' y='30' text-anchor='middle' fill='%23b91c1c' font-size='18' font-weight='bold'%3E🍓 Smoothie Recipe 🥤%3C/text%3E%3Ctext x='200' y='60' text-anchor='middle' fill='%23059669' font-size='14' font-weight='bold'%3EOriginal Recipe%3C/text%3E%3Ctext x='100' y='90' text-anchor='middle' fill='%23dc2626' font-size='32'%3E🍓🍓%3C/text%3E%3Ctext x='100' y='115' text-anchor='middle' fill='%23374151' font-size='12'%3E2 cups%3C/text%3E%3Ctext x='200' y='102' text-anchor='middle' fill='%23374151' font-size='20'%3E:%3C/text%3E%3Ctext x='300' y='90' text-anchor='middle' fill='%2393c5fd' font-size='32'%3E🥛🥛🥛%3C/text%3E%3Ctext x='300' y='115' text-anchor='middle' fill='%23374151' font-size='12'%3E3 cups%3C/text%3E%3Crect x='50' y='130' width='300' height='2' fill='%23d1d5db'/%3E%3Ctext x='200' y='160' text-anchor='middle' fill='%23dc2626' font-size='13' font-weight='bold'%3ERatio: 2 to 3%3C/text%3E%3Ctext x='200' y='185' text-anchor='middle' fill='%23374151' font-size='11'%3ETo double: multiply BOTH by 2%3C/text%3E%3Ctext x='200' y='210' text-anchor='middle' fill='%23374151' font-size='11'%3E🍓🍓 × 2 = 🍓🍓🍓🍓 (4 cups)%3C/text%3E%3Ctext x='200' y='230' text-anchor='middle' fill='%23374151' font-size='11'%3E🥛🥛🥛 × 2 = 🥛🥛🥛🥛🥛🥛 (6 cups)%3C/text%3E%3Ctext x='200' y='260' text-anchor='middle' fill='%23374151' font-size='10' style='font-style:italic'%3EKeeps the same taste!%3C/text%3E%3C/svg%3E",
     // New metadata fields for comprehensive prompt
     problemStatement: 'A smoothie recipe uses 2 cups of strawberries and 3 cups of yogurt. How do you scale this recipe to make different amounts while keeping the same taste?',
@@ -71,17 +85,34 @@ Recipe: 2 cups strawberries + 3 cups yogurt
 
 To double it... 2+3=5, so double = 10 total? Maybe 5 strawberries and 5 yogurt? 🤔
 
-Can you help me understand how to double recipes?`
+Can you help me understand how to double recipes?`,
+    aiIntroES: `¡Hola! ¡Soy Zippy! 🎉
+
+Receta: 2 tazas de fresas + 3 tazas de yogur
+
+Para duplicarlo... 2+3=5, ¿entonces el doble = 10 total? ¿Tal vez 5 fresas y 5 yogur? 🤔
+
+¿Puedes ayudarme a entender cómo duplicar recetas?`
   }
 };
 
+// Helper to get language-specific task field
+const getTaskField = (task, field, language = 'en') => {
+  if (language === 'es' && task[`${field}ES`]) {
+    return task[`${field}ES`];
+  }
+  return task[field];
+};
+
 // Generate system prompt for a task using the new Zippy prompt generator
-const getTaskSystemPrompt = (taskKey) => {
+const getTaskSystemPrompt = (taskKey, language = 'en') => {
   const task = TASKS[taskKey];
   if (!task) return '';
 
-  return generateZippyPrompt({
-    title: task.title,
+  const promptGenerator = language === 'es' ? generateZippyPromptES : generateZippyPrompt;
+
+  return promptGenerator({
+    title: getTaskField(task, 'title', language),
     problemStatement: task.problemStatement,
     teachingPrompt: task.teachingPrompt,
     targetConcepts: task.targetConcepts,
@@ -371,6 +402,17 @@ const App = () => {
     testConnection();
   }, []);
 
+  // Update Zippy's first message when language changes
+  useEffect(() => {
+    if (messages.length === 1 && messages[0].role === 'assistant' && activeAssignment) {
+      const taskKey = activeAssignment.taskId.replace(/_([a-z])/g, (g) => g[1].toUpperCase());
+      const task = TASKS[taskKey];
+      if (task) {
+        setMessages([{ role: 'assistant', content: getTaskField(task, 'aiIntro', language) }]);
+      }
+    }
+  }, [language]);
+
   // Fetch evaluation data from backend when teacher views assignments
   useEffect(() => {
     if (userRole === 'teacher' && view === 'teacherReviewAssignments') {
@@ -460,7 +502,7 @@ const App = () => {
       console.error(`Task not found for taskId: ${assignment.taskId}, tried key: ${taskKey}`);
       return;
     }
-    setMessages([{ role: 'assistant', content: task.aiIntro }]);
+    setMessages([{ role: 'assistant', content: getTaskField(task, 'aiIntro', language) }]);
     setView('teaching');
   };
 
@@ -487,17 +529,18 @@ const App = () => {
       console.log('🔍 Request payload:', {
         messageCount: updatedMessages.length,
         model: 'claude-sonnet-4-5-20250929',
-        hasSystemPrompt: !!getTaskSystemPrompt(taskKey),
-        hasTaskMetadata: true
+        hasSystemPrompt: !!getTaskSystemPrompt(taskKey, language),
+        hasTaskMetadata: true,
+        language
       });
-      
+
       const response = await fetch(API_ENDPOINTS.chat, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           model: 'claude-sonnet-4-5-20250929',
           max_tokens: 1024,
-          system: getTaskSystemPrompt(taskKey),
+          system: getTaskSystemPrompt(taskKey, language),
           messages: updatedMessages.map(m => ({
             role: m.role === 'assistant' ? 'assistant' : 'user',
             content: m.content
@@ -506,7 +549,7 @@ const App = () => {
           sessionId: sessionId,
           // Include task metadata for backend evaluation
           taskMetadata: {
-            title: task.title,
+            title: getTaskField(task, 'title', language),
             problemStatement: task.problemStatement,
             teachingPrompt: task.teachingPrompt,
             targetConcepts: task.targetConcepts,
@@ -1856,17 +1899,18 @@ const App = () => {
                   <ArrowLeft className="w-5 h-5" />
                 </button>
                 <div>
-                  <h2 className="text-xl font-bold">{task.title}</h2>
+                  <h2 className="text-xl font-bold">{getTaskField(task, 'title', language)}</h2>
                   <p className="text-sm text-green-200">{task.grade} • {task.standard}</p>
                 </div>
               </div>
               <div className="flex items-center gap-4">
+                <LanguageSelector language={language} setLanguage={setLanguage} />
                 <button
                   onClick={completeSession}
                   disabled={messages.length === 0}
                   className="px-4 py-2 bg-white text-green-600 rounded-lg font-semibold hover:bg-green-50 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  Complete Session
+                  {t(language, 'completeSession')}
                 </button>
               </div>
             </div>
@@ -1915,7 +1959,7 @@ const App = () => {
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
                   onKeyPress={(e) => e.key === 'Enter' && sendMessage()}
-                  placeholder="Type your explanation to teach Zippy..."
+                  placeholder={t(language, 'typeMessage')}
                   className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
                   disabled={loading}
                 />
@@ -1935,29 +1979,30 @@ const App = () => {
             <TeachingProgressBar
               turnCount={progress.turnCount}
               evidenceCollected={progress.evidenceCollected}
+              language={language}
             />
 
             {/* Task Presentation - Sticky at Top */}
             <div className="bg-white rounded-xl shadow-md p-4 sticky top-4">
-              <h3 className="font-semibold mb-3 text-sm text-gray-700">Task</h3>
+              <h3 className="font-semibold mb-3 text-sm text-gray-700">{t(language, 'task')}</h3>
               <img
                 src={task.imageUrl}
-                alt={task.title}
+                alt={getTaskField(task, 'title', language)}
                 className="w-full rounded-lg mb-2"
               />
-              <p className="text-xs text-gray-600">{task.description}</p>
+              <p className="text-xs text-gray-600">{getTaskField(task, 'description', language)}</p>
             </div>
 
             <div className="bg-blue-50 rounded-xl p-4 border border-blue-200">
               <h3 className="font-semibold mb-2 flex items-center gap-2 text-blue-900">
                 <Lightbulb className="w-5 h-5" />
-                Teaching Tips
+                {t(language, 'teachingTips')}
               </h3>
               <ul className="text-sm text-blue-800 space-y-2">
-                <li>• Explain the <strong>why</strong>, not just the answer</li>
-                <li>• Use examples to show patterns</li>
-                <li>• Check if Zippy understands each step</li>
-                <li>• Verify with different numbers</li>
+                <li>• {t(language, 'tip1')}</li>
+                <li>• {t(language, 'tip2')}</li>
+                <li>• {t(language, 'tip3')}</li>
+                <li>• {t(language, 'tip4')}</li>
               </ul>
             </div>
           </div>
