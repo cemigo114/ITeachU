@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Send, Sparkles, Brain, HelpCircle, BarChart3, Home, Users, ChevronRight, CheckCircle, AlertCircle, Clock, ArrowLeft, MessageSquare, Target, Lightbulb, Award, UserCircle, BookOpen, Trophy, TrendingUp } from 'lucide-react';
+import { Send, Sparkles, Brain, HelpCircle, BarChart3, Home, Users, ChevronRight, CheckCircle, AlertCircle, Clock, ArrowLeft, MessageSquare, Target, Lightbulb, Award, UserCircle, BookOpen, Trophy, TrendingUp, Mic, MicOff } from 'lucide-react';
 import LumoMascot from './components/LumoMascot';
 import StandardBadge from './components/StandardBadge';
 import TaskCollectionBrowser from './components/TaskCollectionBrowser';
@@ -376,6 +376,95 @@ const App = () => {
   // Evaluation data from backend
   const [evaluationData, setEvaluationData] = useState(null);
   const [loadingEvaluations, setLoadingEvaluations] = useState(false);
+
+  // Speech recognition state
+  const [isRecording, setIsRecording] = useState(false);
+  const [recognition, setRecognition] = useState(null);
+  const recordingStartTextRef = React.useRef('');
+  const currentTranscriptRef = React.useRef('');
+
+  // Initialize speech recognition
+  useEffect(() => {
+    if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      const recognitionInstance = new SpeechRecognition();
+
+      recognitionInstance.continuous = true;
+      recognitionInstance.interimResults = true;
+      recognitionInstance.lang = language === 'es' ? 'es-ES' : 'en-US';
+
+      recognitionInstance.onresult = (event) => {
+        let interimTranscript = '';
+        let finalTranscript = '';
+
+        for (let i = event.resultIndex; i < event.results.length; i++) {
+          const transcript = event.results[i][0].transcript;
+          if (event.results[i].isFinal) {
+            finalTranscript += transcript + ' ';
+          } else {
+            interimTranscript += transcript;
+          }
+        }
+
+        // Update input: always append to the text that existed when recording started
+        // This prevents duplication of interim results
+        if (finalTranscript) {
+          // Add final transcript to our accumulated transcript
+          currentTranscriptRef.current += finalTranscript;
+          setInput(recordingStartTextRef.current + (recordingStartTextRef.current ? ' ' : '') + currentTranscriptRef.current.trim());
+        } else if (interimTranscript) {
+          // Show interim results without duplicating
+          setInput(recordingStartTextRef.current + (recordingStartTextRef.current ? ' ' : '') + currentTranscriptRef.current + interimTranscript);
+        }
+      };
+
+      recognitionInstance.onerror = (event) => {
+        console.error('Speech recognition error:', event.error);
+        setIsRecording(false);
+        if (event.error === 'no-speech') {
+          alert(language === 'es' ? 'No se detectó voz. Por favor intente de nuevo.' : 'No speech detected. Please try again.');
+        } else if (event.error === 'not-allowed') {
+          alert(language === 'es' ? 'Permiso de micrófono denegado. Por favor habilite el acceso al micrófono.' : 'Microphone permission denied. Please enable microphone access.');
+        }
+      };
+
+      recognitionInstance.onend = () => {
+        setIsRecording(false);
+      };
+
+      setRecognition(recognitionInstance);
+    } else {
+      console.warn('Speech recognition not supported in this browser');
+    }
+  }, [language]);
+
+  // Toggle speech recognition
+  const toggleRecording = () => {
+    if (!recognition) {
+      alert(language === 'es'
+        ? 'El reconocimiento de voz no está disponible en este navegador. Por favor use Chrome, Edge o Safari.'
+        : 'Speech recognition is not available in this browser. Please use Chrome, Edge, or Safari.');
+      return;
+    }
+
+    if (isRecording) {
+      recognition.stop();
+      setIsRecording(false);
+      // Reset refs for next recording
+      recordingStartTextRef.current = '';
+      currentTranscriptRef.current = '';
+    } else {
+      try {
+        // Capture the current input text before starting
+        recordingStartTextRef.current = input;
+        currentTranscriptRef.current = '';
+        recognition.start();
+        setIsRecording(true);
+      } catch (error) {
+        console.error('Error starting recognition:', error);
+      }
+    }
+  };
 
   // Check for resumable session on mount
   useEffect(() => {
@@ -1963,6 +2052,18 @@ const App = () => {
                   className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
                   disabled={loading}
                 />
+                <button
+                  onClick={toggleRecording}
+                  disabled={loading}
+                  className={`px-4 py-3 rounded-lg flex items-center gap-2 transition-colors ${
+                    isRecording
+                      ? 'bg-red-600 text-white hover:bg-red-700 animate-pulse'
+                      : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                  } disabled:opacity-50 disabled:cursor-not-allowed`}
+                  title={isRecording ? (language === 'es' ? 'Detener grabación' : 'Stop recording') : (language === 'es' ? 'Iniciar grabación de voz' : 'Start voice recording')}
+                >
+                  {isRecording ? <MicOff className="w-5 h-5" /> : <Mic className="w-5 h-5" />}
+                </button>
                 <button
                   onClick={sendMessage}
                   disabled={loading || !input.trim()}
