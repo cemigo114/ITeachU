@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Send, Sparkles, Brain, HelpCircle, BarChart3, Home, Users, ChevronRight, CheckCircle, AlertCircle, Clock, ArrowLeft, MessageSquare, Target, Lightbulb, Award, UserCircle, BookOpen, Trophy, TrendingUp, Mic, MicOff } from 'lucide-react';
+import { Send, Sparkles, Brain, HelpCircle, BarChart3, Home, Users, ChevronRight, CheckCircle, AlertCircle, Clock, ArrowLeft, MessageSquare, Target, Lightbulb, Award, UserCircle, BookOpen, Trophy, TrendingUp, Search, Filter, X, ChevronDown } from 'lucide-react';
 import LumoMascot from './components/LumoMascot';
 import StandardBadge from './components/StandardBadge';
 import TaskCollectionBrowser from './components/TaskCollectionBrowser';
@@ -93,8 +93,288 @@ Receta: 2 tazas de fresas + 3 tazas de yogur
 Para duplicarlo... 2+3=5, ¿entonces el doble = 10 total? ¿Tal vez 5 fresas y 5 yogur? 🤔
 
 ¿Puedes ayudarme a entender cómo duplicar recetas?`
+  },
+  basketballHeights: {
+    id: 'basketball_heights',
+    title: 'The Basketball Team Heights',
+    titleES: 'Las Alturas del Equipo de Baloncesto',
+    grade: 'Grade 6',
+    standard: 'CCSS.MATH.6.SP.A.2',
+    description: 'Analyze height data and use statistical measures to understand team composition',
+    descriptionES: 'Analizar datos de altura y usar medidas estadísticas para entender la composición del equipo',
+    imageUrl: '/images/basketball.jpg',
+    problemStatement: 'The basketball coach collected height data for all team members: 65, 66, 66, 67, 67, 67, 68, 68, 71, 73 inches. Use statistical measures (mean, median, range) to analyze the distribution and describe what the data tells us about the team.',
+    teachingPrompt: 'Help Zippy understand how to summarize a data set using center (mean, median) and spread (range), and why different measures give different pictures of the team.',
+    targetConcepts: ['Mean', 'Median', 'Range', 'Data distribution', 'Outliers', 'Statistical variability'],
+    correctSolutionPathway: 'Mean = 67.8 inches. Median = 67 inches. Range = 73 - 65 = 8 inches. Most players cluster between 65-68 inches, with two taller players (71, 73) pulling the mean up. The median (67) is more representative of a typical player height than the mean (67.8) because of the two outliers.',
+    misconceptions: [
+      'Thinking the mean always represents the "typical" value',
+      'Confusing range (max-min) with interquartile range',
+      'Not recognizing that outliers pull the mean away from center',
+      'Thinking all averages give the same result'
+    ],
+    aiIntro: `Hi! I'm Zippy! 🎉
+
+The basketball coach gave me the team heights: 65, 66, 66, 67, 67, 67, 68, 68, 71, 73 inches.
+
+To find the average I just add them all up... that's 678, and there are 10 players, so the average is 67.8 inches.
+
+So every player is about 67.8 inches tall, right? 🤔
+
+Can you help me understand what this data really tells us about the team?`,
+    aiIntroES: `¡Hola! ¡Soy Zippy! 🎉
+
+El entrenador de baloncesto me dio las alturas del equipo: 65, 66, 66, 67, 67, 67, 68, 68, 71, 73 pulgadas.
+
+Para encontrar el promedio sumo todo... eso es 678, y hay 10 jugadores, así que el promedio es 67.8 pulgadas.
+
+¿Entonces todos los jugadores miden aproximadamente 67.8 pulgadas? 🤔
+
+¿Puedes ayudarme a entender qué nos dicen realmente estos datos sobre el equipo?`
+  },
+  solarEnergy: {
+    id: 'solar_energy',
+    title: 'Solar Panel Energy',
+    titleES: 'Energía del Panel Solar',
+    grade: 'Grade 6',
+    standard: 'CCSS.MATH.6.EE.A.1',
+    description: 'Use expressions to calculate energy production from solar panels',
+    descriptionES: 'Usar expresiones para calcular la producción de energía de paneles solares',
+    imageUrl: '/images/solar.jpg',
+    problemStatement: 'A single solar panel produces 5 kWh per day. If the number of panels doubles each year (starting with 1 panel), write an expression using exponents for the energy produced after n years. How much energy is produced daily after 4 years?',
+    teachingPrompt: 'Help Zippy understand the difference between multiplication and exponents, and how exponential growth models real-world situations like solar panel expansion.',
+    targetConcepts: ['Exponents', 'Expressions', 'Order of operations', 'Exponential growth', 'Evaluating expressions'],
+    correctSolutionPathway: 'After n years there are 2^n panels. Each produces 5 kWh, so total daily energy = 5 × 2^n. After 4 years: 5 × 2^4 = 5 × 16 = 80 kWh per day.',
+    misconceptions: [
+      'Treating exponents as multiplication: 2^4 = 2 × 4 = 8 instead of 16',
+      'Not following order of operations: computing 5 × 2 first, then raising to power',
+      'Confusing linear growth (adding panels) with exponential growth (doubling)',
+      'Struggling to write expressions before evaluating them'
+    ],
+    aiIntro: `Hi! I'm Zippy! 🎉
+
+So we start with 1 solar panel that makes 5 kWh per day, and the panels double each year...
+
+After 4 years, the panels double 4 times, so that's 2 × 4 = 8 panels? And 8 × 5 = 40 kWh!
+
+Wait, my friend said it should be way more than 40... 🤔
+
+Can you help me figure out how "doubling" really works?`,
+    aiIntroES: `¡Hola! ¡Soy Zippy! 🎉
+
+Empezamos con 1 panel solar que produce 5 kWh por día, y los paneles se duplican cada año...
+
+Después de 4 años, los paneles se duplican 4 veces, ¿así que son 2 × 4 = 8 paneles? ¡Y 8 × 5 = 40 kWh!
+
+Espera, mi amigo dijo que debería ser mucho más que 40... 🤔
+
+¿Puedes ayudarme a entender cómo funciona realmente "duplicar"?`
+  },
+  unitRates: {
+    id: 'unit_rates',
+    title: 'Comparing Unit Rates',
+    titleES: 'Comparando Tasas Unitarias',
+    grade: 'Grade 6',
+    standard: 'CCSS.MATH.6.RP.A.3',
+    description: 'Find and compare unit rates to determine the better buy',
+    descriptionES: 'Encontrar y comparar tasas unitarias para determinar la mejor compra',
+    imageUrl: '/images/shopping.jpg',
+    problemStatement: 'Store A sells 3 notebooks for $4.50. Store B sells 5 notebooks for $7.00. Which store has the better price per notebook? How do you know?',
+    teachingPrompt: 'Help Zippy understand what a unit rate is, how to calculate it by dividing, and how to use it to compare deals fairly.',
+    targetConcepts: ['Unit rate', 'Division to find rate', 'Ratio comparison', 'Proportional reasoning'],
+    correctSolutionPathway: 'Store A: $4.50 ÷ 3 = $1.50 per notebook. Store B: $7.00 ÷ 5 = $1.40 per notebook. Store B is cheaper per notebook. The unit rate lets you compare fairly even when the quantities differ.',
+    misconceptions: [
+      'Comparing total prices instead of unit rates (Store A is cheaper because $4.50 < $7.00)',
+      'Dividing the wrong way (3 ÷ $4.50 instead of $4.50 ÷ 3)',
+      'Not understanding that lower unit price = better deal',
+      'Thinking you need the same quantity to compare'
+    ],
+    aiIntro: `Hi! I'm Zippy! 🎉
+
+Store A has 3 notebooks for $4.50 and Store B has 5 notebooks for $7.00.
+
+Well, $4.50 is less than $7.00, so Store A must be the better deal... right? 🤔
+
+But Store B gives you more notebooks... I'm confused about how to compare when the amounts are different!
+
+Can you teach me a fair way to compare these?`,
+    aiIntroES: `¡Hola! ¡Soy Zippy! 🎉
+
+La Tienda A tiene 3 cuadernos por $4.50 y la Tienda B tiene 5 cuadernos por $7.00.
+
+Bueno, $4.50 es menos que $7.00, así que la Tienda A debe ser la mejor oferta... ¿verdad? 🤔
+
+Pero la Tienda B te da más cuadernos... ¡Estoy confundido sobre cómo comparar cuando las cantidades son diferentes!
+
+¿Puedes enseñarme una forma justa de comparar estas?`
   }
 };
+
+// EXAMPLE TASK BANK DATA - Replace with API data later ****
+const EXAMPLE_TASKS = [
+  {
+    id: 'basketball_heights',
+    slug: '6_sp_a_2_basketball_heights',
+    title: 'The Basketball Team Heights',
+    description: 'Analyze height data and use statistical measures to understand team composition',
+    standard: '6.SP.A.2',
+    standardDescription: 'Understand that a set of data collected to answer a statistical question has a distribution',
+    grade: 'Grade 6',
+    domain: 'Statistics & Probability',
+    imageUrl: '/images/basketball.jpg',
+    sections: {
+      studentPrompt:
+        'The basketball coach has collected height data for all team members. Your task is to help analyze this data to understand the team better.',
+      misconceptions: [
+        'Students may think the average (mean) is always the most representative value',
+        'Students might not recognize that outliers significantly affect the mean',
+        'Students may confuse range with interquartile range'
+      ],
+      patternRecognition: 'Look at the height distribution. What patterns do you notice?',
+      generalization:
+        'Always/Sometimes/Never: The tallest player on a team is always more than 6 inches taller than the shortest player.',
+      inference:
+        "If a new player joins the team and is 72 inches tall, how would this affect the team's average height?",
+      mappingData: {
+        claims: ['The team has mostly players of similar height', 'There are a few very tall players'],
+        evidence: 'Height data shows 8 players between 65-68 inches, with 2 players over 70 inches',
+        criticalThinking: 'Student demonstrates understanding of distribution and central tendency'
+      }
+    }
+  },
+  {
+    id: 'solar_energy',
+    slug: '6_ee_a_1_solar_task',
+    title: 'Solar Panel Energy',
+    description: 'Use expressions to calculate energy production from solar panels',
+    standard: '6.EE.A.1',
+    standardDescription: 'Write and evaluate numerical expressions involving whole-number exponents',
+    grade: 'Grade 6',
+    domain: 'Expressions & Equations',
+    imageUrl: '/images/solar.jpg',
+    sections: {
+      studentPrompt:
+        'A solar panel produces energy based on hours of sunlight. Write an expression to calculate total energy production over different time periods.',
+      misconceptions: [
+        'Students may not understand order of operations with exponents',
+        'Students might treat exponents as multiplication',
+        'Students may struggle with writing expressions before evaluating them'
+      ],
+      patternRecognition: 'How does doubling the number of solar panels affect total energy? What pattern do you see?',
+      generalization: 'Always/Sometimes/Never: Increasing the exponent in an expression always increases the value.',
+      inference: 'If we add 3 more solar panels, predict how the expression would change.',
+      mappingData: {
+        claims: ['Energy production grows exponentially with more panels', 'Time affects total output linearly'],
+        evidence: 'Expression shows 2^n × hours, where n is number of panels',
+        criticalThinking: 'Student connects exponential growth to real-world context'
+      }
+    }
+  },
+  {
+    id: 'unit_rates',
+    slug: '6_rp_a_3_unit_rates',
+    title: 'Comparing Unit Rates',
+    description: 'Find and compare unit rates to determine the better buy',
+    standard: '6.RP.A.3',
+    standardDescription: 'Use ratio and rate reasoning to solve problems',
+    grade: 'Grade 6',
+    domain: 'Ratios & Proportions',
+    imageUrl: '/images/shopping.jpg',
+    sections: {
+      studentPrompt:
+        'Store A sells 3 notebooks for $4.50. Store B sells 5 notebooks for $7.00. Which store has the better price per notebook?',
+      misconceptions: [
+        'Students may compare total prices instead of unit rates',
+        "Students might not divide correctly to find unit price",
+        'Students may not understand that lower unit rate means better deal'
+      ],
+      patternRecognition: 'What relationship do you see between the number of items and total cost?',
+      generalization: 'Always/Sometimes/Never: Buying more items always results in a lower unit price.',
+      inference: 'If Store A offered 4 notebooks for $6.00, predict whether this would be better or worse than Store B.',
+      mappingData: {
+        claims: ['Store A has a unit rate of $1.50 per notebook', 'Store B has a unit rate of $1.40 per notebook'],
+        evidence: 'Store B: $7.00 ÷ 5 = $1.40; Store A: $4.50 ÷ 3 = $1.50',
+        criticalThinking: 'Student uses unit rate reasoning to make informed consumer decisions'
+      }
+    }
+  },
+
+  // ✅ ADDED: TASKS -> EXAMPLE_TASKS so they show in Task Bank
+  {
+    id: 'stack_of_cups',              // IMPORTANT: matches TASKS.stackOfCups.id
+    slug: 'stack_of_cups',            // optional, but harmless
+    title: 'Stack of Cups Challenge',
+    description: 'Teach AI to understand linear patterns in stacked cups',
+    standard: 'CCSS.MATH.8.F.B.4',
+    standardDescription:
+      'Construct a function to model a linear relationship between two quantities and interpret the rate of change and initial value.',
+    grade: 'Grade 8',
+    domain: 'Functions',
+    imageUrl: TASKS.stackOfCups.imageUrl, // reuse the SVG you already have
+    sections: {
+      studentPrompt:
+        'Given a stack of cups where 2 cups = 16cm, 4 cups = 20cm, and 8 cups = 28cm, explain the pattern and create a formula for the height of n cups.',
+      misconceptions: [
+        'Proportional thinking: 2 cups = 16cm means 1 cup = 8cm, so 8 cups = 64cm',
+        'Additive only: Cups stack completely on top without nesting',
+        'Missing constant: Thinking the pattern is only 2n without an initial value',
+        'Cannot generalize: Can compute specific cases but struggles to create a formula'
+      ],
+      patternRecognition:
+        'Compare the heights as cups increase. What changes each time you add cups? What stays the same?',
+      generalization:
+        'Always/Sometimes/Never: When objects “nest,” each additional object adds the full height of one object.',
+      inference:
+        'If the stack has n cups and you add 5 more cups, how much does the height change? Explain why.',
+      mappingData: {
+        claims: [
+          'The relationship between number of cups and height is linear',
+          'Each extra cup adds a constant amount to the height'
+        ],
+        evidence:
+          'From 2 cups (16) to 4 cups (20) is +4 cm for +2 cups → +2 cm per cup; 8 cups is 28 cm, consistent with +2 per added cup after the base.',
+        criticalThinking:
+          'Student distinguishes nesting from stacking, identifies constant rate of change, and explains the initial value (base cup height).'
+      }
+    }
+  },
+  {
+    id: 'smoothie_recipe',            // IMPORTANT: matches TASKS.smoothieRecipe.id
+    slug: 'smoothie_recipe',
+    title: 'Smoothie Recipe Ratios',
+    description: 'Teach AI about ratio and proportional reasoning with recipes',
+    standard: 'CCSS.MATH.6.RP.A.3',
+    standardDescription:
+      'Use ratio and rate reasoning to solve real-world and mathematical problems, e.g., by reasoning about tables of equivalent ratios.',
+    grade: 'Grade 6',
+    domain: 'Ratios & Proportions',
+    imageUrl: TASKS.smoothieRecipe.imageUrl,
+    sections: {
+      studentPrompt:
+        'A smoothie recipe uses 2 cups of strawberries and 3 cups of yogurt. Explain how to scale the recipe to make different amounts while keeping the same taste.',
+      misconceptions: [
+        'Additive thinking: 2+3=5, so double means 10 total and split equally as 5 and 5',
+        'Multiplying only one part: Doubling strawberries but keeping yogurt the same',
+        'Procedural only: Can compute but cannot explain why both parts must scale',
+        'No generalization: Struggles to apply the same idea to other scale factors'
+      ],
+      patternRecognition:
+        'If you multiply the number of smoothies by 2, what must happen to EACH ingredient to keep the flavor the same?',
+      generalization:
+        'Always/Sometimes/Never: If two quantities are in a fixed ratio, you can add the same number to both and keep the ratio.',
+      inference:
+        'If you only have 12 cups of yogurt, how many cups of strawberries do you need to keep the recipe’s taste the same?',
+      mappingData: {
+        claims: ['Equivalent ratios keep the same taste', 'Scaling is multiplicative, not additive'],
+        evidence:
+          'Original ratio is 2:3. Double gives 4:6; triple gives 6:9. The factor multiplies both quantities.',
+        criticalThinking:
+          'Student uses equivalent ratios (and optionally unit rate) to justify scaling decisions and check reasonableness.'
+      }
+    }
+  }
+];
+
 
 // Helper to get language-specific task field
 const getTaskField = (task, field, language = 'en') => {
@@ -377,94 +657,14 @@ const App = () => {
   const [evaluationData, setEvaluationData] = useState(null);
   const [loadingEvaluations, setLoadingEvaluations] = useState(false);
 
-  // Speech recognition state
-  const [isRecording, setIsRecording] = useState(false);
-  const [recognition, setRecognition] = useState(null);
-  const recordingStartTextRef = React.useRef('');
-  const currentTranscriptRef = React.useRef('');
-
-  // Initialize speech recognition
-  useEffect(() => {
-    if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
-      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-      const recognitionInstance = new SpeechRecognition();
-
-      recognitionInstance.continuous = true;
-      recognitionInstance.interimResults = true;
-      recognitionInstance.lang = language === 'es' ? 'es-ES' : 'en-US';
-
-      recognitionInstance.onresult = (event) => {
-        let interimTranscript = '';
-        let finalTranscript = '';
-
-        for (let i = event.resultIndex; i < event.results.length; i++) {
-          const transcript = event.results[i][0].transcript;
-          if (event.results[i].isFinal) {
-            finalTranscript += transcript + ' ';
-          } else {
-            interimTranscript += transcript;
-          }
-        }
-
-        // Update input: always append to the text that existed when recording started
-        // This prevents duplication of interim results
-        if (finalTranscript) {
-          // Add final transcript to our accumulated transcript
-          currentTranscriptRef.current += finalTranscript;
-          setInput(recordingStartTextRef.current + (recordingStartTextRef.current ? ' ' : '') + currentTranscriptRef.current.trim());
-        } else if (interimTranscript) {
-          // Show interim results without duplicating
-          setInput(recordingStartTextRef.current + (recordingStartTextRef.current ? ' ' : '') + currentTranscriptRef.current + interimTranscript);
-        }
-      };
-
-      recognitionInstance.onerror = (event) => {
-        console.error('Speech recognition error:', event.error);
-        setIsRecording(false);
-        if (event.error === 'no-speech') {
-          alert(language === 'es' ? 'No se detectó voz. Por favor intente de nuevo.' : 'No speech detected. Please try again.');
-        } else if (event.error === 'not-allowed') {
-          alert(language === 'es' ? 'Permiso de micrófono denegado. Por favor habilite el acceso al micrófono.' : 'Microphone permission denied. Please enable microphone access.');
-        }
-      };
-
-      recognitionInstance.onend = () => {
-        setIsRecording(false);
-      };
-
-      setRecognition(recognitionInstance);
-    } else {
-      console.warn('Speech recognition not supported in this browser');
-    }
-  }, [language]);
-
-  // Toggle speech recognition
-  const toggleRecording = () => {
-    if (!recognition) {
-      alert(language === 'es'
-        ? 'El reconocimiento de voz no está disponible en este navegador. Por favor use Chrome, Edge o Safari.'
-        : 'Speech recognition is not available in this browser. Please use Chrome, Edge, or Safari.');
-      return;
-    }
-
-    if (isRecording) {
-      recognition.stop();
-      setIsRecording(false);
-      // Reset refs for next recording
-      recordingStartTextRef.current = '';
-      currentTranscriptRef.current = '';
-    } else {
-      try {
-        // Capture the current input text before starting
-        recordingStartTextRef.current = input;
-        currentTranscriptRef.current = '';
-        recognition.start();
-        setIsRecording(true);
-      } catch (error) {
-        console.error('Error starting recognition:', error);
-      }
-    }
-  };
+  // Enhanced teacher task browsing ****
+  const [browsing, setBrowsing] = useState(false);
+  const [selectedTaskForDetail, setSelectedTaskForDetail] = useState(null);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedGrade, setSelectedGrade] = useState('all');
+  const [selectedDomain, setSelectedDomain] = useState('all');
+  const [showFilters, setShowFilters] = useState(false);
+  const [collectionView, setCollectionView] = useState('all'); // all, byGrade, byDomain
 
   // Check for resumable session on mount
   useEffect(() => {
@@ -551,12 +751,17 @@ const App = () => {
 
     const newAssignments = selectedStudentsForAssignment.map((studentId) => {
       const student = MOCK_STUDENTS.find(s => s.id === studentId);
+      
+      // Handle both TASKS format and EXAMPLE_TASKS format
+      const taskId = selectedTaskForAssignment.id || selectedTaskForAssignment.slug;
+      const taskTitle = selectedTaskForAssignment.title;
+      
       return {
         id: assignments.length + studentId,
         studentId: student.id,
         studentName: student.name,
-        taskId: selectedTaskForAssignment.id,
-        taskTitle: selectedTaskForAssignment.title,
+        taskId: taskId,
+        taskTitle: taskTitle,
         status: 'assigned',
         completedDate: null,
         messages: []
@@ -567,6 +772,9 @@ const App = () => {
     setSelectedTaskForAssignment(null);
     setSelectedStudentsForAssignment([]);
     setView('teacherDashboard');
+    
+    // Success message
+    alert(`Task "${selectedTaskForAssignment.title}" assigned to ${selectedStudentsForAssignment.length} student(s)!`);
   };
 
   // Student: Start teaching session
@@ -834,7 +1042,7 @@ const App = () => {
       <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
         {/* Hero Section */}
         <div className="relative overflow-hidden">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-36 pb-16">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%' }}>
               {/* Zippy mascot - centered */}
               <div style={{ width: '90px', height: '90px', marginBottom: '16px', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
@@ -1077,15 +1285,14 @@ const App = () => {
 
         <div className="max-w-7xl mx-auto p-6">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-            <button
-              onClick={() => setView('teacherAssignTask')}
-              className="bg-white p-6 rounded-xl shadow-md hover:shadow-lg transition border-2 border-transparent hover:border-indigo-500"
-            >
-              <Target className="w-12 h-12 text-indigo-600 mb-3" />
-              <h3 className="text-xl font-semibold mb-2">Assign New Task</h3>
-              <p className="text-gray-600">Choose a task and assign to students</p>
-            </button>
-
+          <button // NEW ADD TASK BUTTON ****
+            onClick={() => setView('teacherBrowseTasks')}
+            className="bg-white p-6 rounded-xl shadow-md hover:shadow-lg transition border-2 border-transparent hover:border-indigo-500"
+          >
+            <BookOpen className="w-12 h-12 text-indigo-600 mb-3" />
+            <h3 className="text-xl font-semibold mb-2">Browse Task Bank</h3>
+            <p className="text-gray-600">View all {EXAMPLE_TASKS.length} available tasks and assign to students</p>
+          </button>
             <button
               onClick={() => setView('teacherReviewAssignments')}
               className="bg-white p-6 rounded-xl shadow-md hover:shadow-lg transition border-2 border-transparent hover:border-indigo-500"
@@ -1114,8 +1321,8 @@ const App = () => {
                       {assignment.status.replace('_', ' ')}
                     </span>
                     {assignment.status === 'completed' && (
-                      <span className="text-sm font-semibold text-indigo-600">
-                        Score: {assignment.evaluation?.totalScore?.toFixed(0) || 0}/100
+                      <span className={`text-sm font-semibold ${getBadge(assignment.evaluation?.totalScore || 0).color} text-white px-2 py-0.5 rounded`}>
+                        {getBadge(assignment.evaluation?.totalScore || 0).icon} {getBadge(assignment.evaluation?.totalScore || 0).name}
                       </span>
                     )}
                   </div>
@@ -1127,6 +1334,342 @@ const App = () => {
       </div>
     );
   }
+
+  // TEACHER: BROWSE TASK BANK
+if (view === 'teacherBrowseTasks') {
+  const grades = [...new Set(EXAMPLE_TASKS.map(t => t.grade))];
+  const domains = [...new Set(EXAMPLE_TASKS.map(t => t.domain))];
+
+  const filteredTasks = EXAMPLE_TASKS.filter(task => {
+    const matchesSearch = task.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                         task.standard.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesGrade = selectedGrade === 'all' || task.grade === selectedGrade;
+    const matchesDomain = selectedDomain === 'all' || task.domain === selectedDomain;
+    return matchesSearch && matchesGrade && matchesDomain;
+  });
+
+  const getGroupedTasks = () => {
+    if (collectionView === 'byGrade') {
+      return grades.reduce((acc, grade) => {
+        acc[grade] = filteredTasks.filter(t => t.grade === grade);
+        return acc;
+      }, {});
+    } else if (collectionView === 'byDomain') {
+      return domains.reduce((acc, domain) => {
+        acc[domain] = filteredTasks.filter(t => t.domain === domain);
+        return acc;
+      }, {});
+    }
+    return { 'All Tasks': filteredTasks };
+  };
+
+  const groupedTasks = getGroupedTasks();
+
+  return (
+    <div className="min-h-screen bg-gray-50">
+      <div className="bg-indigo-600 text-white p-6">
+        <div className="max-w-7xl mx-auto flex items-center gap-4">
+          <button onClick={() => setView('teacherDashboard')} className="p-2 hover:bg-indigo-700 rounded">
+            <ArrowLeft className="w-5 h-5" />
+          </button>
+          <div>
+            <h1 className="text-2xl font-bold">Task Bank</h1>
+            <p className="text-indigo-200">{filteredTasks.length} tasks available</p>
+          </div>
+        </div>
+      </div>
+
+      <div className="max-w-7xl mx-auto p-6">
+        {/* Search and Filters */}
+        <div className="bg-white rounded-xl shadow-md p-4 mb-6">
+          <div className="flex flex-col md:flex-row gap-4">
+            <div className="flex-1 relative">
+              <Search className="w-5 h-5 absolute left-3 top-3 text-gray-400" />
+              <input
+                type="text"
+                placeholder="Search by task name or standard code..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+              />
+            </div>
+
+            <button
+              onClick={() => setShowFilters(!showFilters)}
+              className="px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg flex items-center gap-2"
+            >
+              <Filter className="w-5 h-5" />
+              Filters
+              {(selectedGrade !== 'all' || selectedDomain !== 'all') && (
+                <span className="bg-indigo-600 text-white text-xs px-2 py-1 rounded-full">
+                  {(selectedGrade !== 'all' ? 1 : 0) + (selectedDomain !== 'all' ? 1 : 0)}
+                </span>
+              )}
+            </button>
+
+            <select
+              value={collectionView}
+              onChange={(e) => setCollectionView(e.target.value)}
+              className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
+            >
+              <option value="all">All Tasks</option>
+              <option value="byGrade">Group by Grade</option>
+              <option value="byDomain">Group by Domain</option>
+            </select>
+          </div>
+
+          {showFilters && (
+            <div className="mt-4 pt-4 border-t grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Grade Level</label>
+                <select
+                  value={selectedGrade}
+                  onChange={(e) => setSelectedGrade(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
+                >
+                  <option value="all">All Grades</option>
+                  {grades.map(grade => (
+                    <option key={grade} value={grade}>{grade}</option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Domain</label>
+                <select
+                  value={selectedDomain}
+                  onChange={(e) => setSelectedDomain(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
+                >
+                  <option value="all">All Domains</option>
+                  {domains.map(domain => (
+                    <option key={domain} value={domain}>{domain}</option>
+                  ))}
+                </select>
+              </div>
+
+              {(selectedGrade !== 'all' || selectedDomain !== 'all') && (
+                <div className="md:col-span-2">
+                  <button
+                    onClick={() => {
+                      setSelectedGrade('all');
+                      setSelectedDomain('all');
+                    }}
+                    className="text-sm text-indigo-600 hover:text-indigo-700 flex items-center gap-1"
+                  >
+                    <X className="w-4 h-4" />
+                    Clear all filters
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+
+        {/* Task Groups */}
+        {Object.entries(groupedTasks).map(([groupName, tasks]) => (
+          <div key={groupName} className="mb-8">
+            {collectionView !== 'all' && (
+              <h2 className="text-xl font-bold text-gray-900 mb-4">{groupName}</h2>
+            )}
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {tasks.map(task => (
+                <div
+                  key={task.id}
+                  className="bg-white rounded-lg shadow-md hover:shadow-lg transition border-2 border-transparent hover:border-indigo-300 overflow-hidden"
+                >
+                  <div className="p-4">
+                    <div className="flex items-start justify-between mb-2">
+                      <h3 className="font-semibold text-lg text-gray-900 flex-1">
+                        {task.title}
+                      </h3>
+                    </div>
+                    
+                    <p className="text-sm text-gray-600 mb-3 line-clamp-2">
+                      {task.description}
+                    </p>
+
+                    <div className="flex flex-wrap gap-2 mb-3">
+                      <span className="bg-gray-100 text-gray-700 px-2 py-1 rounded text-xs">
+                        {task.grade}
+                      </span>
+                      <span className="bg-indigo-100 text-indigo-700 px-2 py-1 rounded text-xs font-semibold">
+                        {task.standard}
+                      </span>
+                    </div>
+
+                    <div className="text-xs text-gray-500 mb-3">
+                      {task.domain}
+                    </div>
+
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => {
+                          setSelectedTaskForDetail(task);
+                          setView('teacherTaskDetail');
+                        }}
+                        className="flex-1 px-3 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition text-sm font-medium"
+                      >
+                        View Details
+                      </button>
+                      <button
+                        onClick={() => {
+                          setSelectedTaskForAssignment(task);
+                          setView('teacherAssignTask');
+                        }}
+                        className="px-3 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition text-sm font-medium"
+                      >
+                        Assign
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {tasks.length === 0 && (
+              <div className="bg-white rounded-lg shadow-md p-8 text-center">
+                <p className="text-gray-500">No tasks found matching your criteria.</p>
+              </div>
+            )}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// TEACHER: TASK DETAIL VIEW
+if (view === 'teacherTaskDetail' && selectedTaskForDetail) {
+  const task = selectedTaskForDetail;
+
+  return (
+    <div className="min-h-screen bg-gray-50">
+      <div className="bg-indigo-600 text-white p-6">
+        <div className="max-w-5xl mx-auto flex items-center gap-4">
+          <button onClick={() => setView('teacherBrowseTasks')} className="p-2 hover:bg-indigo-700 rounded">
+            <ArrowLeft className="w-5 h-5" />
+          </button>
+          <div>
+            <h1 className="text-2xl font-bold">{task.title}</h1>
+            <p className="text-indigo-200">{task.standard} • {task.grade}</p>
+          </div>
+        </div>
+      </div>
+
+      <div className="max-w-5xl mx-auto p-6">
+        <div className="bg-white rounded-xl shadow-md p-6 mb-6">
+          <div className="flex items-center gap-2 mb-4">
+            <span className="bg-indigo-100 text-indigo-700 px-3 py-1 rounded text-sm font-semibold">
+              {task.standard}
+            </span>
+            <span className="bg-gray-100 text-gray-700 px-3 py-1 rounded text-sm">
+              {task.grade}
+            </span>
+            <span className="bg-purple-100 text-purple-700 px-3 py-1 rounded text-sm">
+              {task.domain}
+            </span>
+          </div>
+          
+          <p className="text-gray-700 mb-4">{task.description}</p>
+          <p className="text-sm text-gray-600 italic">{task.standardDescription}</p>
+        </div>
+
+        {/* Section 1: Student Prompt */}
+        <div className="bg-white rounded-xl shadow-md p-6 mb-4">
+          <h2 className="text-lg font-bold text-indigo-900 mb-3">
+            1. Student Prompt (Low Entry Point)
+          </h2>
+          <p className="text-gray-700">{task.sections.studentPrompt}</p>
+        </div>
+
+        {/* Section 2: Misconceptions */}
+        <div className="bg-white rounded-xl shadow-md p-6 mb-4">
+          <h2 className="text-lg font-bold text-indigo-900 mb-3">
+            2. Possible Misconceptions
+          </h2>
+          <ul className="space-y-2">
+            {task.sections.misconceptions.map((misconception, idx) => (
+              <li key={idx} className="flex gap-3">
+                <span className="text-indigo-600 font-semibold">{idx + 1}.</span>
+                <span className="text-gray-700">{misconception}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+
+        {/* Section 3: Pattern Recognition */}
+        <div className="bg-white rounded-xl shadow-md p-6 mb-4">
+          <h2 className="text-lg font-bold text-indigo-900 mb-3">
+            3. Pattern Recognition Prompt
+          </h2>
+          <p className="text-gray-700">{task.sections.patternRecognition}</p>
+        </div>
+
+        {/* Section 4: Generalization */}
+        <div className="bg-white rounded-xl shadow-md p-6 mb-4">
+          <h2 className="text-lg font-bold text-indigo-900 mb-3">
+            4. Generalization Question (Always/Sometimes/Never)
+          </h2>
+          <p className="text-gray-700">{task.sections.generalization}</p>
+        </div>
+
+        {/* Section 5: Inference */}
+        <div className="bg-white rounded-xl shadow-md p-6 mb-4">
+          <h2 className="text-lg font-bold text-indigo-900 mb-3">
+            5. Inference and Prediction
+          </h2>
+          <p className="text-gray-700">{task.sections.inference}</p>
+        </div>
+
+        {/* Section 6: Mapping Data */}
+        <div className="bg-white rounded-xl shadow-md p-6 mb-6">
+          <h2 className="text-lg font-bold text-indigo-900 mb-3">
+            6. Mapping and Process Data
+          </h2>
+          <div className="space-y-3">
+            <div>
+              <h3 className="font-semibold text-gray-900 mb-1">Claims:</h3>
+              <ul className="list-disc list-inside space-y-1">
+                {task.sections.mappingData.claims.map((claim, idx) => (
+                  <li key={idx} className="text-gray-700">{claim}</li>
+                ))}
+              </ul>
+            </div>
+            <div>
+              <h3 className="font-semibold text-gray-900 mb-1">Evidence:</h3>
+              <p className="text-gray-700">{task.sections.mappingData.evidence}</p>
+            </div>
+            <div>
+              <h3 className="font-semibold text-gray-900 mb-1">Process Data Revealing Critical Thinking:</h3>
+              <p className="text-gray-700">{task.sections.mappingData.criticalThinking}</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Action Buttons */}
+        <div className="flex gap-4">
+          <button
+            onClick={() => setView('teacherBrowseTasks')}
+            className="flex-1 px-6 py-3 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition font-semibold"
+          >
+            Back to Task Bank
+          </button>
+          <button
+            onClick={() => {
+              setSelectedTaskForAssignment(task);
+              setView('teacherAssignTask');
+            }}
+            className="flex-1 px-6 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition font-semibold"
+          >
+            Assign to Students
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
 
   // TEACHER: ASSIGN TASK
   if (view === 'teacherAssignTask') {
@@ -1144,31 +1687,73 @@ const App = () => {
         <div className="max-w-4xl mx-auto p-6">
           <div className="bg-white rounded-xl shadow-md p-6 mb-6">
             <h2 className="text-xl font-semibold mb-4">Step 1: Choose Task</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {Object.values(TASKS).map(task => (
-                <button
-                  key={task.id}
-                  onClick={() => setSelectedTaskForAssignment(task)}
-                  className={`p-4 rounded-lg border-2 text-left transition ${
-                    selectedTaskForAssignment?.id === task.id
-                      ? 'border-indigo-600 bg-indigo-50'
-                      : 'border-gray-200 hover:border-indigo-300'
-                  }`}
-                >
-                  <h3 className="font-semibold text-lg mb-1">{task.title}</h3>
-                  <p className="text-sm text-gray-600 mb-2">{task.description}</p>
-                  <div className="flex items-center gap-2 text-xs text-gray-500">
-                    <span className="bg-gray-100 px-2 py-1 rounded">{task.grade}</span>
-                    <StandardBadge standardId={task.standardId} standardCode={task.standard} />
+            
+            {selectedTaskForAssignment ? (
+              // Show selected task from browser
+              <div className="p-4 rounded-lg border-2 border-indigo-600 bg-indigo-50">
+                <div className="flex items-start justify-between mb-2">
+                  <div className="flex-1">
+                    <h3 className="font-semibold text-lg mb-1">{selectedTaskForAssignment.title}</h3>
+                    <p className="text-sm text-gray-600 mb-2">{selectedTaskForAssignment.description}</p>
+                    <div className="flex items-center gap-2 text-xs text-gray-500">
+                      <span className="bg-gray-100 px-2 py-1 rounded">{selectedTaskForAssignment.grade}</span>
+                      <span className="bg-indigo-100 text-indigo-700 px-2 py-1 rounded font-semibold">
+                        {selectedTaskForAssignment.standard}
+                      </span>
+                    </div>
                   </div>
-                </button>
-              ))}
-            </div>
+                  <button
+                    onClick={() => setSelectedTaskForAssignment(null)}
+                    className="ml-4 px-3 py-1 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 text-sm"
+                  >
+                    Change Task
+                  </button>
+                </div>
+              </div>
+            ) : (
+              // Show task selection grid (original TASKS)
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {Object.values(TASKS).map(task => (
+                  <button
+                    key={task.id}
+                    onClick={() => setSelectedTaskForAssignment(task)}
+                    className="p-4 rounded-lg border-2 border-gray-200 hover:border-indigo-300 text-left transition"
+                  >
+                    <h3 className="font-semibold text-lg mb-1">{task.title}</h3>
+                    <p className="text-sm text-gray-600 mb-2">{task.description}</p>
+                    <div className="flex items-center gap-2 text-xs text-gray-500">
+                      <span className="bg-gray-100 px-2 py-1 rounded">{task.grade}</span>
+                      <StandardBadge standardId={task.standardId} standardCode={task.standard} />
+                    </div>
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
 
           {selectedTaskForAssignment && (
             <div className="bg-white rounded-xl shadow-md p-6 mb-6">
-              <h2 className="text-xl font-semibold mb-4">Step 2: Select Students</h2>
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-xl font-semibold">Step 2: Select Students</h2>
+                
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={selectedStudentsForAssignment.length === MOCK_STUDENTS.length}
+                    onChange={(e) => {
+                      if (e.target.checked) {
+                        setSelectedStudentsForAssignment(MOCK_STUDENTS.map(s => s.id));
+                      } else {
+                        setSelectedStudentsForAssignment([]);
+                      }
+                    }}
+                    className="w-5 h-5 text-indigo-600"
+                  />
+                  <span className="font-semibold text-indigo-600">
+                    Assign to All Students
+                  </span>
+                </label>
+              </div>
               <div className="space-y-2">
                 {MOCK_STUDENTS.map(student => (
                   <label key={student.id} className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg cursor-pointer hover:bg-gray-100">
@@ -1207,6 +1792,7 @@ const App = () => {
     );
   }
 
+  
   // TEACHER: REVIEW ASSIGNMENTS
   if (view === 'teacherReviewAssignments') {
     return (
@@ -1286,16 +1872,13 @@ const App = () => {
                       const displayScore = evaluation && !evaluation.error
                         ? evaluation.totalScore
                         : assignment.evaluation?.totalScore || 0;
+                      const evalBadge = getBadge(displayScore);
                       
                       return (
                         <div className="flex items-center justify-between text-sm">
-                          <span className="text-gray-600">Evaluation Score:</span>
-                          <span className={`font-semibold ${
-                            displayScore >= 75 ? 'text-green-600' :
-                            displayScore >= 50 ? 'text-yellow-600' :
-                            'text-red-600'
-                          }`}>
-                            {displayScore}/100
+                          <span className="text-gray-600">Evaluation:</span>
+                          <span className={`font-semibold ${evalBadge.color} text-white px-2 py-0.5 rounded`}>
+                            {evalBadge.icon} {evalBadge.name}
                           </span>
                         </div>
                       );
@@ -1411,7 +1994,8 @@ const App = () => {
                   {Object.entries(EVALUATION_CATEGORIES).map(([key, category]) => {
                     const score = categoryScores[key] || 0;
                     const justification = justifications[key] || 'No justification available';
-                    const scoreColor = score >= 3 ? 'text-green-600' : score >= 2 ? 'text-yellow-600' : 'text-red-600';
+                    const levelLabel = score >= 4 ? 'Strong' : score >= 3 ? 'Proficient' : score >= 2 ? 'Developing' : 'Emerging';
+                    const levelColor = score >= 3 ? 'bg-green-100 text-green-700' : score >= 2 ? 'bg-yellow-100 text-yellow-700' : 'bg-orange-100 text-orange-700';
 
                     return (
                       <div key={key} className="p-3 bg-gray-50 rounded-lg">
@@ -1420,9 +2004,9 @@ const App = () => {
                             <div className="font-semibold">{category.label}</div>
                             <div className="text-sm text-gray-600">{category.description}</div>
                           </div>
-                          <div className={`text-xl font-bold ${scoreColor} ml-4`}>
-                            {score}/4
-                          </div>
+                          <span className={`text-xs font-semibold px-2 py-1 rounded ${levelColor} ml-4`}>
+                            {levelLabel}
+                          </span>
                         </div>
                         <div className="mt-2 pt-2 border-t border-gray-200">
                           <div className="text-xs text-gray-600 italic">"{justification}"</div>
@@ -1566,22 +2150,15 @@ const App = () => {
                     );
                   }
 
-                  const totalScore = evaluation.totalScore || 0;
                   const categoryScores = evaluation.categoryScores || {};
                   const justifications = evaluation.justifications || {};
 
                   return (
                     <>
-                      <div className="grid grid-cols-2 gap-4 mb-6">
-                        <div className="bg-gray-50 p-4 rounded-lg">
-                          <div className="text-sm text-gray-600 mb-1">Total Score</div>
-                          <div className="text-3xl font-bold text-indigo-600">{totalScore}/100</div>
-                        </div>
-                        <div className="bg-gray-50 p-4 rounded-lg">
-                          <div className="text-sm text-gray-600 mb-1">Badge Earned</div>
-                          <div className={`${badge.color} text-white px-3 py-2 rounded inline-block`}>
-                            {badge.icon} {badge.name}
-                          </div>
+                      <div className="mb-6 bg-gray-50 p-4 rounded-lg text-center">
+                        <div className="text-sm text-gray-600 mb-1">Badge Earned</div>
+                        <div className={`${badge.color} text-white px-4 py-2 rounded-lg inline-block text-lg font-bold`}>
+                          {badge.icon} {badge.name}
                         </div>
                       </div>
 
@@ -1589,8 +2166,9 @@ const App = () => {
                         {Object.entries(EVALUATION_CATEGORIES).map(([key, category]) => {
                           const score = categoryScores[key] || 0;
                           const justification = justifications[key] || 'No justification available';
-                          const scoreColor = score >= 3 ? 'text-green-600' : score >= 2 ? 'text-yellow-600' : 'text-red-600';
+                          const levelLabel = score >= 4 ? 'Strong' : score >= 3 ? 'Proficient' : score >= 2 ? 'Developing' : 'Emerging';
                           const bgColor = score >= 3 ? 'bg-green-50' : score >= 2 ? 'bg-yellow-50' : 'bg-red-50';
+                          const levelColor = score >= 3 ? 'bg-green-100 text-green-700' : score >= 2 ? 'bg-yellow-100 text-yellow-700' : 'bg-orange-100 text-orange-700';
 
                           return (
                             <div key={key} className={`p-4 rounded-lg border-l-4 ${bgColor} ${
@@ -1601,9 +2179,9 @@ const App = () => {
                                   <div className="font-semibold text-gray-900">{category.label}</div>
                                   <div className="text-sm text-gray-600 mt-1">{category.description}</div>
                                 </div>
-                                <div className={`text-2xl font-bold ${scoreColor} ml-4`}>
-                                  {score}/4
-                                </div>
+                                <span className={`text-sm font-semibold px-3 py-1 rounded ${levelColor} ml-4`}>
+                                  {levelLabel}
+                                </span>
                               </div>
                               <div className="mt-3 pt-3 border-t border-gray-200">
                                 <div className="text-sm font-medium text-gray-700 mb-1">Evidence:</div>
@@ -1623,13 +2201,13 @@ const App = () => {
                 <div className="bg-white rounded-xl shadow-md p-6">
                   <h2 className="text-xl font-semibold mb-4">Competency Evaluation</h2>
 
-                  {/* Total Score Display */}
+                  {/* Proficiency Level Display */}
                   <div className="mb-6 p-4 bg-gradient-to-r from-indigo-50 to-purple-50 rounded-lg">
                     <div className="flex items-center justify-between">
                       <div>
-                        <div className="text-sm text-gray-600 font-medium">Weighted Total Score</div>
-                        <div className="text-3xl font-bold text-indigo-600">
-                          {student.evaluation.totalScore?.toFixed(1) || 0}/100
+                        <div className="text-sm text-gray-600 font-medium">Badge Earned</div>
+                        <div className={`${getBadge(student.evaluation.totalScore || 0).color} text-white px-4 py-2 rounded-lg inline-block text-lg font-bold mt-1`}>
+                          {getBadge(student.evaluation.totalScore || 0).icon} {getBadge(student.evaluation.totalScore || 0).name}
                         </div>
                       </div>
                       <div className="text-right">
@@ -1646,11 +2224,13 @@ const App = () => {
                     </div>
                   </div>
 
-                  {/* Category Scores */}
+                  {/* Category Evaluations */}
                   <div className="space-y-4">
                     {Object.entries(EVALUATION_CATEGORIES).map(([key, category]) => {
                       const score = student.evaluation.categoryScores?.[key] || 0;
                       const justification = student.evaluation.justifications?.[key] || 'No evaluation available';
+                      const levelLabel = score >= 4 ? 'Strong' : score >= 3 ? 'Proficient' : score >= 2 ? 'Developing' : 'Emerging';
+                      const levelColor = score >= 3 ? 'bg-green-100 text-green-700' : score >= 2 ? 'bg-yellow-100 text-yellow-700' : 'bg-orange-100 text-orange-700';
 
                       return (
                         <div key={key} className="p-4 bg-gray-50 rounded-lg border-l-4 border-indigo-400">
@@ -1659,21 +2239,13 @@ const App = () => {
                               <h3 className="font-semibold text-gray-900">{category.label}</h3>
                               <p className="text-xs text-gray-500 mt-1">{category.description}</p>
                             </div>
-                            <div className="ml-4 text-right">
-                              <div className="text-2xl font-bold text-indigo-600">{score}/4</div>
-                              <div className="text-xs text-gray-500">Weight: {(category.weight * 100).toFixed(0)}%</div>
-                            </div>
+                            <span className={`text-sm font-semibold px-3 py-1 rounded ${levelColor} ml-4`}>
+                              {levelLabel}
+                            </span>
                           </div>
                           <div className="mt-2 p-3 bg-white rounded border border-gray-200">
                             <div className="text-xs font-semibold text-gray-600 mb-1">Evidence:</div>
                             <p className="text-sm text-gray-700">{justification}</p>
-                          </div>
-                          {/* Score Bar */}
-                          <div className="mt-2 h-2 bg-gray-200 rounded-full overflow-hidden">
-                            <div
-                              className="h-full bg-indigo-500 transition-all duration-500"
-                              style={{ width: `${(score / 4) * 100}%` }}
-                            ></div>
                           </div>
                         </div>
                       );
@@ -1682,10 +2254,10 @@ const App = () => {
 
                   {/* Evaluation Legend */}
                   <div className="mt-6 p-4 bg-gray-100 rounded-lg">
-                    <div className="text-xs font-semibold text-gray-600 mb-2">Scoring Scale (1-4):</div>
+                    <div className="text-xs font-semibold text-gray-600 mb-2">Proficiency Levels:</div>
                     <div className="grid grid-cols-2 gap-2 text-xs text-gray-600">
-                      <div>• <strong>4 - Strong:</strong> Demonstrates mastery</div>
-                      <div>• <strong>3 - Adequate:</strong> Generally proficient</div>
+                      <div>• <strong>Strong:</strong> Demonstrates mastery</div>
+                      <div>• <strong>Proficient:</strong> Generally proficient</div>
                       <div>• <strong>2 - Emerging:</strong> Partial understanding</div>
                       <div>• <strong>1 - Weak:</strong> Limited demonstration</div>
                     </div>
@@ -1925,9 +2497,17 @@ const App = () => {
         <div className="max-w-7xl mx-auto p-6">
           <TaskCollectionBrowser
             onSelectTask={(task) => {
-              // Handle task selection - could create an assignment or just view details
-              console.log('Selected task:', task);
-              // For now, just log the task. In the future, could create an assignment
+              const assignment = {
+                id: Date.now(),
+                studentId: currentUser?.id,
+                studentName: currentUser?.name,
+                taskId: task.id,
+                taskTitle: task.title,
+                status: 'in_progress',
+                completedDate: null,
+                messages: []
+              };
+              startTeachingSession(assignment);
             }}
           />
         </div>
@@ -2008,7 +2588,7 @@ const App = () => {
 
         <div className="flex-1 max-w-7xl mx-auto w-full p-6 grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2 bg-white rounded-2xl shadow-lg flex flex-col h-[calc(100vh-200px)]">
-            <div className="flex-1 overflow-y-auto pt-10 px-6 pb-6 space-y-4">
+            <div className="flex-1 overflow-y-auto p-6 space-y-4">
               {messages.map((msg, idx) => (
                 <div key={idx} className={`flex gap-3 items-start ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
                   {msg.role === 'assistant' && (
@@ -2052,18 +2632,6 @@ const App = () => {
                   className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
                   disabled={loading}
                 />
-                <button
-                  onClick={toggleRecording}
-                  disabled={loading}
-                  className={`px-4 py-3 rounded-lg flex items-center gap-2 transition-colors ${
-                    isRecording
-                      ? 'bg-red-600 text-white hover:bg-red-700 animate-pulse'
-                      : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                  } disabled:opacity-50 disabled:cursor-not-allowed`}
-                  title={isRecording ? (language === 'es' ? 'Detener grabación' : 'Stop recording') : (language === 'es' ? 'Iniciar grabación de voz' : 'Start voice recording')}
-                >
-                  {isRecording ? <MicOff className="w-5 h-5" /> : <Mic className="w-5 h-5" />}
-                </button>
                 <button
                   onClick={sendMessage}
                   disabled={loading || !input.trim()}
@@ -2136,15 +2704,9 @@ const App = () => {
               <p className="text-gray-600">You've earned a badge!</p>
             </div>
 
-            <div className="grid grid-cols-2 gap-4 max-w-md mx-auto">
-              <div className="bg-green-50 p-4 rounded-lg">
-                <div className="text-sm text-gray-600 mb-1">Total Score</div>
-                <div className="text-3xl font-bold text-green-600">{assignment.evaluation?.totalScore?.toFixed(1) || 0}/100</div>
-              </div>
-              <div className="bg-blue-50 p-4 rounded-lg">
-                <div className="text-sm text-gray-600 mb-1">Messages Sent</div>
-                <div className="text-3xl font-bold text-blue-600">{assignment.messages?.length || messages.length}</div>
-              </div>
+            <div className="bg-blue-50 p-4 rounded-lg max-w-xs mx-auto">
+              <div className="text-sm text-gray-600 mb-1">Messages Sent</div>
+              <div className="text-3xl font-bold text-blue-600">{assignment.messages?.length || messages.length}</div>
             </div>
           </div>
 
@@ -2197,20 +2759,16 @@ const App = () => {
 
               const categoryScores = evaluation.categoryScores || {};
               const justifications = evaluation.justifications || {};
-              const totalScore = evaluation.totalScore || 0;
 
               return (
                 <>
-                  <div className="mb-4 p-4 bg-indigo-50 rounded-lg text-center">
-                    <div className="text-sm text-gray-600 mb-1">Overall Score</div>
-                    <div className="text-4xl font-bold text-indigo-600">{totalScore}/100</div>
-                  </div>
                   <div className="space-y-3">
                     {Object.entries(EVALUATION_CATEGORIES).map(([key, category]) => {
                       const score = categoryScores[key] || 0;
                       const justification = justifications[key] || 'No justification available';
-                      const scoreColor = score >= 3 ? 'text-green-600' : score >= 2 ? 'text-yellow-600' : 'text-red-600';
+                      const levelLabel = score >= 4 ? 'Strong' : score >= 3 ? 'Proficient' : score >= 2 ? 'Developing' : 'Emerging';
                       const bgColor = score >= 3 ? 'bg-green-50' : score >= 2 ? 'bg-yellow-50' : 'bg-red-50';
+                      const levelColor = score >= 3 ? 'bg-green-100 text-green-700' : score >= 2 ? 'bg-yellow-100 text-yellow-700' : 'bg-orange-100 text-orange-700';
 
                       return (
                         <div key={key} className={`p-3 rounded-lg border-l-4 ${bgColor} ${
@@ -2221,9 +2779,9 @@ const App = () => {
                               <div className="font-semibold">{category.label}</div>
                               <div className="text-sm text-gray-600">{category.description}</div>
                             </div>
-                            <div className={`text-xl font-bold ${scoreColor} ml-4`}>
-                              {score}/4
-                            </div>
+                            <span className={`text-sm font-semibold px-3 py-1 rounded ${levelColor} ml-4`}>
+                              {levelLabel}
+                            </span>
                           </div>
                           <div className="mt-2 pt-2 border-t border-gray-200">
                             <div className="text-xs text-gray-600 italic">"{justification}"</div>
@@ -2345,10 +2903,6 @@ const App = () => {
                     <div className="flex items-center gap-4">
                       {assignment.status === 'completed' && (
                         <>
-                          <div className="text-center">
-                            <div className="text-sm text-gray-600">Score</div>
-                            <div className="font-semibold">{assignment.evaluation?.totalScore?.toFixed(0) || 0}/100</div>
-                          </div>
                           <div className={`${badge.color} text-white px-3 py-2 rounded`}>
                             {badge.icon} {badge.name}
                           </div>
