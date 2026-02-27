@@ -163,28 +163,46 @@ const TaskCollectionBrowser = ({ onSelectTask }) => {
   );
 };
 
-// Helper to get task details by ID (MVP - hardcoded, will fetch from API)
-const getTaskById = (taskId) => {
-  const tasks = {
-    stack_of_cups: {
-      id: 'stack_of_cups',
-      title: 'Stack of Cups Challenge',
-      grade: 'Grade 8',
-      standard: '8.F.B.4',
-      standardId: '06f7e578-0d65-55d4-a817-77e4cd0a4b05', // CT standard for 8.F.B.4
-      description: 'Teach AI to understand linear patterns in stacked cups'
-    },
-    smoothie_recipe: {
-      id: 'smoothie_recipe',
-      title: 'Smoothie Recipe Ratios',
-      grade: 'Grade 6',
-      standard: '6.RP.A.3',
-      standardId: '62d0029e-9b81-5f08-b0bb-8ae1ddc9e8d0', // CT standard for 6.RP.A.3
-      description: 'Teach AI about ratios and proportional relationships'
-    }
-  };
-
-  return tasks[taskId];
+const TASK_DETAILS = {
+  stack_of_cups: {
+    id: 'stack_of_cups',
+    title: 'Stack of Cups Challenge',
+    grade: 'Grade 8',
+    standard: '8.F.B.4',
+    standardId: '06f7e578-0d65-55d4-a817-77e4cd0a4b05',
+    description: 'Teach AI to understand linear patterns in stacked cups'
+  },
+  smoothie_recipe: {
+    id: 'smoothie_recipe',
+    title: 'Smoothie Recipe Ratios',
+    grade: 'Grade 6',
+    standard: '6.RP.A.3',
+    standardId: '62d0029e-9b81-5f08-b0bb-8ae1ddc9e8d0',
+    description: 'Teach AI about ratios and proportional relationships'
+  },
+  basketball_heights: {
+    id: 'basketball_heights',
+    title: 'The Basketball Team Heights',
+    grade: 'Grade 6',
+    standard: '6.SP.A.2',
+    description: 'Analyze height data and use statistical measures to understand team composition'
+  },
+  solar_energy: {
+    id: 'solar_energy',
+    title: 'Solar Panel Energy',
+    grade: 'Grade 6',
+    standard: '6.EE.A.1',
+    description: 'Use expressions to calculate energy production from solar panels'
+  },
+  unit_rates: {
+    id: 'unit_rates',
+    title: 'Comparing Unit Rates',
+    grade: 'Grade 6',
+    standard: '6.RP.A.3',
+    description: 'Find and compare unit rates to determine the better buy'
+  }
 };
+
+const getTaskById = (taskId) => TASK_DETAILS[taskId];
 
 export default TaskCollectionBrowser;

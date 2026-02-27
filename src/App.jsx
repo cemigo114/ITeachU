@@ -93,13 +93,127 @@ Receta: 2 tazas de fresas + 3 tazas de yogur
 Para duplicarlo... 2+3=5, ¿entonces el doble = 10 total? ¿Tal vez 5 fresas y 5 yogur? 🤔
 
 ¿Puedes ayudarme a entender cómo duplicar recetas?`
+  },
+  basketballHeights: {
+    id: 'basketball_heights',
+    title: 'The Basketball Team Heights',
+    titleES: 'Las Alturas del Equipo de Baloncesto',
+    grade: 'Grade 6',
+    standard: 'CCSS.MATH.6.SP.A.2',
+    description: 'Analyze height data and use statistical measures to understand team composition',
+    descriptionES: 'Analizar datos de altura y usar medidas estadísticas para entender la composición del equipo',
+    imageUrl: '/images/basketball.jpg',
+    problemStatement: 'The basketball coach collected height data for all team members: 65, 66, 66, 67, 67, 67, 68, 68, 71, 73 inches. Use statistical measures (mean, median, range) to analyze the distribution and describe what the data tells us about the team.',
+    teachingPrompt: 'Help Zippy understand how to summarize a data set using center (mean, median) and spread (range), and why different measures give different pictures of the team.',
+    targetConcepts: ['Mean', 'Median', 'Range', 'Data distribution', 'Outliers', 'Statistical variability'],
+    correctSolutionPathway: 'Mean = 67.8 inches. Median = 67 inches. Range = 73 - 65 = 8 inches. Most players cluster between 65-68 inches, with two taller players (71, 73) pulling the mean up. The median (67) is more representative of a typical player height than the mean (67.8) because of the two outliers.',
+    misconceptions: [
+      'Thinking the mean always represents the "typical" value',
+      'Confusing range (max-min) with interquartile range',
+      'Not recognizing that outliers pull the mean away from center',
+      'Thinking all averages give the same result'
+    ],
+    aiIntro: `Hi! I'm Zippy! 🎉
+
+The basketball coach gave me the team heights: 65, 66, 66, 67, 67, 67, 68, 68, 71, 73 inches.
+
+To find the average I just add them all up... that's 678, and there are 10 players, so the average is 67.8 inches.
+
+So every player is about 67.8 inches tall, right? 🤔
+
+Can you help me understand what this data really tells us about the team?`,
+    aiIntroES: `¡Hola! ¡Soy Zippy! 🎉
+
+El entrenador de baloncesto me dio las alturas del equipo: 65, 66, 66, 67, 67, 67, 68, 68, 71, 73 pulgadas.
+
+Para encontrar el promedio sumo todo... eso es 678, y hay 10 jugadores, así que el promedio es 67.8 pulgadas.
+
+¿Entonces todos los jugadores miden aproximadamente 67.8 pulgadas? 🤔
+
+¿Puedes ayudarme a entender qué nos dicen realmente estos datos sobre el equipo?`
+  },
+  solarEnergy: {
+    id: 'solar_energy',
+    title: 'Solar Panel Energy',
+    titleES: 'Energía del Panel Solar',
+    grade: 'Grade 6',
+    standard: 'CCSS.MATH.6.EE.A.1',
+    description: 'Use expressions to calculate energy production from solar panels',
+    descriptionES: 'Usar expresiones para calcular la producción de energía de paneles solares',
+    imageUrl: '/images/solar.jpg',
+    problemStatement: 'A single solar panel produces 5 kWh per day. If the number of panels doubles each year (starting with 1 panel), write an expression using exponents for the energy produced after n years. How much energy is produced daily after 4 years?',
+    teachingPrompt: 'Help Zippy understand the difference between multiplication and exponents, and how exponential growth models real-world situations like solar panel expansion.',
+    targetConcepts: ['Exponents', 'Expressions', 'Order of operations', 'Exponential growth', 'Evaluating expressions'],
+    correctSolutionPathway: 'After n years there are 2^n panels. Each produces 5 kWh, so total daily energy = 5 × 2^n. After 4 years: 5 × 2^4 = 5 × 16 = 80 kWh per day.',
+    misconceptions: [
+      'Treating exponents as multiplication: 2^4 = 2 × 4 = 8 instead of 16',
+      'Not following order of operations: computing 5 × 2 first, then raising to power',
+      'Confusing linear growth (adding panels) with exponential growth (doubling)',
+      'Struggling to write expressions before evaluating them'
+    ],
+    aiIntro: `Hi! I'm Zippy! 🎉
+
+So we start with 1 solar panel that makes 5 kWh per day, and the panels double each year...
+
+After 4 years, the panels double 4 times, so that's 2 × 4 = 8 panels? And 8 × 5 = 40 kWh!
+
+Wait, my friend said it should be way more than 40... 🤔
+
+Can you help me figure out how "doubling" really works?`,
+    aiIntroES: `¡Hola! ¡Soy Zippy! 🎉
+
+Empezamos con 1 panel solar que produce 5 kWh por día, y los paneles se duplican cada año...
+
+Después de 4 años, los paneles se duplican 4 veces, ¿así que son 2 × 4 = 8 paneles? ¡Y 8 × 5 = 40 kWh!
+
+Espera, mi amigo dijo que debería ser mucho más que 40... 🤔
+
+¿Puedes ayudarme a entender cómo funciona realmente "duplicar"?`
+  },
+  unitRates: {
+    id: 'unit_rates',
+    title: 'Comparing Unit Rates',
+    titleES: 'Comparando Tasas Unitarias',
+    grade: 'Grade 6',
+    standard: 'CCSS.MATH.6.RP.A.3',
+    description: 'Find and compare unit rates to determine the better buy',
+    descriptionES: 'Encontrar y comparar tasas unitarias para determinar la mejor compra',
+    imageUrl: '/images/shopping.jpg',
+    problemStatement: 'Store A sells 3 notebooks for $4.50. Store B sells 5 notebooks for $7.00. Which store has the better price per notebook? How do you know?',
+    teachingPrompt: 'Help Zippy understand what a unit rate is, how to calculate it by dividing, and how to use it to compare deals fairly.',
+    targetConcepts: ['Unit rate', 'Division to find rate', 'Ratio comparison', 'Proportional reasoning'],
+    correctSolutionPathway: 'Store A: $4.50 ÷ 3 = $1.50 per notebook. Store B: $7.00 ÷ 5 = $1.40 per notebook. Store B is cheaper per notebook. The unit rate lets you compare fairly even when the quantities differ.',
+    misconceptions: [
+      'Comparing total prices instead of unit rates (Store A is cheaper because $4.50 < $7.00)',
+      'Dividing the wrong way (3 ÷ $4.50 instead of $4.50 ÷ 3)',
+      'Not understanding that lower unit price = better deal',
+      'Thinking you need the same quantity to compare'
+    ],
+    aiIntro: `Hi! I'm Zippy! 🎉
+
+Store A has 3 notebooks for $4.50 and Store B has 5 notebooks for $7.00.
+
+Well, $4.50 is less than $7.00, so Store A must be the better deal... right? 🤔
+
+But Store B gives you more notebooks... I'm confused about how to compare when the amounts are different!
+
+Can you teach me a fair way to compare these?`,
+    aiIntroES: `¡Hola! ¡Soy Zippy! 🎉
+
+La Tienda A tiene 3 cuadernos por $4.50 y la Tienda B tiene 5 cuadernos por $7.00.
+
+Bueno, $4.50 es menos que $7.00, así que la Tienda A debe ser la mejor oferta... ¿verdad? 🤔
+
+Pero la Tienda B te da más cuadernos... ¡Estoy confundido sobre cómo comparar cuando las cantidades son diferentes!
+
+¿Puedes enseñarme una forma justa de comparar estas?`
   }
 };
 
 // EXAMPLE TASK BANK DATA - Replace with API data later ****
 const EXAMPLE_TASKS = [
   {
-    id: 'task_1',
+    id: 'basketball_heights',
     slug: '6_sp_a_2_basketball_heights',
     title: 'The Basketball Team Heights',
     description: 'Analyze height data and use statistical measures to understand team composition',
@@ -129,7 +243,7 @@ const EXAMPLE_TASKS = [
     }
   },
   {
-    id: 'task_2',
+    id: 'solar_energy',
     slug: '6_ee_a_1_solar_task',
     title: 'Solar Panel Energy',
     description: 'Use expressions to calculate energy production from solar panels',
@@ -157,7 +271,7 @@ const EXAMPLE_TASKS = [
     }
   },
   {
-    id: 'task_3',
+    id: 'unit_rates',
     slug: '6_rp_a_3_unit_rates',
     title: 'Comparing Unit Rates',
     description: 'Find and compare unit rates to determine the better buy',
@@ -1207,8 +1321,8 @@ const App = () => {
                       {assignment.status.replace('_', ' ')}
                     </span>
                     {assignment.status === 'completed' && (
-                      <span className="text-sm font-semibold text-indigo-600">
-                        Score: {assignment.evaluation?.totalScore?.toFixed(0) || 0}/100
+                      <span className={`text-sm font-semibold ${getBadge(assignment.evaluation?.totalScore || 0).color} text-white px-2 py-0.5 rounded`}>
+                        {getBadge(assignment.evaluation?.totalScore || 0).icon} {getBadge(assignment.evaluation?.totalScore || 0).name}
                       </span>
                     )}
                   </div>
@@ -1758,16 +1872,13 @@ if (view === 'teacherTaskDetail' && selectedTaskForDetail) {
                       const displayScore = evaluation && !evaluation.error
                         ? evaluation.totalScore
                         : assignment.evaluation?.totalScore || 0;
+                      const evalBadge = getBadge(displayScore);
                       
                       return (
                         <div className="flex items-center justify-between text-sm">
-                          <span className="text-gray-600">Evaluation Score:</span>
-                          <span className={`font-semibold ${
-                            displayScore >= 75 ? 'text-green-600' :
-                            displayScore >= 50 ? 'text-yellow-600' :
-                            'text-red-600'
-                          }`}>
-                            {displayScore}/100
+                          <span className="text-gray-600">Evaluation:</span>
+                          <span className={`font-semibold ${evalBadge.color} text-white px-2 py-0.5 rounded`}>
+                            {evalBadge.icon} {evalBadge.name}
                           </span>
                         </div>
                       );
@@ -1883,7 +1994,8 @@ if (view === 'teacherTaskDetail' && selectedTaskForDetail) {
                   {Object.entries(EVALUATION_CATEGORIES).map(([key, category]) => {
                     const score = categoryScores[key] || 0;
                     const justification = justifications[key] || 'No justification available';
-                    const scoreColor = score >= 3 ? 'text-green-600' : score >= 2 ? 'text-yellow-600' : 'text-red-600';
+                    const levelLabel = score >= 4 ? 'Strong' : score >= 3 ? 'Proficient' : score >= 2 ? 'Developing' : 'Emerging';
+                    const levelColor = score >= 3 ? 'bg-green-100 text-green-700' : score >= 2 ? 'bg-yellow-100 text-yellow-700' : 'bg-orange-100 text-orange-700';
 
                     return (
                       <div key={key} className="p-3 bg-gray-50 rounded-lg">
@@ -1892,9 +2004,9 @@ if (view === 'teacherTaskDetail' && selectedTaskForDetail) {
                             <div className="font-semibold">{category.label}</div>
                             <div className="text-sm text-gray-600">{category.description}</div>
                           </div>
-                          <div className={`text-xl font-bold ${scoreColor} ml-4`}>
-                            {score}/4
-                          </div>
+                          <span className={`text-xs font-semibold px-2 py-1 rounded ${levelColor} ml-4`}>
+                            {levelLabel}
+                          </span>
                         </div>
                         <div className="mt-2 pt-2 border-t border-gray-200">
                           <div className="text-xs text-gray-600 italic">"{justification}"</div>
@@ -2038,22 +2150,15 @@ if (view === 'teacherTaskDetail' && selectedTaskForDetail) {
                     );
                   }
 
-                  const totalScore = evaluation.totalScore || 0;
                   const categoryScores = evaluation.categoryScores || {};
                   const justifications = evaluation.justifications || {};
 
                   return (
                     <>
-                      <div className="grid grid-cols-2 gap-4 mb-6">
-                        <div className="bg-gray-50 p-4 rounded-lg">
-                          <div className="text-sm text-gray-600 mb-1">Total Score</div>
-                          <div className="text-3xl font-bold text-indigo-600">{totalScore}/100</div>
-                        </div>
-                        <div className="bg-gray-50 p-4 rounded-lg">
-                          <div className="text-sm text-gray-600 mb-1">Badge Earned</div>
-                          <div className={`${badge.color} text-white px-3 py-2 rounded inline-block`}>
-                            {badge.icon} {badge.name}
-                          </div>
+                      <div className="mb-6 bg-gray-50 p-4 rounded-lg text-center">
+                        <div className="text-sm text-gray-600 mb-1">Badge Earned</div>
+                        <div className={`${badge.color} text-white px-4 py-2 rounded-lg inline-block text-lg font-bold`}>
+                          {badge.icon} {badge.name}
                         </div>
                       </div>
 
@@ -2061,8 +2166,9 @@ if (view === 'teacherTaskDetail' && selectedTaskForDetail) {
                         {Object.entries(EVALUATION_CATEGORIES).map(([key, category]) => {
                           const score = categoryScores[key] || 0;
                           const justification = justifications[key] || 'No justification available';
-                          const scoreColor = score >= 3 ? 'text-green-600' : score >= 2 ? 'text-yellow-600' : 'text-red-600';
+                          const levelLabel = score >= 4 ? 'Strong' : score >= 3 ? 'Proficient' : score >= 2 ? 'Developing' : 'Emerging';
                           const bgColor = score >= 3 ? 'bg-green-50' : score >= 2 ? 'bg-yellow-50' : 'bg-red-50';
+                          const levelColor = score >= 3 ? 'bg-green-100 text-green-700' : score >= 2 ? 'bg-yellow-100 text-yellow-700' : 'bg-orange-100 text-orange-700';
 
                           return (
                             <div key={key} className={`p-4 rounded-lg border-l-4 ${bgColor} ${
@@ -2073,9 +2179,9 @@ if (view === 'teacherTaskDetail' && selectedTaskForDetail) {
                                   <div className="font-semibold text-gray-900">{category.label}</div>
                                   <div className="text-sm text-gray-600 mt-1">{category.description}</div>
                                 </div>
-                                <div className={`text-2xl font-bold ${scoreColor} ml-4`}>
-                                  {score}/4
-                                </div>
+                                <span className={`text-sm font-semibold px-3 py-1 rounded ${levelColor} ml-4`}>
+                                  {levelLabel}
+                                </span>
                               </div>
                               <div className="mt-3 pt-3 border-t border-gray-200">
                                 <div className="text-sm font-medium text-gray-700 mb-1">Evidence:</div>
@@ -2095,13 +2201,13 @@ if (view === 'teacherTaskDetail' && selectedTaskForDetail) {
                 <div className="bg-white rounded-xl shadow-md p-6">
                   <h2 className="text-xl font-semibold mb-4">Competency Evaluation</h2>
 
-                  {/* Total Score Display */}
+                  {/* Proficiency Level Display */}
                   <div className="mb-6 p-4 bg-gradient-to-r from-indigo-50 to-purple-50 rounded-lg">
                     <div className="flex items-center justify-between">
                       <div>
-                        <div className="text-sm text-gray-600 font-medium">Weighted Total Score</div>
-                        <div className="text-3xl font-bold text-indigo-600">
-                          {student.evaluation.totalScore?.toFixed(1) || 0}/100
+                        <div className="text-sm text-gray-600 font-medium">Badge Earned</div>
+                        <div className={`${getBadge(student.evaluation.totalScore || 0).color} text-white px-4 py-2 rounded-lg inline-block text-lg font-bold mt-1`}>
+                          {getBadge(student.evaluation.totalScore || 0).icon} {getBadge(student.evaluation.totalScore || 0).name}
                         </div>
                       </div>
                       <div className="text-right">
@@ -2118,11 +2224,13 @@ if (view === 'teacherTaskDetail' && selectedTaskForDetail) {
                     </div>
                   </div>
 
-                  {/* Category Scores */}
+                  {/* Category Evaluations */}
                   <div className="space-y-4">
                     {Object.entries(EVALUATION_CATEGORIES).map(([key, category]) => {
                       const score = student.evaluation.categoryScores?.[key] || 0;
                       const justification = student.evaluation.justifications?.[key] || 'No evaluation available';
+                      const levelLabel = score >= 4 ? 'Strong' : score >= 3 ? 'Proficient' : score >= 2 ? 'Developing' : 'Emerging';
+                      const levelColor = score >= 3 ? 'bg-green-100 text-green-700' : score >= 2 ? 'bg-yellow-100 text-yellow-700' : 'bg-orange-100 text-orange-700';
 
                       return (
                         <div key={key} className="p-4 bg-gray-50 rounded-lg border-l-4 border-indigo-400">
@@ -2131,21 +2239,13 @@ if (view === 'teacherTaskDetail' && selectedTaskForDetail) {
                               <h3 className="font-semibold text-gray-900">{category.label}</h3>
                               <p className="text-xs text-gray-500 mt-1">{category.description}</p>
                             </div>
-                            <div className="ml-4 text-right">
-                              <div className="text-2xl font-bold text-indigo-600">{score}/4</div>
-                              <div className="text-xs text-gray-500">Weight: {(category.weight * 100).toFixed(0)}%</div>
-                            </div>
+                            <span className={`text-sm font-semibold px-3 py-1 rounded ${levelColor} ml-4`}>
+                              {levelLabel}
+                            </span>
                           </div>
                           <div className="mt-2 p-3 bg-white rounded border border-gray-200">
                             <div className="text-xs font-semibold text-gray-600 mb-1">Evidence:</div>
                             <p className="text-sm text-gray-700">{justification}</p>
-                          </div>
-                          {/* Score Bar */}
-                          <div className="mt-2 h-2 bg-gray-200 rounded-full overflow-hidden">
-                            <div
-                              className="h-full bg-indigo-500 transition-all duration-500"
-                              style={{ width: `${(score / 4) * 100}%` }}
-                            ></div>
                           </div>
                         </div>
                       );
@@ -2154,10 +2254,10 @@ if (view === 'teacherTaskDetail' && selectedTaskForDetail) {
 
                   {/* Evaluation Legend */}
                   <div className="mt-6 p-4 bg-gray-100 rounded-lg">
-                    <div className="text-xs font-semibold text-gray-600 mb-2">Scoring Scale (1-4):</div>
+                    <div className="text-xs font-semibold text-gray-600 mb-2">Proficiency Levels:</div>
                     <div className="grid grid-cols-2 gap-2 text-xs text-gray-600">
-                      <div>• <strong>4 - Strong:</strong> Demonstrates mastery</div>
-                      <div>• <strong>3 - Adequate:</strong> Generally proficient</div>
+                      <div>• <strong>Strong:</strong> Demonstrates mastery</div>
+                      <div>• <strong>Proficient:</strong> Generally proficient</div>
                       <div>• <strong>2 - Emerging:</strong> Partial understanding</div>
                       <div>• <strong>1 - Weak:</strong> Limited demonstration</div>
                     </div>
@@ -2397,9 +2497,17 @@ if (view === 'teacherTaskDetail' && selectedTaskForDetail) {
         <div className="max-w-7xl mx-auto p-6">
           <TaskCollectionBrowser
             onSelectTask={(task) => {
-              // Handle task selection - could create an assignment or just view details
-              console.log('Selected task:', task);
-              // For now, just log the task. In the future, could create an assignment
+              const assignment = {
+                id: Date.now(),
+                studentId: currentUser?.id,
+                studentName: currentUser?.name,
+                taskId: task.id,
+                taskTitle: task.title,
+                status: 'in_progress',
+                completedDate: null,
+                messages: []
+              };
+              startTeachingSession(assignment);
             }}
           />
         </div>
@@ -2596,15 +2704,9 @@ if (view === 'teacherTaskDetail' && selectedTaskForDetail) {
               <p className="text-gray-600">You've earned a badge!</p>
             </div>
 
-            <div className="grid grid-cols-2 gap-4 max-w-md mx-auto">
-              <div className="bg-green-50 p-4 rounded-lg">
-                <div className="text-sm text-gray-600 mb-1">Total Score</div>
-                <div className="text-3xl font-bold text-green-600">{assignment.evaluation?.totalScore?.toFixed(1) || 0}/100</div>
-              </div>
-              <div className="bg-blue-50 p-4 rounded-lg">
-                <div className="text-sm text-gray-600 mb-1">Messages Sent</div>
-                <div className="text-3xl font-bold text-blue-600">{assignment.messages?.length || messages.length}</div>
-              </div>
+            <div className="bg-blue-50 p-4 rounded-lg max-w-xs mx-auto">
+              <div className="text-sm text-gray-600 mb-1">Messages Sent</div>
+              <div className="text-3xl font-bold text-blue-600">{assignment.messages?.length || messages.length}</div>
             </div>
           </div>
 
@@ -2657,20 +2759,16 @@ if (view === 'teacherTaskDetail' && selectedTaskForDetail) {
 
               const categoryScores = evaluation.categoryScores || {};
               const justifications = evaluation.justifications || {};
-              const totalScore = evaluation.totalScore || 0;
 
               return (
                 <>
-                  <div className="mb-4 p-4 bg-indigo-50 rounded-lg text-center">
-                    <div className="text-sm text-gray-600 mb-1">Overall Score</div>
-                    <div className="text-4xl font-bold text-indigo-600">{totalScore}/100</div>
-                  </div>
                   <div className="space-y-3">
                     {Object.entries(EVALUATION_CATEGORIES).map(([key, category]) => {
                       const score = categoryScores[key] || 0;
                       const justification = justifications[key] || 'No justification available';
-                      const scoreColor = score >= 3 ? 'text-green-600' : score >= 2 ? 'text-yellow-600' : 'text-red-600';
+                      const levelLabel = score >= 4 ? 'Strong' : score >= 3 ? 'Proficient' : score >= 2 ? 'Developing' : 'Emerging';
                       const bgColor = score >= 3 ? 'bg-green-50' : score >= 2 ? 'bg-yellow-50' : 'bg-red-50';
+                      const levelColor = score >= 3 ? 'bg-green-100 text-green-700' : score >= 2 ? 'bg-yellow-100 text-yellow-700' : 'bg-orange-100 text-orange-700';
 
                       return (
                         <div key={key} className={`p-3 rounded-lg border-l-4 ${bgColor} ${
@@ -2681,9 +2779,9 @@ if (view === 'teacherTaskDetail' && selectedTaskForDetail) {
                               <div className="font-semibold">{category.label}</div>
                               <div className="text-sm text-gray-600">{category.description}</div>
                             </div>
-                            <div className={`text-xl font-bold ${scoreColor} ml-4`}>
-                              {score}/4
-                            </div>
+                            <span className={`text-sm font-semibold px-3 py-1 rounded ${levelColor} ml-4`}>
+                              {levelLabel}
+                            </span>
                           </div>
                           <div className="mt-2 pt-2 border-t border-gray-200">
                             <div className="text-xs text-gray-600 italic">"{justification}"</div>
@@ -2805,10 +2903,6 @@ if (view === 'teacherTaskDetail' && selectedTaskForDetail) {
                     <div className="flex items-center gap-4">
                       {assignment.status === 'completed' && (
                         <>
-                          <div className="text-center">
-                            <div className="text-sm text-gray-600">Score</div>
-                            <div className="font-semibold">{assignment.evaluation?.totalScore?.toFixed(0) || 0}/100</div>
-                          </div>
                           <div className={`${badge.color} text-white px-3 py-2 rounded`}>
                             {badge.icon} {badge.name}
                           </div>

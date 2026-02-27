@@ -25,6 +25,36 @@
       "tasks": []
     },
     {
+      "id": "grade-6-stats",
+      "title": "Grade 6 - Statistics & Probability",
+      "description": "Understanding data distributions and statistical measures",
+      "type": "unit",
+      "grade": 6,
+      "published": true,
+      "tasks": [
+        {
+          "id": "basketball_heights",
+          "order": 1,
+          "required": true
+        }
+      ]
+    },
+    {
+      "id": "grade-6-expressions",
+      "title": "Grade 6 - Expressions & Equations",
+      "description": "Write and evaluate numerical expressions involving exponents",
+      "type": "unit",
+      "grade": 6,
+      "published": true,
+      "tasks": [
+        {
+          "id": "solar_energy",
+          "order": 1,
+          "required": true
+        }
+      ]
+    },
+    {
       "id": "grade-6-ratios",
       "title": "Grade 6 - Ratios & Proportions",
       "description": "Ratio reasoning and proportional relationships",
@@ -36,6 +66,11 @@
           "id": "smoothie_recipe",
           "order": 1,
           "required": true
+        },
+        {
+          "id": "unit_rates",
+          "order": 2,
+          "required": false
         }
       ]
     }
