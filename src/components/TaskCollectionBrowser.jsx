@@ -32,7 +32,6 @@ const TaskCollectionBrowser = ({ onSelectTask }) => {
     );
   }
 
-  // Collection grid view
   if (!selectedCollection) {
     return (
       <div className="space-y-6">
@@ -72,7 +71,6 @@ const TaskCollectionBrowser = ({ onSelectTask }) => {
     );
   }
 
-  // Task list view within selected collection
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-3">
@@ -95,17 +93,12 @@ const TaskCollectionBrowser = ({ onSelectTask }) => {
             <p className="text-gray-500">No tasks available in this collection yet.</p>
           </div>
         ) : (
-          selectedCollection.tasks.map((taskRef, index) => {
-            // In a real app, fetch task details from TASKS object or API
-            const task = getTaskById(taskRef.id);
-
-            if (!task) return null;
-
-            const isLocked = index > 0 && !taskRef.required;
+          selectedCollection.tasks.map((task, index) => {
+            const isLocked = index > 0 && !task.required;
 
             return (
               <div
-                key={taskRef.id}
+                key={task.id}
                 className={`bg-white rounded-xl shadow-md p-6 ${
                   isLocked ? 'opacity-60' : 'hover:shadow-lg cursor-pointer'
                 } transition`}
@@ -117,7 +110,7 @@ const TaskCollectionBrowser = ({ onSelectTask }) => {
                       <span className="text-sm font-semibold text-gray-500">
                         Task {index + 1}
                       </span>
-                      {taskRef.required && (
+                      {task.required && (
                         <span className="text-xs bg-red-100 text-red-700 px-2 py-1 rounded">
                           Required
                         </span>
@@ -134,11 +127,11 @@ const TaskCollectionBrowser = ({ onSelectTask }) => {
                     <p className="text-sm text-gray-600 mb-3">{task.description}</p>
 
                     <div className="flex items-center gap-3 text-sm text-gray-500">
-                      <span>{task.grade}</span>
-                      {task.standardId && (
+                      <span>Grade {task.grade}</span>
+                      {task.standard && (
                         <>
                           <span>•</span>
-                          <StandardBadge standardId={task.standardId} standardCode={task.standard} />
+                          <span className="bg-indigo-100 text-indigo-700 px-2 py-0.5 rounded text-xs font-semibold">{task.standard}</span>
                         </>
                       )}
                     </div>
@@ -162,47 +155,5 @@ const TaskCollectionBrowser = ({ onSelectTask }) => {
     </div>
   );
 };
-
-const TASK_DETAILS = {
-  stack_of_cups: {
-    id: 'stack_of_cups',
-    title: 'Stack of Cups Challenge',
-    grade: 'Grade 8',
-    standard: '8.F.B.4',
-    standardId: '06f7e578-0d65-55d4-a817-77e4cd0a4b05',
-    description: 'Teach AI to understand linear patterns in stacked cups'
-  },
-  smoothie_recipe: {
-    id: 'smoothie_recipe',
-    title: 'Smoothie Recipe Ratios',
-    grade: 'Grade 6',
-    standard: '6.RP.A.3',
-    standardId: '62d0029e-9b81-5f08-b0bb-8ae1ddc9e8d0',
-    description: 'Teach AI about ratios and proportional relationships'
-  },
-  basketball_heights: {
-    id: 'basketball_heights',
-    title: 'The Basketball Team Heights',
-    grade: 'Grade 6',
-    standard: '6.SP.A.2',
-    description: 'Analyze height data and use statistical measures to understand team composition'
-  },
-  solar_energy: {
-    id: 'solar_energy',
-    title: 'Solar Panel Energy',
-    grade: 'Grade 6',
-    standard: '6.EE.A.1',
-    description: 'Use expressions to calculate energy production from solar panels'
-  },
-  unit_rates: {
-    id: 'unit_rates',
-    title: 'Comparing Unit Rates',
-    grade: 'Grade 6',
-    standard: '6.RP.A.3',
-    description: 'Find and compare unit rates to determine the better buy'
-  }
-};
-
-const getTaskById = (taskId) => TASK_DETAILS[taskId];
 
 export default TaskCollectionBrowser;

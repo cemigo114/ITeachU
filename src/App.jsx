@@ -21,386 +21,55 @@ import {
 } from './utils/sessionStorage';
 
 // Task configurations
-const TASKS = {
-  stackOfCups: {
-    id: 'stack_of_cups',
-    title: 'Stack of Cups Challenge',
-    titleES: 'Desafío de Pila de Vasos',
-    grade: 'Grade 8',
-    standard: 'CCSS.MATH.8.F.B.4',
-    standardId: '06f7e578-0d65-55d4-a817-77e4cd0a4b05', // CT standard for 8.F.B.4
-    description: 'Teach AI to understand linear patterns in stacked cups',
-    descriptionES: 'Enseña a la IA a comprender patrones lineales en vasos apilados',
-    imageUrl: "data:image/svg+xml,%3Csvg width='400' height='200' xmlns='http://www.w3.org/2000/svg'%3E%3Crect fill='%23f3f4f6' width='400' height='200'/%3E%3Ctext x='50%25' y='30%25' text-anchor='middle' fill='%23374151' font-size='14'%3E2 cups = 16 cm%3C/text%3E%3Ctext x='50%25' y='50%25' text-anchor='middle' fill='%23374151' font-size='14'%3E4 cups = 20 cm%3C/text%3E%3Ctext x='50%25' y='70%25' text-anchor='middle' fill='%23374151' font-size='14'%3E8 cups = 28 cm%3C/text%3E%3C/svg%3E",
-    // New metadata fields for comprehensive prompt
-    problemStatement: 'Given a stack of cups where 2 cups = 16cm, 4 cups = 20cm, and 8 cups = 28cm, determine the pattern and create a formula for the height of n cups.',
-    teachingPrompt: 'Help Zippy understand how cups nest together and how to model the linear relationship between number of cups and total height.',
-    targetConcepts: ['Linear patterns', 'Nesting structures', 'Function notation', 'Rate of change'],
-    correctSolutionPathway: 'Cups nest inside each other. Base cup is 14cm tall. Each additional cup adds only its 2cm rim. Formula: h = 14 + 2(n-1) or h = 2n + 12',
-    misconceptions: [
-      'Proportional thinking: 2 cups = 16cm means 1 cup = 8cm, so 8 cups = 64cm',
-      'Additive only: Cups stack completely on top without nesting',
-      'Missing constant: Thinking pattern is only 2n without the base constant',
-      'Cannot generalize: Can calculate specific cases but struggles to create formula'
-    ],
-    aiIntro: `Hi! I'm Zippy! 🎉
-
-I see 2 cups = 16cm and 4 cups = 20cm.
-
-If 1 cup = 8cm, then 8 cups = 64cm... but the picture shows 28cm! 🤔
-
-Can you help me figure out what's happening?`,
-    aiIntroES: `¡Hola! ¡Soy Zippy! 🎉
-
-Veo que 2 vasos = 16cm y 4 vasos = 20cm.
-
-Si 1 vaso = 8cm, entonces 8 vasos = 64cm... ¡pero la imagen muestra 28cm! 🤔
-
-¿Puedes ayudarme a entender qué está pasando?`
-  },
-  smoothieRecipe: {
-    id: 'smoothie_recipe',
-    title: 'Smoothie Recipe Ratios',
-    titleES: 'Proporciones de Receta de Batido',
-    grade: 'Grade 6',
-    standard: 'CCSS.MATH.6.RP.A.3',
-    standardId: '62d0029e-9b81-5f08-b0bb-8ae1ddc9e8d0', // CT standard for 6.RP.A.3
-    description: 'Teach AI about ratio and proportional reasoning with recipes',
-    descriptionES: 'Enseña a la IA sobre razones y razonamiento proporcional con recetas',
-    imageUrl: "data:image/svg+xml,%3Csvg width='400' height='280' xmlns='http://www.w3.org/2000/svg'%3E%3Crect fill='%23fef3c7' width='400' height='280'/%3E%3Ctext x='200' y='30' text-anchor='middle' fill='%23b91c1c' font-size='18' font-weight='bold'%3E🍓 Smoothie Recipe 🥤%3C/text%3E%3Ctext x='200' y='60' text-anchor='middle' fill='%23059669' font-size='14' font-weight='bold'%3EOriginal Recipe%3C/text%3E%3Ctext x='100' y='90' text-anchor='middle' fill='%23dc2626' font-size='32'%3E🍓🍓%3C/text%3E%3Ctext x='100' y='115' text-anchor='middle' fill='%23374151' font-size='12'%3E2 cups%3C/text%3E%3Ctext x='200' y='102' text-anchor='middle' fill='%23374151' font-size='20'%3E:%3C/text%3E%3Ctext x='300' y='90' text-anchor='middle' fill='%2393c5fd' font-size='32'%3E🥛🥛🥛%3C/text%3E%3Ctext x='300' y='115' text-anchor='middle' fill='%23374151' font-size='12'%3E3 cups%3C/text%3E%3Crect x='50' y='130' width='300' height='2' fill='%23d1d5db'/%3E%3Ctext x='200' y='160' text-anchor='middle' fill='%23dc2626' font-size='13' font-weight='bold'%3ERatio: 2 to 3%3C/text%3E%3Ctext x='200' y='185' text-anchor='middle' fill='%23374151' font-size='11'%3ETo double: multiply BOTH by 2%3C/text%3E%3Ctext x='200' y='210' text-anchor='middle' fill='%23374151' font-size='11'%3E🍓🍓 × 2 = 🍓🍓🍓🍓 (4 cups)%3C/text%3E%3Ctext x='200' y='230' text-anchor='middle' fill='%23374151' font-size='11'%3E🥛🥛🥛 × 2 = 🥛🥛🥛🥛🥛🥛 (6 cups)%3C/text%3E%3Ctext x='200' y='260' text-anchor='middle' fill='%23374151' font-size='10' style='font-style:italic'%3EKeeps the same taste!%3C/text%3E%3C/svg%3E",
-    // New metadata fields for comprehensive prompt
-    problemStatement: 'A smoothie recipe uses 2 cups of strawberries and 3 cups of yogurt. How do you scale this recipe to make different amounts while keeping the same taste?',
-    teachingPrompt: 'Help Zippy understand how ratios work and how to scale recipes multiplicatively (not additively).',
-    targetConcepts: ['Ratios', 'Proportional reasoning', 'Multiplicative scaling', 'Unit rates'],
-    correctSolutionPathway: 'Ratios scale multiplicatively. To double: multiply both parts by 2 (4 strawberries, 6 yogurt). To triple: multiply both by 3. Unit rate: 2/3 cup strawberries per cup yogurt.',
-    misconceptions: [
-      'Additive thinking: 2+3=5, so double means 10 total, split equally as 5 and 5',
-      'Multiplying only one part: Doubling means 4 strawberries but keeping 3 yogurt',
-      'Missing the relationship: Can compute specific cases but doesn\'t understand the ratio structure',
-      'Cannot generalize: Struggles to apply ratio concept to different scaling factors'
-    ],
-    aiIntro: `Hi! I'm Zippy! 🎉
-
-Recipe: 2 cups strawberries + 3 cups yogurt
-
-To double it... 2+3=5, so double = 10 total? Maybe 5 strawberries and 5 yogurt? 🤔
-
-Can you help me understand how to double recipes?`,
-    aiIntroES: `¡Hola! ¡Soy Zippy! 🎉
-
-Receta: 2 tazas de fresas + 3 tazas de yogur
-
-Para duplicarlo... 2+3=5, ¿entonces el doble = 10 total? ¿Tal vez 5 fresas y 5 yogur? 🤔
-
-¿Puedes ayudarme a entender cómo duplicar recetas?`
-  },
-  basketballHeights: {
-    id: 'basketball_heights',
-    title: 'The Basketball Team Heights',
-    titleES: 'Las Alturas del Equipo de Baloncesto',
-    grade: 'Grade 6',
-    standard: 'CCSS.MATH.6.SP.A.2',
-    description: 'Analyze height data and use statistical measures to understand team composition',
-    descriptionES: 'Analizar datos de altura y usar medidas estadísticas para entender la composición del equipo',
-    imageUrl: '/images/basketball.jpg',
-    problemStatement: 'The basketball coach collected height data for all team members: 65, 66, 66, 67, 67, 67, 68, 68, 71, 73 inches. Use statistical measures (mean, median, range) to analyze the distribution and describe what the data tells us about the team.',
-    teachingPrompt: 'Help Zippy understand how to summarize a data set using center (mean, median) and spread (range), and why different measures give different pictures of the team.',
-    targetConcepts: ['Mean', 'Median', 'Range', 'Data distribution', 'Outliers', 'Statistical variability'],
-    correctSolutionPathway: 'Mean = 67.8 inches. Median = 67 inches. Range = 73 - 65 = 8 inches. Most players cluster between 65-68 inches, with two taller players (71, 73) pulling the mean up. The median (67) is more representative of a typical player height than the mean (67.8) because of the two outliers.',
-    misconceptions: [
-      'Thinking the mean always represents the "typical" value',
-      'Confusing range (max-min) with interquartile range',
-      'Not recognizing that outliers pull the mean away from center',
-      'Thinking all averages give the same result'
-    ],
-    aiIntro: `Hi! I'm Zippy! 🎉
-
-The basketball coach gave me the team heights: 65, 66, 66, 67, 67, 67, 68, 68, 71, 73 inches.
-
-To find the average I just add them all up... that's 678, and there are 10 players, so the average is 67.8 inches.
-
-So every player is about 67.8 inches tall, right? 🤔
-
-Can you help me understand what this data really tells us about the team?`,
-    aiIntroES: `¡Hola! ¡Soy Zippy! 🎉
-
-El entrenador de baloncesto me dio las alturas del equipo: 65, 66, 66, 67, 67, 67, 68, 68, 71, 73 pulgadas.
-
-Para encontrar el promedio sumo todo... eso es 678, y hay 10 jugadores, así que el promedio es 67.8 pulgadas.
-
-¿Entonces todos los jugadores miden aproximadamente 67.8 pulgadas? 🤔
-
-¿Puedes ayudarme a entender qué nos dicen realmente estos datos sobre el equipo?`
-  },
-  solarEnergy: {
-    id: 'solar_energy',
-    title: 'Solar Panel Energy',
-    titleES: 'Energía del Panel Solar',
-    grade: 'Grade 6',
-    standard: 'CCSS.MATH.6.EE.A.1',
-    description: 'Use expressions to calculate energy production from solar panels',
-    descriptionES: 'Usar expresiones para calcular la producción de energía de paneles solares',
-    imageUrl: '/images/solar.jpg',
-    problemStatement: 'A single solar panel produces 5 kWh per day. If the number of panels doubles each year (starting with 1 panel), write an expression using exponents for the energy produced after n years. How much energy is produced daily after 4 years?',
-    teachingPrompt: 'Help Zippy understand the difference between multiplication and exponents, and how exponential growth models real-world situations like solar panel expansion.',
-    targetConcepts: ['Exponents', 'Expressions', 'Order of operations', 'Exponential growth', 'Evaluating expressions'],
-    correctSolutionPathway: 'After n years there are 2^n panels. Each produces 5 kWh, so total daily energy = 5 × 2^n. After 4 years: 5 × 2^4 = 5 × 16 = 80 kWh per day.',
-    misconceptions: [
-      'Treating exponents as multiplication: 2^4 = 2 × 4 = 8 instead of 16',
-      'Not following order of operations: computing 5 × 2 first, then raising to power',
-      'Confusing linear growth (adding panels) with exponential growth (doubling)',
-      'Struggling to write expressions before evaluating them'
-    ],
-    aiIntro: `Hi! I'm Zippy! 🎉
-
-So we start with 1 solar panel that makes 5 kWh per day, and the panels double each year...
-
-After 4 years, the panels double 4 times, so that's 2 × 4 = 8 panels? And 8 × 5 = 40 kWh!
-
-Wait, my friend said it should be way more than 40... 🤔
-
-Can you help me figure out how "doubling" really works?`,
-    aiIntroES: `¡Hola! ¡Soy Zippy! 🎉
-
-Empezamos con 1 panel solar que produce 5 kWh por día, y los paneles se duplican cada año...
-
-Después de 4 años, los paneles se duplican 4 veces, ¿así que son 2 × 4 = 8 paneles? ¡Y 8 × 5 = 40 kWh!
-
-Espera, mi amigo dijo que debería ser mucho más que 40... 🤔
-
-¿Puedes ayudarme a entender cómo funciona realmente "duplicar"?`
-  },
-  unitRates: {
-    id: 'unit_rates',
-    title: 'Comparing Unit Rates',
-    titleES: 'Comparando Tasas Unitarias',
-    grade: 'Grade 6',
-    standard: 'CCSS.MATH.6.RP.A.3',
-    description: 'Find and compare unit rates to determine the better buy',
-    descriptionES: 'Encontrar y comparar tasas unitarias para determinar la mejor compra',
-    imageUrl: '/images/shopping.jpg',
-    problemStatement: 'Store A sells 3 notebooks for $4.50. Store B sells 5 notebooks for $7.00. Which store has the better price per notebook? How do you know?',
-    teachingPrompt: 'Help Zippy understand what a unit rate is, how to calculate it by dividing, and how to use it to compare deals fairly.',
-    targetConcepts: ['Unit rate', 'Division to find rate', 'Ratio comparison', 'Proportional reasoning'],
-    correctSolutionPathway: 'Store A: $4.50 ÷ 3 = $1.50 per notebook. Store B: $7.00 ÷ 5 = $1.40 per notebook. Store B is cheaper per notebook. The unit rate lets you compare fairly even when the quantities differ.',
-    misconceptions: [
-      'Comparing total prices instead of unit rates (Store A is cheaper because $4.50 < $7.00)',
-      'Dividing the wrong way (3 ÷ $4.50 instead of $4.50 ÷ 3)',
-      'Not understanding that lower unit price = better deal',
-      'Thinking you need the same quantity to compare'
-    ],
-    aiIntro: `Hi! I'm Zippy! 🎉
-
-Store A has 3 notebooks for $4.50 and Store B has 5 notebooks for $7.00.
-
-Well, $4.50 is less than $7.00, so Store A must be the better deal... right? 🤔
-
-But Store B gives you more notebooks... I'm confused about how to compare when the amounts are different!
-
-Can you teach me a fair way to compare these?`,
-    aiIntroES: `¡Hola! ¡Soy Zippy! 🎉
-
-La Tienda A tiene 3 cuadernos por $4.50 y la Tienda B tiene 5 cuadernos por $7.00.
-
-Bueno, $4.50 es menos que $7.00, así que la Tienda A debe ser la mejor oferta... ¿verdad? 🤔
-
-Pero la Tienda B te da más cuadernos... ¡Estoy confundido sobre cómo comparar cuando las cantidades son diferentes!
-
-¿Puedes enseñarme una forma justa de comparar estas?`
-  }
-};
-
-// EXAMPLE TASK BANK DATA - Replace with API data later ****
-const EXAMPLE_TASKS = [
-  {
-    id: 'basketball_heights',
-    slug: '6_sp_a_2_basketball_heights',
-    title: 'The Basketball Team Heights',
-    description: 'Analyze height data and use statistical measures to understand team composition',
-    standard: '6.SP.A.2',
-    standardDescription: 'Understand that a set of data collected to answer a statistical question has a distribution',
-    grade: 'Grade 6',
-    domain: 'Statistics & Probability',
-    imageUrl: '/images/basketball.jpg',
-    sections: {
-      studentPrompt:
-        'The basketball coach has collected height data for all team members. Your task is to help analyze this data to understand the team better.',
-      misconceptions: [
-        'Students may think the average (mean) is always the most representative value',
-        'Students might not recognize that outliers significantly affect the mean',
-        'Students may confuse range with interquartile range'
-      ],
-      patternRecognition: 'Look at the height distribution. What patterns do you notice?',
-      generalization:
-        'Always/Sometimes/Never: The tallest player on a team is always more than 6 inches taller than the shortest player.',
-      inference:
-        "If a new player joins the team and is 72 inches tall, how would this affect the team's average height?",
-      mappingData: {
-        claims: ['The team has mostly players of similar height', 'There are a few very tall players'],
-        evidence: 'Height data shows 8 players between 65-68 inches, with 2 players over 70 inches',
-        criticalThinking: 'Student demonstrates understanding of distribution and central tendency'
-      }
-    }
-  },
-  {
-    id: 'solar_energy',
-    slug: '6_ee_a_1_solar_task',
-    title: 'Solar Panel Energy',
-    description: 'Use expressions to calculate energy production from solar panels',
-    standard: '6.EE.A.1',
-    standardDescription: 'Write and evaluate numerical expressions involving whole-number exponents',
-    grade: 'Grade 6',
-    domain: 'Expressions & Equations',
-    imageUrl: '/images/solar.jpg',
-    sections: {
-      studentPrompt:
-        'A solar panel produces energy based on hours of sunlight. Write an expression to calculate total energy production over different time periods.',
-      misconceptions: [
-        'Students may not understand order of operations with exponents',
-        'Students might treat exponents as multiplication',
-        'Students may struggle with writing expressions before evaluating them'
-      ],
-      patternRecognition: 'How does doubling the number of solar panels affect total energy? What pattern do you see?',
-      generalization: 'Always/Sometimes/Never: Increasing the exponent in an expression always increases the value.',
-      inference: 'If we add 3 more solar panels, predict how the expression would change.',
-      mappingData: {
-        claims: ['Energy production grows exponentially with more panels', 'Time affects total output linearly'],
-        evidence: 'Expression shows 2^n × hours, where n is number of panels',
-        criticalThinking: 'Student connects exponential growth to real-world context'
-      }
-    }
-  },
-  {
-    id: 'unit_rates',
-    slug: '6_rp_a_3_unit_rates',
-    title: 'Comparing Unit Rates',
-    description: 'Find and compare unit rates to determine the better buy',
-    standard: '6.RP.A.3',
-    standardDescription: 'Use ratio and rate reasoning to solve problems',
-    grade: 'Grade 6',
-    domain: 'Ratios & Proportions',
-    imageUrl: '/images/shopping.jpg',
-    sections: {
-      studentPrompt:
-        'Store A sells 3 notebooks for $4.50. Store B sells 5 notebooks for $7.00. Which store has the better price per notebook?',
-      misconceptions: [
-        'Students may compare total prices instead of unit rates',
-        "Students might not divide correctly to find unit price",
-        'Students may not understand that lower unit rate means better deal'
-      ],
-      patternRecognition: 'What relationship do you see between the number of items and total cost?',
-      generalization: 'Always/Sometimes/Never: Buying more items always results in a lower unit price.',
-      inference: 'If Store A offered 4 notebooks for $6.00, predict whether this would be better or worse than Store B.',
-      mappingData: {
-        claims: ['Store A has a unit rate of $1.50 per notebook', 'Store B has a unit rate of $1.40 per notebook'],
-        evidence: 'Store B: $7.00 ÷ 5 = $1.40; Store A: $4.50 ÷ 3 = $1.50',
-        criticalThinking: 'Student uses unit rate reasoning to make informed consumer decisions'
-      }
-    }
-  },
-
-  // ✅ ADDED: TASKS -> EXAMPLE_TASKS so they show in Task Bank
-  {
-    id: 'stack_of_cups',              // IMPORTANT: matches TASKS.stackOfCups.id
-    slug: 'stack_of_cups',            // optional, but harmless
-    title: 'Stack of Cups Challenge',
-    description: 'Teach AI to understand linear patterns in stacked cups',
-    standard: 'CCSS.MATH.8.F.B.4',
-    standardDescription:
-      'Construct a function to model a linear relationship between two quantities and interpret the rate of change and initial value.',
-    grade: 'Grade 8',
-    domain: 'Functions',
-    imageUrl: TASKS.stackOfCups.imageUrl, // reuse the SVG you already have
-    sections: {
-      studentPrompt:
-        'Given a stack of cups where 2 cups = 16cm, 4 cups = 20cm, and 8 cups = 28cm, explain the pattern and create a formula for the height of n cups.',
-      misconceptions: [
-        'Proportional thinking: 2 cups = 16cm means 1 cup = 8cm, so 8 cups = 64cm',
-        'Additive only: Cups stack completely on top without nesting',
-        'Missing constant: Thinking the pattern is only 2n without an initial value',
-        'Cannot generalize: Can compute specific cases but struggles to create a formula'
-      ],
-      patternRecognition:
-        'Compare the heights as cups increase. What changes each time you add cups? What stays the same?',
-      generalization:
-        'Always/Sometimes/Never: When objects “nest,” each additional object adds the full height of one object.',
-      inference:
-        'If the stack has n cups and you add 5 more cups, how much does the height change? Explain why.',
-      mappingData: {
-        claims: [
-          'The relationship between number of cups and height is linear',
-          'Each extra cup adds a constant amount to the height'
-        ],
-        evidence:
-          'From 2 cups (16) to 4 cups (20) is +4 cm for +2 cups → +2 cm per cup; 8 cups is 28 cm, consistent with +2 per added cup after the base.',
-        criticalThinking:
-          'Student distinguishes nesting from stacking, identifies constant rate of change, and explains the initial value (base cup height).'
-      }
-    }
-  },
-  {
-    id: 'smoothie_recipe',            // IMPORTANT: matches TASKS.smoothieRecipe.id
-    slug: 'smoothie_recipe',
-    title: 'Smoothie Recipe Ratios',
-    description: 'Teach AI about ratio and proportional reasoning with recipes',
-    standard: 'CCSS.MATH.6.RP.A.3',
-    standardDescription:
-      'Use ratio and rate reasoning to solve real-world and mathematical problems, e.g., by reasoning about tables of equivalent ratios.',
-    grade: 'Grade 6',
-    domain: 'Ratios & Proportions',
-    imageUrl: TASKS.smoothieRecipe.imageUrl,
-    sections: {
-      studentPrompt:
-        'A smoothie recipe uses 2 cups of strawberries and 3 cups of yogurt. Explain how to scale the recipe to make different amounts while keeping the same taste.',
-      misconceptions: [
-        'Additive thinking: 2+3=5, so double means 10 total and split equally as 5 and 5',
-        'Multiplying only one part: Doubling strawberries but keeping yogurt the same',
-        'Procedural only: Can compute but cannot explain why both parts must scale',
-        'No generalization: Struggles to apply the same idea to other scale factors'
-      ],
-      patternRecognition:
-        'If you multiply the number of smoothies by 2, what must happen to EACH ingredient to keep the flavor the same?',
-      generalization:
-        'Always/Sometimes/Never: If two quantities are in a fixed ratio, you can add the same number to both and keep the ratio.',
-      inference:
-        'If you only have 12 cups of yogurt, how many cups of strawberries do you need to keep the recipe’s taste the same?',
-      mappingData: {
-        claims: ['Equivalent ratios keep the same taste', 'Scaling is multiplicative, not additive'],
-        evidence:
-          'Original ratio is 2:3. Double gives 4:6; triple gives 6:9. The factor multiplies both quantities.',
-        criticalThinking:
-          'Student uses equivalent ratios (and optionally unit rate) to justify scaling decisions and check reasonableness.'
-      }
-    }
-  }
-];
-
+// DB-to-frontend field normalizer: converts snake_case DB columns into
+// the camelCase field names the rest of the UI already expects.
+function normalizeTaskFromApi(apiTask) {
+  return {
+    id: apiTask.id,
+    slug: apiTask.slug,
+    title: apiTask.title,
+    description: apiTask.description,
+    grade: `Grade ${apiTask.grade}`,
+    standard: apiTask.standard_statement_code,
+    domain: apiTask.domain,
+    imageUrl: apiTask.image_url,
+    problemStatement: apiTask.problem_statement,
+    misconceptions: apiTask.misconceptions,
+    patternRecognition: apiTask.pattern_recognition,
+    generalization: apiTask.generalization,
+    inferencePrediction: apiTask.inference_prediction,
+    mappingData: apiTask.mapping_data,
+    teachingPrompt: apiTask.teaching_prompt,
+    targetConcepts: apiTask.target_concepts,
+    correctSolutionPathway: apiTask.correct_solution_pathway,
+    aiIntro: apiTask.ai_intro,
+    aiIntroES: apiTask.ai_intro_es,
+  };
+}
 
 // Helper to get language-specific task field
-const getTaskField = (task, field, language = 'en') => {
-  if (language === 'es' && task[`${field}ES`]) {
+const getTaskField = (task, field, language = "en") => {
+  if (language === "es" && task[`${field}ES`]) {
     return task[`${field}ES`];
   }
   return task[field];
 };
 
-// Generate system prompt for a task using the new Zippy prompt generator
-const getTaskSystemPrompt = (taskKey, language = 'en') => {
-  const task = TASKS[taskKey];
-  if (!task) return '';
-
-  const promptGenerator = language === 'es' ? generateZippyPromptES : generateZippyPrompt;
-
+// Generate system prompt for a task (now takes the task object directly)
+const getTaskSystemPromptFromTask = (task, language = "en") => {
+  if (!task) return "";
+  const promptGenerator = language === "es" ? generateZippyPromptES : generateZippyPrompt;
   return promptGenerator({
-    title: getTaskField(task, 'title', language),
+    title: getTaskField(task, "title", language),
     problemStatement: task.problemStatement,
     teachingPrompt: task.teachingPrompt,
     targetConcepts: task.targetConcepts,
     correctSolutionPathway: task.correctSolutionPathway,
     misconceptions: task.misconceptions,
-    studentCognality: 'Decoder' // Default - could be from user profile
+    studentCognality: "Decoder"
   });
 };
+
 
 // Detect evidence flags from student message content (simple heuristics)
 const detectEvidence = (messageContent, currentEvidence) => {
@@ -666,6 +335,48 @@ const App = () => {
   const [showFilters, setShowFilters] = useState(false);
   const [collectionView, setCollectionView] = useState('all'); // all, byGrade, byDomain
 
+  // Task Bank — loaded from API
+  const [taskBank, setTaskBank] = useState([]);
+  const [taskCache, setTaskCache] = useState({});
+  const [taskBankLoading, setTaskBankLoading] = useState(false);
+
+  // Fetch task bank on mount
+  useEffect(() => {
+    const fetchTasks = async () => {
+      setTaskBankLoading(true);
+      try {
+        const res = await fetch(API_ENDPOINTS.tasks);
+        const data = await res.json();
+        const tasks = (data.tasks || []).map(normalizeTaskFromApi);
+        setTaskBank(tasks);
+        const cache = {};
+        tasks.forEach(t => { cache[t.id] = t; });
+        setTaskCache(cache);
+      } catch (err) {
+        console.error('Failed to load task bank:', err);
+      } finally {
+        setTaskBankLoading(false);
+      }
+    };
+    fetchTasks();
+  }, []);
+
+  // Helper: get a task from cache, or fetch on demand
+  const fetchTaskById = async (taskId) => {
+    if (taskCache[taskId]) return taskCache[taskId];
+    try {
+      const res = await fetch(API_ENDPOINTS.taskById(taskId));
+      if (!res.ok) return null;
+      const data = await res.json();
+      const task = normalizeTaskFromApi(data);
+      setTaskCache(prev => ({ ...prev, [task.id]: task }));
+      return task;
+    } catch (err) {
+      console.error('Failed to fetch task:', taskId, err);
+      return null;
+    }
+  };
+
   // Check for resumable session on mount
   useEffect(() => {
     if (hasResumableSession() && userRole === 'student') {
@@ -694,8 +405,7 @@ const App = () => {
   // Update Zippy's first message when language changes
   useEffect(() => {
     if (messages.length === 1 && messages[0].role === 'assistant' && activeAssignment) {
-      const taskKey = activeAssignment.taskId.replace(/_([a-z])/g, (g) => g[1].toUpperCase());
-      const task = TASKS[taskKey];
+      const task = taskCache[activeAssignment.taskId];
       if (task) {
         setMessages([{ role: 'assistant', content: getTaskField(task, 'aiIntro', language) }]);
       }
@@ -752,7 +462,6 @@ const App = () => {
     const newAssignments = selectedStudentsForAssignment.map((studentId) => {
       const student = MOCK_STUDENTS.find(s => s.id === studentId);
       
-      // Handle both TASKS format and EXAMPLE_TASKS format
       const taskId = selectedTaskForAssignment.id || selectedTaskForAssignment.slug;
       const taskTitle = selectedTaskForAssignment.title;
       
@@ -777,12 +486,10 @@ const App = () => {
     alert(`Task "${selectedTaskForAssignment.title}" assigned to ${selectedStudentsForAssignment.length} student(s)!`);
   };
 
-  // Student: Start teaching session
-  const startTeachingSession = (assignment) => {
+  // Student: Start teaching session (async -- loads task from API/cache)
+  const startTeachingSession = async (assignment) => {
     setActiveAssignment(assignment);
-    // Reset session tracking for new session
     setSessionId(null);
-    // Reset progress tracking
     setProgress({
       turnCount: 0,
       evidenceCollected: {
@@ -792,11 +499,9 @@ const App = () => {
         explainedWhy: false
       }
     });
-    // Convert snake_case to camelCase for TASKS lookup
-    const taskKey = assignment.taskId.replace(/_([a-z])/g, (g) => g[1].toUpperCase());
-    const task = TASKS[taskKey];
+    const task = await fetchTaskById(assignment.taskId);
     if (!task) {
-      console.error(`Task not found for taskId: ${assignment.taskId}, tried key: ${taskKey}`);
+      console.error(`Task not found for taskId: ${assignment.taskId}`);
       return;
     }
     setMessages([{ role: 'assistant', content: getTaskField(task, 'aiIntro', language) }]);
@@ -814,22 +519,12 @@ const App = () => {
     setLoading(true);
 
     try {
-      // Convert snake_case to camelCase for TASKS lookup
-      const taskKey = activeAssignment.taskId.replace(/_([a-z])/g, (g) => g[1].toUpperCase());
-      const task = TASKS[taskKey];
-
+      const task = await fetchTaskById(activeAssignment.taskId);
       if (!task) {
         throw new Error(`Task not found: ${activeAssignment.taskId}`);
       }
 
-      console.log('🔍 Sending request to:', API_ENDPOINTS.chat);
-      console.log('🔍 Request payload:', {
-        messageCount: updatedMessages.length,
-        model: 'claude-sonnet-4-5-20250929',
-        hasSystemPrompt: !!getTaskSystemPrompt(taskKey, language),
-        hasTaskMetadata: true,
-        language
-      });
+      const systemPrompt = getTaskSystemPromptFromTask(task, language);
 
       const response = await fetch(API_ENDPOINTS.chat, {
         method: 'POST',
@@ -837,14 +532,12 @@ const App = () => {
         body: JSON.stringify({
           model: 'claude-sonnet-4-5-20250929',
           max_tokens: 1024,
-          system: getTaskSystemPrompt(taskKey, language),
+          system: systemPrompt,
           messages: updatedMessages.map(m => ({
             role: m.role === 'assistant' ? 'assistant' : 'user',
             content: m.content
           })),
-          // Include sessionId for backend tracking
           sessionId: sessionId,
-          // Include task metadata for backend evaluation
           taskMetadata: {
             title: getTaskField(task, 'title', language),
             problemStatement: task.problemStatement,
@@ -1291,7 +984,7 @@ const App = () => {
           >
             <BookOpen className="w-12 h-12 text-indigo-600 mb-3" />
             <h3 className="text-xl font-semibold mb-2">Browse Task Bank</h3>
-            <p className="text-gray-600">View all {EXAMPLE_TASKS.length} available tasks and assign to students</p>
+            <p className="text-gray-600">View all {taskBank.length} available tasks and assign to students</p>
           </button>
             <button
               onClick={() => setView('teacherReviewAssignments')}
@@ -1337,10 +1030,10 @@ const App = () => {
 
   // TEACHER: BROWSE TASK BANK
 if (view === 'teacherBrowseTasks') {
-  const grades = [...new Set(EXAMPLE_TASKS.map(t => t.grade))];
-  const domains = [...new Set(EXAMPLE_TASKS.map(t => t.domain))];
+  const grades = [...new Set(taskBank.map(t => t.grade))];
+  const domains = [...new Set(taskBank.map(t => t.domain))];
 
-  const filteredTasks = EXAMPLE_TASKS.filter(task => {
+  const filteredTasks = taskBank.filter(task => {
     const matchesSearch = task.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
                          task.standard.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesGrade = selectedGrade === 'all' || task.grade === selectedGrade;
@@ -1573,7 +1266,7 @@ if (view === 'teacherTaskDetail' && selectedTaskForDetail) {
           </div>
           
           <p className="text-gray-700 mb-4">{task.description}</p>
-          <p className="text-sm text-gray-600 italic">{task.standardDescription}</p>
+          <p className="text-sm text-gray-600 italic">{task.description}</p>
         </div>
 
         {/* Section 1: Student Prompt */}
@@ -1581,16 +1274,17 @@ if (view === 'teacherTaskDetail' && selectedTaskForDetail) {
           <h2 className="text-lg font-bold text-indigo-900 mb-3">
             1. Student Prompt (Low Entry Point)
           </h2>
-          <p className="text-gray-700">{task.sections.studentPrompt}</p>
+          <p className="text-gray-700 whitespace-pre-line">{task.problemStatement}</p>
         </div>
 
         {/* Section 2: Misconceptions */}
+        {task.misconceptions?.length > 0 && (
         <div className="bg-white rounded-xl shadow-md p-6 mb-4">
           <h2 className="text-lg font-bold text-indigo-900 mb-3">
             2. Possible Misconceptions
           </h2>
           <ul className="space-y-2">
-            {task.sections.misconceptions.map((misconception, idx) => (
+            {task.misconceptions.map((misconception, idx) => (
               <li key={idx} className="flex gap-3">
                 <span className="text-indigo-600 font-semibold">{idx + 1}.</span>
                 <span className="text-gray-700">{misconception}</span>
@@ -1598,55 +1292,64 @@ if (view === 'teacherTaskDetail' && selectedTaskForDetail) {
             ))}
           </ul>
         </div>
+        )}
 
         {/* Section 3: Pattern Recognition */}
+        {task.patternRecognition && (
         <div className="bg-white rounded-xl shadow-md p-6 mb-4">
           <h2 className="text-lg font-bold text-indigo-900 mb-3">
             3. Pattern Recognition Prompt
           </h2>
-          <p className="text-gray-700">{task.sections.patternRecognition}</p>
+          <p className="text-gray-700 whitespace-pre-line">{task.patternRecognition}</p>
         </div>
+        )}
 
         {/* Section 4: Generalization */}
+        {task.generalization && (
         <div className="bg-white rounded-xl shadow-md p-6 mb-4">
           <h2 className="text-lg font-bold text-indigo-900 mb-3">
             4. Generalization Question (Always/Sometimes/Never)
           </h2>
-          <p className="text-gray-700">{task.sections.generalization}</p>
+          <p className="text-gray-700 whitespace-pre-line">{task.generalization}</p>
         </div>
+        )}
 
         {/* Section 5: Inference */}
+        {task.inferencePrediction && (
         <div className="bg-white rounded-xl shadow-md p-6 mb-4">
           <h2 className="text-lg font-bold text-indigo-900 mb-3">
             5. Inference and Prediction
           </h2>
-          <p className="text-gray-700">{task.sections.inference}</p>
+          <p className="text-gray-700 whitespace-pre-line">{task.inferencePrediction}</p>
         </div>
+        )}
 
         {/* Section 6: Mapping Data */}
+        {task.mappingData && (
         <div className="bg-white rounded-xl shadow-md p-6 mb-6">
           <h2 className="text-lg font-bold text-indigo-900 mb-3">
             6. Mapping and Process Data
           </h2>
           <div className="space-y-3">
+            {task.mappingData.claims?.length > 0 && (
             <div>
               <h3 className="font-semibold text-gray-900 mb-1">Claims:</h3>
               <ul className="list-disc list-inside space-y-1">
-                {task.sections.mappingData.claims.map((claim, idx) => (
+                {task.mappingData.claims.map((claim, idx) => (
                   <li key={idx} className="text-gray-700">{claim}</li>
                 ))}
               </ul>
             </div>
-            <div>
-              <h3 className="font-semibold text-gray-900 mb-1">Evidence:</h3>
-              <p className="text-gray-700">{task.sections.mappingData.evidence}</p>
-            </div>
+            )}
+            {task.mappingData.criticalThinking && (
             <div>
               <h3 className="font-semibold text-gray-900 mb-1">Process Data Revealing Critical Thinking:</h3>
-              <p className="text-gray-700">{task.sections.mappingData.criticalThinking}</p>
+              <p className="text-gray-700">{task.mappingData.criticalThinking}</p>
             </div>
+            )}
           </div>
         </div>
+        )}
 
         {/* Action Buttons */}
         <div className="flex gap-4">
@@ -1711,9 +1414,9 @@ if (view === 'teacherTaskDetail' && selectedTaskForDetail) {
                 </div>
               </div>
             ) : (
-              // Show task selection grid (original TASKS)
+              // Show task selection grid from API
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {Object.values(TASKS).map(task => (
+                {taskBank.map(task => (
                   <button
                     key={task.id}
                     onClick={() => setSelectedTaskForAssignment(task)}
@@ -1723,7 +1426,7 @@ if (view === 'teacherTaskDetail' && selectedTaskForDetail) {
                     <p className="text-sm text-gray-600 mb-2">{task.description}</p>
                     <div className="flex items-center gap-2 text-xs text-gray-500">
                       <span className="bg-gray-100 px-2 py-1 rounded">{task.grade}</span>
-                      <StandardBadge standardId={task.standardId} standardCode={task.standard} />
+                      <span className="bg-indigo-100 text-indigo-700 px-2 py-1 rounded font-semibold">{task.standard}</span>
                     </div>
                   </button>
                 ))}
@@ -2517,9 +2220,7 @@ if (view === 'teacherTaskDetail' && selectedTaskForDetail) {
 
   // TEACHING SESSION VIEW (Student)
   if (view === 'teaching' && activeAssignment) {
-    // Convert snake_case to camelCase for TASKS lookup
-    const taskKey = activeAssignment.taskId.replace(/_([a-z])/g, (g) => g[1].toUpperCase());
-    const task = TASKS[taskKey];
+    const task = taskCache[activeAssignment.taskId];
 
     if (!task) {
       return (

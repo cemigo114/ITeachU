@@ -4,6 +4,7 @@ import 'dotenv/config';
 import fs from 'fs';
 import path from 'path';
 import { generateEvaluatorPrompt } from './src/utils/evaluatorPrompt.js';
+import { getDb } from './db/index.js';
 
 const app = express();
 const PORT = process.env.PORT || 3002;
@@ -428,19 +429,102 @@ app.delete('/api/sessions/:sessionId', (req, res) => {
   }
 });
 
-// Get task collections
+// ---------- Task Bank API (reads from SQLite) ----------
+
+// GET /api/tasks  — list all tasks (optional ?grade= filter)
+app.get('/api/tasks', (req, res) => {
+  try {
+    const db = getDb();
+    const { grade, domain } = req.query;
+    let sql = `SELECT id, slug, title, description, standard_statement_code, grade, domain, image_url,
+                      problem_statement, misconceptions, pattern_recognition, generalization,
+                      inference_prediction, mapping_data, teaching_prompt, target_concepts,
+                      correct_solution_pathway, ai_intro, ai_intro_es
+               FROM task`;
+    const conditions = [];
+    const params = [];
+    if (grade) { conditions.push('grade = ?'); params.push(grade); }
+    if (domain) { conditions.push('domain = ?'); params.push(domain); }
+    if (conditions.length) sql += ' WHERE ' + conditions.join(' AND ');
+    sql += ' ORDER BY standard_statement_code';
+
+    const rows = db.prepare(sql).all(...params);
+    const tasks = rows.map(r => ({
+      ...r,
+      misconceptions: safeJsonParse(r.misconceptions, []),
+      mapping_data: safeJsonParse(r.mapping_data, {}),
+      target_concepts: safeJsonParse(r.target_concepts, []),
+    }));
+    res.json({ tasks, count: tasks.length });
+  } catch (error) {
+    console.error('Tasks fetch error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// GET /api/tasks/:id  — full task detail for teaching sessions
+app.get('/api/tasks/:id', (req, res) => {
+  try {
+    const db = getDb();
+    const row = db.prepare('SELECT * FROM task WHERE id = ? OR slug = ?').get(req.params.id, req.params.id);
+    if (!row) return res.status(404).json({ error: 'Task not found' });
+
+    const task = {
+      ...row,
+      misconceptions: safeJsonParse(row.misconceptions, []),
+      mapping_data: safeJsonParse(row.mapping_data, {}),
+      target_concepts: safeJsonParse(row.target_concepts, []),
+    };
+    res.json(task);
+  } catch (error) {
+    console.error('Task fetch error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// GET /api/collections  — list collections with their tasks
 app.get('/api/collections', (req, res) => {
   try {
-    // In production: Fetch from database
-    // For now: Return from JSON file
-    const collectionsPath = path.join(process.cwd(), 'src/data/taskCollections.json');
-    const collections = JSON.parse(fs.readFileSync(collectionsPath, 'utf-8'));
-    res.json(collections);
+    const db = getDb();
+    const collections = db.prepare(
+      `SELECT id, slug, title, description, type, grade, published FROM collection WHERE published = 1 ORDER BY grade, title`
+    ).all();
+
+    const getTasksForCollection = db.prepare(
+      `SELECT t.id, t.slug, t.title, t.description, t.standard_statement_code, t.grade, t.domain, t.image_url,
+              ct.sort_order, ct.required
+       FROM collection_tasks ct
+       JOIN task t ON t.id = ct.task_id
+       WHERE ct.collection_id = ?
+       ORDER BY ct.sort_order`
+    );
+
+    const result = collections.map(c => ({
+      ...c,
+      tasks: getTasksForCollection.all(c.id).map(t => ({
+        id: t.id,
+        slug: t.slug,
+        title: t.title,
+        description: t.description,
+        standard: t.standard_statement_code,
+        grade: t.grade,
+        domain: t.domain,
+        order: t.sort_order,
+        required: !!t.required,
+      }))
+    }));
+
+    res.json({ collections: result });
   } catch (error) {
     console.error('Collections fetch error:', error);
     res.status(500).json({ error: error.message });
   }
 });
+
+function safeJsonParse(str, fallback) {
+  if (!str) return fallback;
+  try { return JSON.parse(str); } catch { return fallback; }
+}
 
 // Get educational standards (Connecticut Mathematics - 746 standards from Knowledge Graph)
 app.get('/api/standards', (req, res) => {

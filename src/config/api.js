@@ -32,6 +32,10 @@ export const API_ENDPOINTS = {
   // Anthropic Chat API (proxied through backend)
   chat: `${API_BASE_URL}/api/chat`,
 
+  // Task Bank
+  tasks: `${API_BASE_URL}/api/tasks`,
+  taskById: (id) => `${API_BASE_URL}/api/tasks/${id}`,
+
   // Task Collections
   collections: `${API_BASE_URL}/api/collections`,
 
