@@ -30,6 +30,11 @@ export const translations = {
     startTeaching: "Start Teaching",
     viewFeedback: "View Feedback",
 
+    // Drawing
+    draw: "Draw",
+    insertDrawing: "Insert into message",
+    drawingAttached: "Drawing attached",
+
     // Status
     assigned: "Assigned",
     inProgress: "In Progress",
@@ -62,6 +67,11 @@ export const translations = {
     myAssignments: "Mis Asignaciones",
     startTeaching: "Comenzar a Enseñar",
     viewFeedback: "Ver Retroalimentación",
+
+    // Drawing
+    draw: "Dibujar",
+    insertDrawing: "Insertar en mensaje",
+    drawingAttached: "Dibujo adjunto",
 
     // Status
     assigned: "Asignado",

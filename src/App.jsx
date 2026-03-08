@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from 'react';
-import { Send, Sparkles, Brain, HelpCircle, BarChart3, Home, Users, ChevronRight, CheckCircle, AlertCircle, Clock, ArrowLeft, MessageSquare, Target, Lightbulb, Award, UserCircle, BookOpen, Trophy, TrendingUp, Search, Filter, X, ChevronDown, ChevronUp } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { Send, Sparkles, Brain, HelpCircle, BarChart3, Home, Users, ChevronRight, CheckCircle, AlertCircle, Clock, ArrowLeft, MessageSquare, Target, Lightbulb, Award, UserCircle, BookOpen, Trophy, TrendingUp, Search, Filter, X, ChevronDown, ChevronUp, Mic, MicOff, Pencil } from 'lucide-react';
 import LumoMascot from './components/LumoMascot';
 import StandardBadge from './components/StandardBadge';
 import TaskCollectionBrowser from './components/TaskCollectionBrowser';
+import DrawingCanvas from './components/DrawingCanvas';
 import TeachingProgressBar from './components/TeachingProgressBar';
 import { API_ENDPOINTS } from './config/api';
 import { generateZippyPrompt } from './utils/zippyPrompt';
@@ -427,6 +428,16 @@ const App = () => {
   const [showFilters, setShowFilters] = useState(false);
   const [collectionView, setCollectionView] = useState('all'); // all, byGrade, byDomain
 
+  // Drawing canvas state
+  const [showDrawingPanel, setShowDrawingPanel] = useState(false);
+  const canvasApiRef = useRef(null);
+
+  // Speech recognition state
+  const [isRecording, setIsRecording] = useState(false);
+  const [recognition, setRecognition] = useState(null);
+  const recordingStartTextRef = useRef('');
+  const currentTranscriptRef = useRef('');
+
   // Task Bank — loaded from API
   const [taskBank, setTaskBank] = useState([]);
   const [taskCache, setTaskCache] = useState({});
@@ -466,6 +477,86 @@ const App = () => {
     } catch (err) {
       console.error('Failed to fetch task:', taskId, err);
       return null;
+    }
+  };
+
+  // Initialize speech recognition
+  useEffect(() => {
+    if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      const recognitionInstance = new SpeechRecognition();
+      recognitionInstance.continuous = true;
+      recognitionInstance.interimResults = true;
+      recognitionInstance.lang = language === 'es' ? 'es-ES' : 'en-US';
+
+      recognitionInstance.onresult = (event) => {
+        let interimTranscript = '';
+        let finalTranscript = '';
+        for (let i = event.resultIndex; i < event.results.length; i++) {
+          const transcript = event.results[i][0].transcript;
+          if (event.results[i].isFinal) {
+            finalTranscript += transcript + ' ';
+          } else {
+            interimTranscript += transcript;
+          }
+        }
+        if (finalTranscript) {
+          currentTranscriptRef.current += finalTranscript;
+          setInput(recordingStartTextRef.current + (recordingStartTextRef.current ? ' ' : '') + currentTranscriptRef.current.trim());
+        } else if (interimTranscript) {
+          setInput(recordingStartTextRef.current + (recordingStartTextRef.current ? ' ' : '') + currentTranscriptRef.current + interimTranscript);
+        }
+      };
+
+      recognitionInstance.onerror = (event) => {
+        console.error('Speech recognition error:', event.error);
+        setIsRecording(false);
+        if (event.error === 'no-speech') {
+          alert(language === 'es' ? 'No se detectó voz. Por favor intente de nuevo.' : 'No speech detected. Please try again.');
+        } else if (event.error === 'not-allowed') {
+          alert(language === 'es' ? 'Permiso de micrófono denegado.' : 'Microphone permission denied.');
+        }
+      };
+
+      recognitionInstance.onend = () => setIsRecording(false);
+      setRecognition(recognitionInstance);
+    }
+  }, [language]);
+
+  const toggleRecording = () => {
+    if (!recognition) {
+      alert(language === 'es'
+        ? 'El reconocimiento de voz no está disponible en este navegador.'
+        : 'Speech recognition is not available in this browser. Please use Chrome, Edge, or Safari.');
+      return;
+    }
+    if (isRecording) {
+      recognition.stop();
+      setIsRecording(false);
+      recordingStartTextRef.current = '';
+      currentTranscriptRef.current = '';
+    } else {
+      try {
+        recordingStartTextRef.current = input;
+        currentTranscriptRef.current = '';
+        recognition.start();
+        setIsRecording(true);
+      } catch (error) {
+        console.error('Error starting recognition:', error);
+      }
+    }
+  };
+
+  // Insert drawing into chat message
+  const handleInsertDrawing = () => {
+    if (!canvasApiRef.current) return;
+    const dataUrl = canvasApiRef.current.getImageDataUrl();
+    if (dataUrl) {
+      const userMessage = { role: 'user', content: input || t(language, 'drawingAttached'), imageDataUrl: dataUrl };
+      const updatedMessages = [...messages, userMessage];
+      setMessages(updatedMessages);
+      setInput('');
+      setShowDrawingPanel(false);
     }
   };
 
@@ -2554,6 +2645,9 @@ if (view === 'teacherTaskDetail' && selectedTaskForDetail) {
                       ? 'bg-green-600 text-white'
                       : 'bg-gray-100 text-gray-900'
                   }`}>
+                    {msg.imageDataUrl && (
+                      <img src={msg.imageDataUrl} alt={t(language, 'drawingAttached')} className="rounded-lg mb-2 max-w-full" />
+                    )}
                     <p className="whitespace-pre-wrap">{msg.content}</p>
                   </div>
                 </div>
@@ -2575,7 +2669,38 @@ if (view === 'teacherTaskDetail' && selectedTaskForDetail) {
             </div>
 
             <div className="border-t p-4">
-              <div className="flex gap-3">
+              {showDrawingPanel && (
+                <div className="mb-3">
+                  <DrawingCanvas canvasApiRef={canvasApiRef} language={language} className="mb-2" />
+                  <div className="flex gap-2">
+                    <button
+                      onClick={handleInsertDrawing}
+                      className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 text-sm font-medium"
+                    >
+                      {t(language, 'insertDrawing')}
+                    </button>
+                    <button
+                      onClick={() => setShowDrawingPanel(false)}
+                      className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 text-sm"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </div>
+              )}
+              <div className="flex gap-2">
+                <button
+                  onClick={() => setShowDrawingPanel(!showDrawingPanel)}
+                  disabled={loading}
+                  className={`px-3 py-3 rounded-lg flex items-center transition-colors ${
+                    showDrawingPanel
+                      ? 'bg-green-100 text-green-700'
+                      : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                  } disabled:opacity-50 disabled:cursor-not-allowed`}
+                  title={t(language, 'draw')}
+                >
+                  <Pencil className="w-5 h-5" />
+                </button>
                 <input
                   type="text"
                   value={input}
@@ -2585,6 +2710,20 @@ if (view === 'teacherTaskDetail' && selectedTaskForDetail) {
                   className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
                   disabled={loading}
                 />
+                <button
+                  onClick={toggleRecording}
+                  disabled={loading}
+                  className={`px-3 py-3 rounded-lg flex items-center transition-colors ${
+                    isRecording
+                      ? 'bg-red-600 text-white hover:bg-red-700 animate-pulse'
+                      : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                  } disabled:opacity-50 disabled:cursor-not-allowed`}
+                  title={isRecording
+                    ? (language === 'es' ? 'Detener grabación' : 'Stop recording')
+                    : (language === 'es' ? 'Iniciar grabación de voz' : 'Start voice recording')}
+                >
+                  {isRecording ? <MicOff className="w-5 h-5" /> : <Mic className="w-5 h-5" />}
+                </button>
                 <button
                   onClick={sendMessage}
                   disabled={loading || !input.trim()}
