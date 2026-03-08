@@ -691,9 +691,17 @@ const App = () => {
         explainedWhy: false
       }
     });
+
+    if (assignment.messages && assignment.messages.length > 0) {
+      setMessages(assignment.messages);
+      fetchTaskById(assignment.taskId).catch(() => {});
+      setView('teaching');
+      return;
+    }
+
     const task = await fetchTaskById(assignment.taskId);
     if (!task) {
-      console.error(`Task not found for taskId: ${assignment.taskId}`);
+      showToast(`Could not load task "${assignment.taskTitle}". Please check the backend server.`, 'error');
       return;
     }
     setMessages([{ role: 'assistant', content: getTaskField(task, 'aiIntro', language) }]);
@@ -712,11 +720,12 @@ const App = () => {
 
     try {
       const task = await fetchTaskById(activeAssignment.taskId);
-      if (!task) {
-        throw new Error(`Task not found: ${activeAssignment.taskId}`);
-      }
-
-      const systemPrompt = getTaskSystemPromptFromTask(task, language);
+      const systemPrompt = task
+        ? getTaskSystemPromptFromTask(task, language)
+        : (language === 'es' ? generateZippyPromptES : generateZippyPrompt)({
+            title: activeAssignment.taskTitle,
+            studentCognality: 'Decoder'
+          });
 
       const response = await fetch(API_ENDPOINTS.chat, {
         method: 'POST',
@@ -730,14 +739,14 @@ const App = () => {
             content: m.content
           })),
           sessionId: sessionId,
-          taskMetadata: {
+          taskMetadata: task ? {
             title: getTaskField(task, 'title', language),
             problemStatement: task.problemStatement,
             teachingPrompt: task.teachingPrompt,
             targetConcepts: task.targetConcepts,
             correctSolutionPathway: task.correctSolutionPathway,
             misconceptions: task.misconceptions
-          }
+          } : { title: activeAssignment.taskTitle }
         })
       });
 
@@ -2563,24 +2572,7 @@ if (view === 'teacherTaskDetail' && selectedTaskForDetail) {
 
   // TEACHING SESSION VIEW (Student)
   if (view === 'teaching' && activeAssignment) {
-    const task = taskCache[activeAssignment.taskId];
-
-    if (!task) {
-      return (
-        <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-          <div className="text-center">
-            <h2 className="text-2xl font-bold text-red-600 mb-4">Task Not Found</h2>
-            <p className="text-gray-600 mb-4">Task ID: {activeAssignment.taskId}</p>
-            <button
-              onClick={() => setView('studentDashboard')}
-              className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
-            >
-              Back to Dashboard
-            </button>
-          </div>
-        </div>
-      );
-    }
+    const task = taskCache[activeAssignment.taskId] || null;
 
     // Detect Lumo's emotion based on message content
     const getEmotionFromContent = (content) => {
@@ -2612,8 +2604,8 @@ if (view === 'teacherTaskDetail' && selectedTaskForDetail) {
                   <ArrowLeft className="w-5 h-5" />
                 </button>
                 <div>
-                  <h2 className="text-xl font-bold">{getTaskField(task, 'title', language)}</h2>
-                  <p className="text-sm text-green-200">{task.grade} • {task.standard}</p>
+                  <h2 className="text-xl font-bold">{task ? getTaskField(task, 'title', language) : activeAssignment.taskTitle}</h2>
+                  {task && <p className="text-sm text-green-200">{task.grade} • {task.standard}</p>}
                 </div>
               </div>
               <div className="flex items-center gap-4">
@@ -2746,12 +2738,14 @@ if (view === 'teacherTaskDetail' && selectedTaskForDetail) {
             {/* Task Presentation - Sticky at Top */}
             <div className="bg-white rounded-xl shadow-md p-4 sticky top-4">
               <h3 className="font-semibold mb-3 text-sm text-gray-700">{t(language, 'task')}</h3>
-              <img
-                src={task.imageUrl}
-                alt={getTaskField(task, 'title', language)}
-                className="w-full rounded-lg mb-2"
-              />
-              <p className="text-xs text-gray-600">{getTaskField(task, 'description', language)}</p>
+              {task?.imageUrl && (
+                <img
+                  src={task.imageUrl}
+                  alt={task ? getTaskField(task, 'title', language) : activeAssignment.taskTitle}
+                  className="w-full rounded-lg mb-2"
+                />
+              )}
+              <p className="text-xs text-gray-600">{task ? getTaskField(task, 'description', language) : activeAssignment.taskTitle}</p>
             </div>
 
             <div className="bg-blue-50 rounded-xl p-4 border border-blue-200">
