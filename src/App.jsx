@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Send, Sparkles, Brain, HelpCircle, BarChart3, Home, Users, ChevronRight, CheckCircle, AlertCircle, Clock, ArrowLeft, MessageSquare, Target, Lightbulb, Award, UserCircle, BookOpen, Trophy, TrendingUp, Search, Filter, X, ChevronDown } from 'lucide-react';
+import { Send, Sparkles, Brain, HelpCircle, BarChart3, Home, Users, ChevronRight, CheckCircle, AlertCircle, Clock, ArrowLeft, MessageSquare, Target, Lightbulb, Award, UserCircle, BookOpen, Trophy, TrendingUp, Search, Filter, X, ChevronDown, ChevronUp } from 'lucide-react';
 import LumoMascot from './components/LumoMascot';
 import StandardBadge from './components/StandardBadge';
 import TaskCollectionBrowser from './components/TaskCollectionBrowser';
@@ -19,6 +19,87 @@ import {
   hasResumableSession,
   getSessionSummary
 } from './utils/sessionStorage';
+
+// ─── Toast Notification ───────────────────────────────────────────────────────
+const Toast = ({ message, type = 'success', visible }) => {
+  if (!visible) return null;
+  const colors = { success: 'bg-indigo-700 border-indigo-500', error: 'bg-red-700 border-red-500', warning: 'bg-yellow-600 border-yellow-400' };
+  const icons = { success: <CheckCircle className="w-5 h-5 text-white flex-shrink-0" />, error: <AlertCircle className="w-5 h-5 text-white flex-shrink-0" />, warning: <AlertCircle className="w-5 h-5 text-white flex-shrink-0" /> };
+  return (
+    <div className={`fixed top-6 left-1/2 z-50 flex items-center gap-3 px-5 py-3 rounded-xl shadow-2xl border text-white text-sm font-medium ${colors[type]}`}
+      style={{ transform: 'translateX(-50%)' }}>
+      {icons[type]}
+      <span>{message}</span>
+    </div>
+  );
+};
+
+// ─── Duplicate Assignment Warning Modal ───────────────────────────────────────
+const DuplicateWarningModal = ({ warning, onOverride, onCancel }) => {
+  if (!warning) return null;
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
+      <div className="bg-white rounded-2xl shadow-2xl p-6 max-w-md w-full mx-4">
+        <div className="flex items-start gap-3 mb-4">
+          <div className="flex-shrink-0 w-10 h-10 rounded-full bg-yellow-100 flex items-center justify-center">
+            <AlertCircle className="w-5 h-5 text-yellow-600" />
+          </div>
+          <div>
+            <h3 className="text-lg font-bold text-gray-900">Duplicate Assignment</h3>
+            <p className="text-sm text-gray-600 mt-1">This task has already been assigned to:</p>
+            <ul className="mt-2 space-y-1">
+              {warning.duplicates.map((name, i) => (
+                <li key={i} className="text-sm font-semibold text-gray-800">• {name}</li>
+              ))}
+            </ul>
+            <p className="text-sm text-gray-600 mt-3">Do you still want to assign this task to all selected students?</p>
+          </div>
+        </div>
+        <div className="flex gap-3 mt-6">
+          <button onClick={onCancel} className="flex-1 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition font-medium text-sm">Cancel</button>
+          <button onClick={onOverride} className="flex-1 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition font-semibold text-sm">Assign Anyway</button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// ─── Collapsible Section (for teacherTaskDetail) ──────────────────────────────
+const CollapsibleSection = ({ title, children, className = '' }) => {
+  const [isOpen, setIsOpen] = React.useState(false);
+  const [needsExpand, setNeedsExpand] = React.useState(false);
+  const contentRef = React.useRef(null);
+  const PEEK_HEIGHT = 120;
+
+  React.useEffect(() => {
+    if (contentRef.current) {
+      setNeedsExpand(contentRef.current.scrollHeight > PEEK_HEIGHT);
+    }
+  }, [children]);
+
+  return (
+    <div className={`bg-white rounded-xl shadow-md overflow-hidden mb-4 ${className}`}>
+      <div className="px-6 pt-6 pb-2">
+        <h2 className="text-lg font-bold text-indigo-900">{title}</h2>
+      </div>
+      <div className="px-6 overflow-hidden transition-all duration-300"
+        style={{ maxHeight: (!needsExpand || isOpen) ? '2000px' : `${PEEK_HEIGHT}px` }}>
+        <div ref={contentRef}>{children}</div>
+      </div>
+      {needsExpand && (
+        <div className="relative">
+          {!isOpen && <div className="absolute bottom-full left-0 right-0 h-8 bg-gradient-to-t from-white to-transparent pointer-events-none" />}
+          <div className="flex justify-center py-2">
+            <button onClick={() => setIsOpen(!isOpen)} className="text-indigo-400 hover:text-indigo-600 transition-colors" aria-label={isOpen ? 'Show less' : 'Show more'}>
+              {isOpen ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+            </button>
+          </div>
+        </div>
+      )}
+      {!needsExpand && <div className="pb-6" />}
+    </div>
+  );
+};
 
 // Task configurations
 // DB-to-frontend field normalizer: converts snake_case DB columns into
@@ -294,6 +375,7 @@ const App = () => {
   // Teacher state
   const [selectedTaskForAssignment, setSelectedTaskForAssignment] = useState(null);
   const [selectedStudentsForAssignment, setSelectedStudentsForAssignment] = useState([]);
+  const [activeFilter, setActiveFilter] = useState(null); // donut chart filter
 
   // Student state
   const [activeAssignment, setActiveAssignment] = useState(null);
@@ -325,6 +407,16 @@ const App = () => {
   // Evaluation data from backend
   const [evaluationData, setEvaluationData] = useState(null);
   const [loadingEvaluations, setLoadingEvaluations] = useState(false);
+
+  // Toast state
+  const [toast, setToast] = useState({ visible: false, message: '', type: 'success' });
+  const showToast = (message, type = 'success') => {
+    setToast({ visible: true, message, type });
+    setTimeout(() => setToast(t => ({ ...t, visible: false })), 5000);
+  };
+
+  // Duplicate assignment warning
+  const [duplicateWarning, setDuplicateWarning] = useState(null);
 
   // Enhanced teacher task browsing ****
   const [browsing, setBrowsing] = useState(false);
@@ -455,35 +547,44 @@ const App = () => {
   // Teacher: Create new assignment
   const handleCreateAssignment = () => {
     if (!selectedTaskForAssignment || selectedStudentsForAssignment.length === 0) {
-      alert('Please select a task and at least one student');
+      showToast('Please select a task and at least one student', 'warning');
       return;
     }
 
-    const newAssignments = selectedStudentsForAssignment.map((studentId) => {
-      const student = MOCK_STUDENTS.find(s => s.id === studentId);
-      
-      const taskId = selectedTaskForAssignment.id || selectedTaskForAssignment.slug;
-      const taskTitle = selectedTaskForAssignment.title;
-      
-      return {
-        id: assignments.length + studentId,
-        studentId: student.id,
-        studentName: student.name,
-        taskId: taskId,
-        taskTitle: taskTitle,
-        status: 'assigned',
-        completedDate: null,
-        messages: []
-      };
-    });
+    const taskId = selectedTaskForAssignment.id || selectedTaskForAssignment.slug;
+    const taskTitle = selectedTaskForAssignment.title;
 
+    // Check for duplicates
+    const duplicates = selectedStudentsForAssignment
+      .filter(studentId =>
+        assignments.some(a => a.studentId === studentId &&
+          (a.taskId === taskId || a.taskTitle === taskTitle))
+      )
+      .map(studentId => MOCK_STUDENTS.find(s => s.id === studentId)?.name);
+
+    if (duplicates.length > 0) {
+      const pendingAssignments = selectedStudentsForAssignment.map(studentId => {
+        const student = MOCK_STUDENTS.find(s => s.id === studentId);
+        return { id: assignments.length + studentId, studentId: student.id, studentName: student.name, taskId, taskTitle, status: 'assigned', completedDate: null, messages: [] };
+      });
+      setDuplicateWarning({ duplicates, pendingAssignments, taskTitle });
+      return;
+    }
+
+    commitAssignment(taskId, taskTitle);
+  };
+
+  const commitAssignment = (taskId, taskTitle, pendingAssignments = null) => {
+    const newAssignments = pendingAssignments || selectedStudentsForAssignment.map(studentId => {
+      const student = MOCK_STUDENTS.find(s => s.id === studentId);
+      return { id: assignments.length + studentId, studentId: student.id, studentName: student.name, taskId, taskTitle, status: 'assigned', completedDate: null, messages: [] };
+    });
     setAssignments([...assignments, ...newAssignments]);
     setSelectedTaskForAssignment(null);
     setSelectedStudentsForAssignment([]);
+    setDuplicateWarning(null);
     setView('teacherDashboard');
-    
-    // Success message
-    alert(`Task "${selectedTaskForAssignment.title}" assigned to ${selectedStudentsForAssignment.length} student(s)!`);
+    showToast(`Successfully assigned "${taskTitle}" to ${newAssignments.length} student(s)`, 'success');
   };
 
   // Student: Start teaching session (async -- loads task from API/cache)
@@ -627,7 +728,7 @@ const App = () => {
   const completeSession = () => {
     if (!sessionId) {
       console.error('❌ No session ID available - cannot complete session');
-      alert('Error: Session tracking failed. Please try your last message again.');
+      showToast('Session tracking failed. Please try your last message again.', 'error');
       return;
     }
 
@@ -728,6 +829,9 @@ const App = () => {
 
     return () => clearInterval(interval);
   }, []);
+
+  // Global toast element (position:fixed, renders anywhere in tree)
+  const toastEl = <Toast message={toast.message} type={toast.type} visible={toast.visible} />;
 
   // LANDING PAGE
   if (view === 'landing') {
@@ -959,8 +1063,45 @@ const App = () => {
 
   // TEACHER DASHBOARD
   if (view === 'teacherDashboard') {
+    const totalAssigned = assignments.length;
+    const totalCompleted = assignments.filter(a => a.status === 'completed').length;
+    const totalInProgress = assignments.filter(a => a.status === 'in_progress').length;
+    const totalNotStarted = assignments.filter(a => a.status === 'assigned').length;
+
+    // Donut chart math
+    const segments = [
+      { key: 'completed',   label: 'Completed',   count: totalCompleted,  color: '#22c55e', hover: '#16a34a' },
+      { key: 'in_progress', label: 'In Progress',  count: totalInProgress, color: '#eab308', hover: '#ca8a04' },
+      { key: 'assigned',    label: 'Not Started',  count: totalNotStarted, color: '#cbd5e1', hover: '#94a3b8' },
+    ];
+    const radius = 70;
+    const cx = 100;
+    const cy = 100;
+    const strokeW = 28;
+    const circumference = 2 * Math.PI * radius;
+
+    let offset = 0;
+    const arcs = segments.map(seg => {
+      const pct = totalAssigned > 0 ? seg.count / totalAssigned : 0;
+      const dash = pct * circumference;
+      const gap = circumference - dash;
+      const arc = { ...seg, dash, gap, offset, pct };
+      offset += dash;
+      return arc;
+    });
+
+    // Group assignments by student, filtered
+    const byStudent = MOCK_STUDENTS.map(student => ({
+      ...student,
+      assignments: assignments.filter(a =>
+        a.studentId === student.id &&
+        (activeFilter === null || a.status === activeFilter)
+      )
+    })).filter(s => s.assignments.length > 0);
+
     return (
       <div className="min-h-screen bg-gray-50">
+        {toastEl}
         <div className="bg-indigo-600 text-white p-6">
           <div className="max-w-7xl mx-auto flex items-center justify-between">
             <div>
@@ -976,53 +1117,176 @@ const App = () => {
           </div>
         </div>
 
-        <div className="max-w-7xl mx-auto p-6">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-          <button // NEW ADD TASK BUTTON ****
-            onClick={() => setView('teacherBrowseTasks')}
-            className="bg-white p-6 rounded-xl shadow-md hover:shadow-lg transition border-2 border-transparent hover:border-indigo-500"
-          >
-            <BookOpen className="w-12 h-12 text-indigo-600 mb-3" />
-            <h3 className="text-xl font-semibold mb-2">Browse Task Bank</h3>
-            <p className="text-gray-600">View all {taskBank.length} available tasks and assign to students</p>
-          </button>
+        <div className="max-w-7xl mx-auto p-6 space-y-6">
+
+          {/* Action buttons */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <button
+              onClick={() => setView('teacherBrowseTasks')}
+              className="bg-white p-6 rounded-xl shadow-md hover:shadow-lg transition border-2 border-transparent hover:border-indigo-500 text-left"
+            >
+              <BookOpen className="w-10 h-10 text-indigo-600 mb-3" />
+              <h3 className="text-xl font-semibold mb-1">Browse Task Bank</h3>
+              <p className="text-gray-600 text-sm">View all {taskBank.length} available tasks and assign to students</p>
+            </button>
             <button
               onClick={() => setView('teacherReviewAssignments')}
-              className="bg-white p-6 rounded-xl shadow-md hover:shadow-lg transition border-2 border-transparent hover:border-indigo-500"
+              className="bg-white p-6 rounded-xl shadow-md hover:shadow-lg transition border-2 border-transparent hover:border-indigo-500 text-left"
             >
-              <BarChart3 className="w-12 h-12 text-indigo-600 mb-3" />
-              <h3 className="text-xl font-semibold mb-2">Review Progress</h3>
-              <p className="text-gray-600">View student work & provide feedback</p>
+              <BarChart3 className="w-10 h-10 text-indigo-600 mb-3" />
+              <h3 className="text-xl font-semibold mb-1">Review Progress</h3>
+              <p className="text-gray-600 text-sm">View student work & provide feedback</p>
             </button>
           </div>
 
+          {/* Donut chart + legend */}
           <div className="bg-white rounded-xl shadow-md p-6">
-            <h2 className="text-xl font-semibold mb-4">Recent Assignments</h2>
-            <div className="space-y-3">
-              {assignments.slice(0, 5).map(assignment => (
-                <div key={assignment.id} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-                  <div>
-                    <div className="font-semibold">{assignment.studentName}</div>
-                    <div className="text-sm text-gray-600">{assignment.taskTitle}</div>
-                  </div>
-                  <div className="flex items-center gap-4">
-                    <span className={`px-3 py-1 rounded-full text-sm ${
-                      assignment.status === 'completed' ? 'bg-green-100 text-green-700' :
-                      assignment.status === 'in_progress' ? 'bg-yellow-100 text-yellow-700' :
-                      'bg-gray-100 text-gray-700'
-                    }`}>
-                      {assignment.status.replace('_', ' ')}
+            <div className="flex flex-col md:flex-row items-center gap-8">
+            {/* Donut SVG */}
+            <div className="flex-shrink-0">
+              <svg width="200" height="200" viewBox="0 0 200 200">
+                <circle cx={cx} cy={cy} r={radius} fill="none" stroke="#f1f5f9" strokeWidth={strokeW} />
+                {totalAssigned === 0 ? (
+                  <circle cx={cx} cy={cy} r={radius} fill="none" stroke="#e5e7eb" strokeWidth={strokeW} />
+                ) : (
+                  arcs.slice().reverse().map((arc) => arc.count > 0 && (
+                    <circle
+                      key={arc.key}
+                      cx={cx} cy={cy} r={radius}
+                      fill="none"
+                      stroke={activeFilter === arc.key ? arc.hover : arc.color}
+                      strokeWidth={strokeW}
+                      strokeDasharray={`${arc.dash} ${arc.gap}`}
+                      strokeDashoffset={-arc.offset}
+                      strokeLinecap="butt"
+                      style={{ cursor: 'pointer', transition: 'all 0.2s', transform: 'rotate(-90deg)', transformOrigin: `${cx}px ${cy}px` }}
+                      onClick={() => setActiveFilter(activeFilter === arc.key ? null : arc.key)}
+                    />
+                  ))
+                )}
+                <text x={cx} y={cy - 8} textAnchor="middle" style={{ fontSize: '28px', fontWeight: 'bold', fill: '#1e1b4b' }}>
+                  {totalAssigned}
+                </text>
+                <text x={cx} y={cy + 14} textAnchor="middle" style={{ fontSize: '11px', fill: '#6b7280' }}>
+                  total tasks
+                </text>
+              </svg>
+            </div>
+
+            {/* Legend */}
+            <div className="flex flex-col gap-3 w-full">
+              <p className="text-sm text-gray-400 mb-1">Click a segment to filter assignments below</p>
+              {segments.map(seg => (
+                <button
+                  key={seg.key}
+                  onClick={() => setActiveFilter(activeFilter === seg.key ? null : seg.key)}
+                  className={`flex items-center gap-3 px-4 py-3 rounded-lg border-2 transition text-left w-full ${
+                    activeFilter === seg.key
+                      ? 'border-indigo-500 bg-indigo-50'
+                      : 'border-transparent bg-gray-50 hover:bg-gray-100'
+                  }`}
+                >
+                  <span className="w-3 h-3 rounded-full flex-shrink-0" style={{ backgroundColor: seg.color === '#e5e7eb' ? '#9ca3af' : seg.color }} />
+                  <span className="flex-1 font-medium text-gray-700 text-sm">{seg.label}</span>
+                  <span className="font-bold text-lg" style={{ color: seg.color === '#e5e7eb' ? '#9ca3af' : seg.color }}>
+                    {seg.count}
+                  </span>
+                  {totalAssigned > 0 && (
+                    <span className="text-xs text-gray-400 w-9 text-right">
+                      {Math.round((seg.count / totalAssigned) * 100)}%
                     </span>
-                    {assignment.status === 'completed' && (
-                      <span className={`text-sm font-semibold ${getBadge(assignment.evaluation?.totalScore || 0).color} text-white px-2 py-0.5 rounded`}>
-                        {getBadge(assignment.evaluation?.totalScore || 0).icon} {getBadge(assignment.evaluation?.totalScore || 0).name}
-                      </span>
-                    )}
+                  )}
+                </button>
+              ))}
+              {activeFilter && (
+                <button onClick={() => setActiveFilter(null)} className="text-xs text-indigo-500 hover:text-indigo-700 mt-1 text-left">
+                  ✕ Clear filter
+                </button>
+              )}
+            </div>
+            </div>
+          </div>
+
+          {/* Assignments grouped by student */}
+          <div className="bg-white rounded-xl shadow-md p-6">
+            <h2 className="text-xl font-semibold mb-5">All Assignments by Student</h2>
+            <div className="space-y-6">
+              {byStudent.map(student => (
+                <div key={student.id}>
+                  {/* Student header */}
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="w-9 h-9 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-700 font-bold text-sm flex-shrink-0">
+                      {student.name.split(' ').map(n => n[0]).join('')}
+                    </div>
+                    <div>
+                      <div className="font-semibold text-gray-900">{student.name}</div>
+                      <div className="text-xs text-gray-500">{student.grade} Grade • {student.email}</div>
+                    </div>
+                    <div className="ml-auto text-xs text-gray-400">{student.assignments.length} task{student.assignments.length !== 1 ? 's' : ''}</div>
+                  </div>
+
+                  {/* Task rows */}
+                  <div className="ml-12 space-y-2">
+                    {student.assignments.map(assignment => {
+                      const badge = getBadge(assignment.evaluation?.totalScore || 0);
+                      const score = assignment.evaluation?.totalScore;
+                      // Find standard from taskBank
+                      const taskMeta = taskBank.find(t =>
+                        t.id === assignment.taskId ||
+                        t.slug === assignment.taskId ||
+                        t.title?.toLowerCase() === assignment.taskTitle?.toLowerCase()
+                      );
+                      return (
+                        <div
+                          key={assignment.id}
+                          onClick={() => {
+                            if (assignment.status !== 'assigned') {
+                              setSelectedStudentForDetail(assignment);
+                              setView('studentDetail');
+                            }
+                          }}
+                          className={`flex items-center justify-between px-4 py-3 rounded-lg border border-gray-100 bg-gray-50 ${assignment.status !== 'assigned' ? 'cursor-pointer hover:bg-indigo-50 hover:border-indigo-200 transition' : ''}`}
+                        >
+                          <div className="flex-1 min-w-0">
+                            <div className="font-medium text-gray-800 text-sm truncate">{assignment.taskTitle}</div>
+                            <div className="flex items-center gap-2 mt-1 flex-wrap">
+                              {taskMeta?.standard ? (
+                                <span className="text-xs bg-indigo-100 text-indigo-700 px-2 py-0.5 rounded font-semibold">{taskMeta.standard}</span>
+                              ) : (
+                                <span className="text-xs bg-gray-100 text-gray-400 px-2 py-0.5 rounded">No standard</span>
+                              )}
+                              {assignment.status === 'completed' && assignment.completedDate && (
+                                <span className="text-xs text-gray-400">Completed {assignment.completedDate}</span>
+                              )}
+                              {assignment.status === 'in_progress' && (
+                                <span className="text-xs text-gray-400">In progress</span>
+                              )}
+                              {assignment.status === 'assigned' && (
+                                <span className="text-xs text-gray-400">Not started</span>
+                              )}
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-3 ml-4 flex-shrink-0">
+                            {score !== undefined && assignment.status === 'completed' && (
+                              <span className="text-sm font-bold text-gray-700">{Math.round(score)}/100</span>
+                            )}
+                            <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                              assignment.status === 'completed' ? 'bg-green-100 text-green-700' :
+                              assignment.status === 'in_progress' ? 'bg-yellow-100 text-yellow-700' :
+                              'bg-gray-100 text-gray-500'
+                            }`}>
+                              {assignment.status.replace('_', ' ')}
+                            </span>
+                          </div>
+                        </div>
+                      );
+                    })}
                   </div>
                 </div>
               ))}
             </div>
           </div>
+
         </div>
       </div>
     );
@@ -1270,19 +1534,13 @@ if (view === 'teacherTaskDetail' && selectedTaskForDetail) {
         </div>
 
         {/* Section 1: Student Prompt */}
-        <div className="bg-white rounded-xl shadow-md p-6 mb-4">
-          <h2 className="text-lg font-bold text-indigo-900 mb-3">
-            1. Student Prompt (Low Entry Point)
-          </h2>
+        <CollapsibleSection title="1. Student Prompt (Low Entry Point)">
           <p className="text-gray-700 whitespace-pre-line">{task.problemStatement}</p>
-        </div>
+        </CollapsibleSection>
 
         {/* Section 2: Misconceptions */}
         {task.misconceptions?.length > 0 && (
-        <div className="bg-white rounded-xl shadow-md p-6 mb-4">
-          <h2 className="text-lg font-bold text-indigo-900 mb-3">
-            2. Possible Misconceptions
-          </h2>
+        <CollapsibleSection title="2. Possible Misconceptions">
           <ul className="space-y-2">
             {task.misconceptions.map((misconception, idx) => (
               <li key={idx} className="flex gap-3">
@@ -1291,45 +1549,33 @@ if (view === 'teacherTaskDetail' && selectedTaskForDetail) {
               </li>
             ))}
           </ul>
-        </div>
+        </CollapsibleSection>
         )}
 
         {/* Section 3: Pattern Recognition */}
         {task.patternRecognition && (
-        <div className="bg-white rounded-xl shadow-md p-6 mb-4">
-          <h2 className="text-lg font-bold text-indigo-900 mb-3">
-            3. Pattern Recognition Prompt
-          </h2>
+        <CollapsibleSection title="3. Pattern Recognition Prompt">
           <p className="text-gray-700 whitespace-pre-line">{task.patternRecognition}</p>
-        </div>
+        </CollapsibleSection>
         )}
 
         {/* Section 4: Generalization */}
         {task.generalization && (
-        <div className="bg-white rounded-xl shadow-md p-6 mb-4">
-          <h2 className="text-lg font-bold text-indigo-900 mb-3">
-            4. Generalization Question (Always/Sometimes/Never)
-          </h2>
+        <CollapsibleSection title="4. Generalization Question (Always/Sometimes/Never)">
           <p className="text-gray-700 whitespace-pre-line">{task.generalization}</p>
-        </div>
+        </CollapsibleSection>
         )}
 
         {/* Section 5: Inference */}
         {task.inferencePrediction && (
-        <div className="bg-white rounded-xl shadow-md p-6 mb-4">
-          <h2 className="text-lg font-bold text-indigo-900 mb-3">
-            5. Inference and Prediction
-          </h2>
+        <CollapsibleSection title="5. Inference and Prediction">
           <p className="text-gray-700 whitespace-pre-line">{task.inferencePrediction}</p>
-        </div>
+        </CollapsibleSection>
         )}
 
         {/* Section 6: Mapping Data */}
         {task.mappingData && (
-        <div className="bg-white rounded-xl shadow-md p-6 mb-6">
-          <h2 className="text-lg font-bold text-indigo-900 mb-3">
-            6. Mapping and Process Data
-          </h2>
+        <CollapsibleSection title="6. Mapping and Process Data">
           <div className="space-y-3">
             {task.mappingData.claims?.length > 0 && (
             <div>
@@ -1348,7 +1594,7 @@ if (view === 'teacherTaskDetail' && selectedTaskForDetail) {
             </div>
             )}
           </div>
-        </div>
+        </CollapsibleSection>
         )}
 
         {/* Action Buttons */}
@@ -1378,6 +1624,12 @@ if (view === 'teacherTaskDetail' && selectedTaskForDetail) {
   if (view === 'teacherAssignTask') {
     return (
       <div className="min-h-screen bg-gray-50">
+        {toastEl}
+        <DuplicateWarningModal
+          warning={duplicateWarning}
+          onOverride={() => commitAssignment(duplicateWarning.pendingAssignments[0]?.taskId, duplicateWarning.taskTitle, duplicateWarning.pendingAssignments)}
+          onCancel={() => setDuplicateWarning(null)}
+        />
         <div className="bg-indigo-600 text-white p-6">
           <div className="max-w-7xl mx-auto flex items-center gap-4">
             <button onClick={() => setView('teacherDashboard')} className="p-2 hover:bg-indigo-700 rounded">
@@ -1484,7 +1736,7 @@ if (view === 'teacherTaskDetail' && selectedTaskForDetail) {
 
           {selectedTaskForAssignment && selectedStudentsForAssignment.length > 0 && (
             <button
-              onClick={handleCreateAssignment}
+              onClick={() => handleCreateAssignment()}
               className="w-full bg-indigo-600 text-white py-3 rounded-lg font-semibold hover:bg-indigo-700 transition"
             >
               Assign Task to {selectedStudentsForAssignment.length} Student(s)
