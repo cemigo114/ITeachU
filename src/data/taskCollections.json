@@ -1,57 +1,14 @@
 {
   "collections": [
     {
-      "id": "grade-8-stats",
-      "title": "Grade 8 - Statistics & Probability",
-      "description": "Data analysis, scatter plots, and linear models",
+      "id": "grade-8-functions",
+      "title": "Grade 8 - Functions",
+      "description": "Linear relationships, rate of change, and function modeling",
       "type": "unit",
       "grade": 8,
       "published": true,
       "tasks": [
-        {
-          "id": "stack_of_cups",
-          "order": 1,
-          "required": true
-        }
-      ]
-    },
-    {
-      "id": "grade-8-algebra",
-      "title": "Grade 8 - Algebra",
-      "description": "Linear equations, functions, and systems",
-      "type": "unit",
-      "grade": 8,
-      "published": true,
-      "tasks": []
-    },
-    {
-      "id": "grade-6-stats",
-      "title": "Grade 6 - Statistics & Probability",
-      "description": "Understanding data distributions and statistical measures",
-      "type": "unit",
-      "grade": 6,
-      "published": true,
-      "tasks": [
-        {
-          "id": "basketball_heights",
-          "order": 1,
-          "required": true
-        }
-      ]
-    },
-    {
-      "id": "grade-6-expressions",
-      "title": "Grade 6 - Expressions & Equations",
-      "description": "Write and evaluate numerical expressions involving exponents",
-      "type": "unit",
-      "grade": 6,
-      "published": true,
-      "tasks": [
-        {
-          "id": "solar_energy",
-          "order": 1,
-          "required": true
-        }
+        { "id": "stack_of_cups", "order": 1, "required": true }
       ]
     },
     {
@@ -62,16 +19,77 @@
       "grade": 6,
       "published": true,
       "tasks": [
-        {
-          "id": "smoothie_recipe",
-          "order": 1,
-          "required": true
-        },
-        {
-          "id": "unit_rates",
-          "order": 2,
-          "required": false
-        }
+        { "id": "the_weekend_volunteer_crew", "order": 1, "required": true },
+        { "id": "the_virtual_runner_training", "order": 2, "required": true },
+        { "id": "smoothie_recipe", "order": 3, "required": true },
+        { "id": "the_perfect_purple_paint", "order": 4, "required": false },
+        { "id": "unit_rates", "order": 5, "required": false }
+      ]
+    },
+    {
+      "id": "grade-6-number-system",
+      "title": "Grade 6 - The Number System",
+      "description": "Fractions, decimals, negative numbers, and the coordinate plane",
+      "type": "unit",
+      "grade": 6,
+      "published": true,
+      "tasks": [
+        { "id": "the_trail_mix_party", "order": 1, "required": true },
+        { "id": "harvest_packing_challenge", "order": 2, "required": true },
+        { "id": "the_farmers_market_booth", "order": 3, "required": true },
+        { "id": "the_community_gift_basket", "order": 4, "required": true },
+        { "id": "the_frozen_tundra_expedition", "order": 5, "required": true },
+        { "id": "the_treasure_map_coordinates", "order": 6, "required": false },
+        { "id": "the_winter_lake_depth", "order": 7, "required": false },
+        { "id": "the_neighborhood_delivery_map", "order": 8, "required": false }
+      ]
+    },
+    {
+      "id": "grade-6-expressions",
+      "title": "Grade 6 - Expressions & Equations",
+      "description": "Write, evaluate, and solve expressions and equations",
+      "type": "unit",
+      "grade": 6,
+      "published": true,
+      "tasks": [
+        { "id": "solar_energy", "order": 1, "required": true },
+        { "id": "snack_stand_expressions", "order": 2, "required": true },
+        { "id": "snack_pack_distribution", "order": 3, "required": true },
+        { "id": "equivalent_expressions_team_jersey_order", "order": 4, "required": true },
+        { "id": "the_community_garden_fence", "order": 5, "required": true },
+        { "id": "the_digital_music_subscription", "order": 6, "required": false },
+        { "id": "the_greenhouse_fundraising_goal", "order": 7, "required": false },
+        { "id": "the_movie_theater_age_limit", "order": 8, "required": false },
+        { "id": "the_battery_life_mystery", "order": 9, "required": false }
+      ]
+    },
+    {
+      "id": "grade-6-geometry",
+      "title": "Grade 6 - Geometry",
+      "description": "Area, volume, surface area, and coordinate geometry",
+      "type": "unit",
+      "grade": 6,
+      "published": true,
+      "tasks": [
+        { "id": "the_custom_patio_design", "order": 1, "required": true },
+        { "id": "the_sandbox_filling_challenge", "order": 2, "required": true },
+        { "id": "mapping_the_school_courtyard", "order": 3, "required": false },
+        { "id": "the_shipping_box_designer", "order": 4, "required": false }
+      ]
+    },
+    {
+      "id": "grade-6-stats",
+      "title": "Grade 6 - Statistics & Probability",
+      "description": "Understanding data distributions and statistical measures",
+      "type": "unit",
+      "grade": 6,
+      "published": true,
+      "tasks": [
+        { "id": "the_school_cafeteria_survey", "order": 1, "required": true },
+        { "id": "basketball_heights", "order": 2, "required": true },
+        { "id": "the_weekend_weather_report", "order": 3, "required": true },
+        { "id": "the_daily_step_challenge", "order": 4, "required": false },
+        { "id": "the_community_garden_harvest", "order": 5, "required": false }
       ]
     }
   ],
@@ -81,24 +99,11 @@
       "title": "Linear Models",
       "description": "Finding patterns in data and creating equations",
       "type": "pathway",
-      "parentCollection": "grade-8-stats",
+      "parentCollection": "grade-8-functions",
       "published": true,
       "tasks": [
-        {
-          "id": "stack_of_cups",
-          "order": 1,
-          "required": true
-        }
+        { "id": "stack_of_cups", "order": 1, "required": true }
       ]
-    },
-    {
-      "id": "data-displays",
-      "title": "Data Displays",
-      "description": "Box plots, histograms, and scatter plots",
-      "type": "pathway",
-      "parentCollection": "grade-8-stats",
-      "published": true,
-      "tasks": []
     }
   ]
 }

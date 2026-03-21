@@ -428,6 +428,48 @@ app.delete('/api/sessions/:sessionId', (req, res) => {
   }
 });
 
+// Get all tasks
+app.get('/api/tasks', (req, res) => {
+  try {
+    const tasksPath = path.join(process.cwd(), 'src/data/tasks.json');
+    const tasksData = JSON.parse(fs.readFileSync(tasksPath, 'utf-8'));
+    const { grade, domain } = req.query;
+
+    let tasks = Object.values(tasksData.tasks);
+
+    if (grade) {
+      tasks = tasks.filter(t => t.grade.toLowerCase().includes(grade.toLowerCase()));
+    }
+    if (domain) {
+      tasks = tasks.filter(t => t.domain.toLowerCase().includes(domain.toLowerCase()));
+    }
+
+    res.json({ tasks });
+  } catch (error) {
+    console.error('Tasks fetch error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Get a single task by ID
+app.get('/api/tasks/:id', (req, res) => {
+  try {
+    const { id } = req.params;
+    const tasksPath = path.join(process.cwd(), 'src/data/tasks.json');
+    const tasksData = JSON.parse(fs.readFileSync(tasksPath, 'utf-8'));
+    const task = tasksData.tasks[id];
+
+    if (!task) {
+      return res.status(404).json({ error: 'Task not found' });
+    }
+
+    res.json(task);
+  } catch (error) {
+    console.error('Task fetch error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
 // Get task collections
 app.get('/api/collections', (req, res) => {
   try {
@@ -494,5 +536,6 @@ app.listen(PORT, () => {
   console.log(`📊 Backend assessment enabled - logs hidden from frontend`);
   console.log(`💾 Session persistence enabled`);
   console.log(`📚 Task collections API ready`);
+  console.log(`📝 Tasks API ready`);
   console.log(`🎯 Standards alignment API ready`);
 });

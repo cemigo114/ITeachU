@@ -1,0 +1,1317 @@
+{
+  "tasks": {
+    "stack_of_cups": {
+      "id": "stack_of_cups",
+      "slug": "stack_of_cups",
+      "title": "Stack of Cups Challenge",
+      "titleES": "Desaf\u00edo de Pila de Vasos",
+      "grade": "Grade 8",
+      "domain": "Functions",
+      "standard": "CCSS.MATH.8.F.B.4",
+      "standardId": "06f7e578-0d65-55d4-a817-77e4cd0a4b05",
+      "standardDescription": "Construct a function to model a linear relationship between two quantities and interpret the rate of change and initial value.",
+      "description": "Teach AI to understand linear patterns in stacked cups",
+      "descriptionES": "Ense\u00f1a a la IA a comprender patrones lineales en vasos apilados",
+      "imageUrl": "data:image/svg+xml,%3Csvg width='400' height='200' xmlns='http://www.w3.org/2000/svg'%3E%3Crect fill='%23f3f4f6' width='400' height='200'/%3E%3Ctext x='50%25' y='30%25' text-anchor='middle' fill='%23374151' font-size='14'%3E2 cups = 16 cm%3C/text%3E%3Ctext x='50%25' y='50%25' text-anchor='middle' fill='%23374151' font-size='14'%3E4 cups = 20 cm%3C/text%3E%3Ctext x='50%25' y='70%25' text-anchor='middle' fill='%23374151' font-size='14'%3E8 cups = 28 cm%3C/text%3E%3C/svg%3E",
+      "problemStatement": "A cafeteria manager is stacking identical plastic cups. She records: 2 cups = 16cm, 4 cups = 20cm, 8 cups = 28cm. Determine the pattern and create a formula for the height of n cups.",
+      "teachingPrompt": "Help Zippy understand how cups nest together and how to model the linear relationship between number of cups and total height.",
+      "targetConcepts": [
+        "Linear patterns",
+        "Nesting structures",
+        "Function notation",
+        "Rate of change"
+      ],
+      "correctSolutionPathway": "Cups nest inside each other. Base cup is 14cm tall. Each additional cup adds only its 2cm rim. Formula: h = 14 + 2(n-1) or h = 2n + 12",
+      "misconceptions": [
+        "The Proportionality Error: Assuming direct variation (y = kx). 2 cups = 16cm so 4 cups = 32cm, ignoring nesting.",
+        "Misidentifying the Rate: Using the height of the first cup (14cm) as the rate of change instead of the rim (2cm).",
+        "n vs. n-1 Error: Off-by-one error by adding rim height for every cup including the first.",
+        "Cannot generalize: Can calculate specific cases but struggles to create formula"
+      ],
+      "aiIntro": "Hi! I'm Zippy! \ud83c\udf89\n\nI see 2 cups = 16cm and 4 cups = 20cm.\n\nIf 1 cup = 8cm, then 8 cups = 64cm... but the picture shows 28cm! \ud83e\udd14\n\nCan you help me figure out what's happening?",
+      "aiIntroES": "\u00a1Hola! \u00a1Soy Zippy! \ud83c\udf89\n\nVeo que 2 vasos = 16cm y 4 vasos = 20cm.\n\nSi 1 vaso = 8cm, entonces 8 vasos = 64cm... \u00a1pero la imagen muestra 28cm! \ud83e\udd14\n\n\u00bfPuedes ayudarme a entender qu\u00e9 est\u00e1 pasando?",
+      "sections": {
+        "studentPrompt": "A cafeteria manager is stacking identical plastic cups. She records: 2 cups = 16cm, 4 cups = 20cm, 8 cups = 28cm. Look at the table above. When you increase the number of cups from 2 to 4, what is the change in height? When you increase from 4 to 8, what is the change in height? Describe what physical part of the cup is represented by this change.",
+        "misconceptions": [
+          "The Proportionality Error: Assuming direct variation (y = kx), ignoring nesting structure",
+          "Misidentifying the Rate: Using full cup height (14cm) as rate instead of rim (2cm)",
+          "n vs. n-1 Error: Off-by-one error in formula leading to incorrect heights",
+          "Cannot generalize: Can compute specific cases but struggles to create a formula"
+        ],
+        "patternRecognition": "Compare the heights as cups increase. What changes each time you add cups? What stays the same?",
+        "generalization": "Always/Sometimes/Never: The total height of a stack of cups is double the height of a stack with half as many cups. Justify your answer using the data from the table.",
+        "inference": "A different brand of 'Mega-Cups' is introduced. The first cup is 20cm tall. When you nest a second cup inside it, the total height becomes 23cm. Create a formula for the height (h) of (n) Mega-Cups. What would be the height of 10 Mega-Cups?",
+        "mappingData": {
+          "claims": [
+            "Student can identify the constant rate of change in a linear context",
+            "The relationship between number of cups and height is linear"
+          ],
+          "evidence": "Student identifies the 2cm increase per cup (the rim height). Providing non-consecutive values (2, 4, 8) forces students to calculate change over an interval.",
+          "criticalThinking": "Critical thinking is revealed if a student checks their generated formula against all three data points. Self-correction and data validation demonstrate deeper understanding."
+        }
+      }
+    },
+    "smoothie_recipe": {
+      "id": "smoothie_recipe",
+      "slug": "smoothie_recipe",
+      "title": "Smoothie Recipe Ratios",
+      "titleES": "Proporciones de Receta de Batido",
+      "grade": "Grade 6",
+      "domain": "Ratios & Proportions",
+      "standard": "CCSS.MATH.6.RP.A.3",
+      "standardId": "62d0029e-9b81-5f08-b0bb-8ae1ddc9e8d0",
+      "standardDescription": "Use ratio and rate reasoning to solve real-world and mathematical problems, e.g., by reasoning about tables of equivalent ratios.",
+      "description": "Teach AI about ratio and proportional reasoning with recipes",
+      "descriptionES": "Ense\u00f1a a la IA sobre razones y razonamiento proporcional con recetas",
+      "imageUrl": "data:image/svg+xml,%3Csvg width='400' height='280' xmlns='http://www.w3.org/2000/svg'%3E%3Crect fill='%23fef3c7' width='400' height='280'/%3E%3Ctext x='200' y='30' text-anchor='middle' fill='%23b91c1c' font-size='18' font-weight='bold'%3E\ud83c\udf53 Smoothie Recipe \ud83e\udd64%3C/text%3E%3Ctext x='200' y='60' text-anchor='middle' fill='%23059669' font-size='14' font-weight='bold'%3EOriginal Recipe%3C/text%3E%3Ctext x='100' y='90' text-anchor='middle' fill='%23dc2626' font-size='32'%3E\ud83c\udf53\ud83c\udf53%3C/text%3E%3Ctext x='100' y='115' text-anchor='middle' fill='%23374151' font-size='12'%3E2 cups%3C/text%3E%3Ctext x='200' y='102' text-anchor='middle' fill='%23374151' font-size='20'%3E:%3C/text%3E%3Ctext x='300' y='90' text-anchor='middle' fill='%2393c5fd' font-size='32'%3E\ud83e\udd5b\ud83e\udd5b\ud83e\udd5b%3C/text%3E%3Ctext x='300' y='115' text-anchor='middle' fill='%23374151' font-size='12'%3E3 cups%3C/text%3E%3Crect x='50' y='130' width='300' height='2' fill='%23d1d5db'/%3E%3Ctext x='200' y='160' text-anchor='middle' fill='%23dc2626' font-size='13' font-weight='bold'%3ERatio: 2 to 3%3C/text%3E%3Ctext x='200' y='185' text-anchor='middle' fill='%23374151' font-size='11'%3ETo double: multiply BOTH by 2%3C/text%3E%3Ctext x='200' y='210' text-anchor='middle' fill='%23374151' font-size='11'%3E\ud83c\udf53\ud83c\udf53 \u00d7 2 = \ud83c\udf53\ud83c\udf53\ud83c\udf53\ud83c\udf53 (4 cups)%3C/text%3E%3Ctext x='200' y='230' text-anchor='middle' fill='%23374151' font-size='11'%3E\ud83e\udd5b\ud83e\udd5b\ud83e\udd5b \u00d7 2 = \ud83e\udd5b\ud83e\udd5b\ud83e\udd5b\ud83e\udd5b\ud83e\udd5b\ud83e\udd5b (6 cups)%3C/text%3E%3Ctext x='200' y='260' text-anchor='middle' fill='%23374151' font-size='10' style='font-style:italic'%3EKeeps the same taste!%3C/text%3E%3C/svg%3E",
+      "problemStatement": "A 'Berry Blast' smoothie recipe uses 2 cups of strawberries and 3 cups of yogurt. Complete a table to make Single, Double, Half, and Five Batches of the same smoothie while keeping the same taste.",
+      "teachingPrompt": "Help Zippy understand how ratios work and how to scale recipes multiplicatively (not additively).",
+      "targetConcepts": [
+        "Ratios",
+        "Proportional reasoning",
+        "Multiplicative scaling",
+        "Unit rates",
+        "Equivalent ratios"
+      ],
+      "correctSolutionPathway": "Ratios scale multiplicatively. Double: 4 strawberries, 6 yogurt. Half: 1 strawberry, 1.5 yogurt. Five: 10 strawberries, 15 yogurt. Unit rate: 2/3 cup strawberries per cup yogurt.",
+      "misconceptions": [
+        "Additive Reasoning: Thinking adding 1 cup of each ingredient keeps the taste the same (moving from 2:3 to 3:4).",
+        "Part-to-Whole Confusion: Mistaking the ratio of strawberries to yogurt (2/3) for the fraction of strawberries in the whole smoothie (2/5).",
+        "Scaling Error: Scaling only one ingredient and not the other, or using different multipliers.",
+        "Cannot generalize: Struggles to apply ratio concept to different scaling factors"
+      ],
+      "aiIntro": "Hi! I'm Zippy! \ud83c\udf89\n\nRecipe: 2 cups strawberries + 3 cups yogurt\n\nTo double it... 2+3=5, so double = 10 total? Maybe 5 strawberries and 5 yogurt? \ud83e\udd14\n\nCan you help me understand how to double recipes?",
+      "aiIntroES": "\u00a1Hola! \u00a1Soy Zippy! \ud83c\udf89\n\nReceta: 2 tazas de fresas + 3 tazas de yogur\n\nPara duplicarlo... 2+3=5, \u00bfentonces el doble = 10 total? \u00bfTal vez 5 fresas y 5 yogur? \ud83e\udd14\n\n\u00bfPuedes ayudarme a entender c\u00f3mo duplicar recetas?",
+      "sections": {
+        "studentPrompt": "A recipe for a 'Berry Blast' smoothie uses 2 cups of strawberries and 3 cups of yogurt. Complete the table to make Single Batch (2, 3), Double Batch (4, 6), Half Batch (?, ?), and Five Batches (?, ?). Look at the relationship between the two ingredients in every row. What mathematical pattern ensures the 'taste' stays exactly the same?",
+        "misconceptions": [
+          "Additive Reasoning: Thinking adding 1 cup of each ingredient keeps the taste the same",
+          "Part-to-Whole Confusion: Mistaking ratio of ingredients for fraction of whole smoothie",
+          "Scaling Error: Scaling only one ingredient or using different multipliers",
+          "No generalization: Struggles to apply the same idea to other scale factors"
+        ],
+        "patternRecognition": "If you multiply the number of smoothies by 2, what must happen to EACH ingredient to keep the flavor the same?",
+        "generalization": "Always, Sometimes, or Never: If you want to increase a recipe while keeping the same taste, you should add 1 cup of each ingredient for every new person you are serving. Justify your answer using the Berry Blast recipe as an example.",
+        "inference": "A chef has 10 cups of yogurt and wants to use all of it to make a giant Berry Blast smoothie. Using the 2:3 ratio, how many cups of strawberries are needed? If she only has 10 cups of strawberries, how much yogurt would she need to maintain the same taste?",
+        "mappingData": {
+          "claims": [
+            "Student can maintain equivalent ratios through scaling",
+            "Scaling is multiplicative, not additive"
+          ],
+          "evidence": "Correct completion of the Half and Five Batch rows in the table. Requiring a 'Half Batch' prevents reliance on addition (2+2+2) and forces multiplicative thinking.",
+          "criticalThinking": "Student uses equivalent ratios (and optionally unit rate of 1.5 cups yogurt per 1 cup strawberry) to verify scaled rows, demonstrating high-level conceptual mapping."
+        }
+      }
+    },
+    "basketball_heights": {
+      "id": "basketball_heights",
+      "slug": "6_sp_a_2_basketball_heights",
+      "title": "The Basketball Team Heights",
+      "titleES": "Las Alturas del Equipo de Baloncesto",
+      "grade": "Grade 6",
+      "domain": "Statistics & Probability",
+      "standard": "CCSS.MATH.6.SP.A.2",
+      "standardId": "",
+      "standardDescription": "Understand that a set of data collected to answer a statistical question has a distribution",
+      "description": "Analyze height data and use statistical measures to understand team composition",
+      "descriptionES": "Analizar datos de altura y usar medidas estad\u00edsticas para entender la composici\u00f3n del equipo",
+      "imageUrl": "/images/basketball.jpg",
+      "problemStatement": "The basketball coach collected height data for all team members: 65, 66, 66, 67, 67, 67, 68, 68, 71, 73 inches. Use statistical measures (mean, median, range) to analyze the distribution and describe what the data tells us about the team.",
+      "teachingPrompt": "Help Zippy understand how to summarize a data set using center (mean, median) and spread (range), and why different measures give different pictures of the team.",
+      "targetConcepts": [
+        "Mean",
+        "Median",
+        "Range",
+        "Data distribution",
+        "Outliers",
+        "Statistical variability"
+      ],
+      "correctSolutionPathway": "Mean = 67.8 inches. Median = 67 inches. Range = 73 - 65 = 8 inches. Most players cluster between 65-68 inches, with two taller players (71, 73) pulling the mean up. The median (67) is more representative of a typical player height than the mean (67.8) because of the two outliers.",
+      "misconceptions": [
+        "Thinking the mean always represents the 'typical' value",
+        "Confusing range (max-min) with interquartile range",
+        "Not recognizing that outliers pull the mean away from center",
+        "Thinking all averages give the same result"
+      ],
+      "aiIntro": "Hi! I'm Zippy! \ud83c\udf89\n\nThe basketball coach gave me the team heights: 65, 66, 66, 67, 67, 67, 68, 68, 71, 73 inches.\n\nTo find the average I just add them all up... that's 678, and there are 10 players, so the average is 67.8 inches.\n\nSo every player is about 67.8 inches tall, right? \ud83e\udd14\n\nCan you help me understand what this data really tells us about the team?",
+      "aiIntroES": "\u00a1Hola! \u00a1Soy Zippy! \ud83c\udf89\n\nEl entrenador de baloncesto me dio las alturas del equipo: 65, 66, 66, 67, 67, 67, 68, 68, 71, 73 pulgadas.\n\nPara encontrar el promedio sumo todo... eso es 678, y hay 10 jugadores, as\u00ed que el promedio es 67.8 pulgadas.\n\n\u00bfEntonces todos los jugadores miden aproximadamente 67.8 pulgadas? \ud83e\udd14\n\n\u00bfPuedes ayudarme a entender qu\u00e9 nos dicen realmente estos datos sobre el equipo?",
+      "sections": {
+        "studentPrompt": "The basketball coach has collected height data for all team members. Your task is to help analyze this data to understand the team better.",
+        "misconceptions": [
+          "Students may think the average (mean) is always the most representative value",
+          "Students might not recognize that outliers significantly affect the mean",
+          "Students may confuse range with interquartile range"
+        ],
+        "patternRecognition": "Look at the height distribution. What patterns do you notice?",
+        "generalization": "Always/Sometimes/Never: The tallest player on a team is always more than 6 inches taller than the shortest player.",
+        "inference": "If a new player joins the team and is 72 inches tall, how would this affect the team's average height?",
+        "mappingData": {
+          "claims": [
+            "The team has mostly players of similar height",
+            "There are a few very tall players"
+          ],
+          "evidence": "Height data shows 8 players between 65-68 inches, with 2 players over 70 inches",
+          "criticalThinking": "Student demonstrates understanding of distribution and central tendency"
+        }
+      }
+    },
+    "solar_energy": {
+      "id": "solar_energy",
+      "slug": "6_ee_a_1_solar_task",
+      "title": "Solar Panel Energy",
+      "titleES": "Energ\u00eda del Panel Solar",
+      "grade": "Grade 6",
+      "domain": "Expressions & Equations",
+      "standard": "CCSS.MATH.6.EE.A.1",
+      "standardId": "",
+      "standardDescription": "Write and evaluate numerical expressions involving whole-number exponents",
+      "description": "Use expressions to calculate energy production from solar panels",
+      "descriptionES": "Usar expresiones para calcular la producci\u00f3n de energ\u00eda de paneles solares",
+      "imageUrl": "/images/solar.jpg",
+      "problemStatement": "A single solar panel produces 5 kWh per day. If the number of panels doubles each year (starting with 1 panel), write an expression using exponents for the energy produced after n years. How much energy is produced daily after 4 years?",
+      "teachingPrompt": "Help Zippy understand the difference between multiplication and exponents, and how exponential growth models real-world situations like solar panel expansion.",
+      "targetConcepts": [
+        "Exponents",
+        "Expressions",
+        "Order of operations",
+        "Exponential growth",
+        "Evaluating expressions"
+      ],
+      "correctSolutionPathway": "After n years there are 2^n panels. Each produces 5 kWh, so total daily energy = 5 \u00d7 2^n. After 4 years: 5 \u00d7 2^4 = 5 \u00d7 16 = 80 kWh per day.",
+      "misconceptions": [
+        "Treating exponents as multiplication: 2^4 = 2 \u00d7 4 = 8 instead of 16",
+        "Not following order of operations: computing 5 \u00d7 2 first, then raising to power",
+        "Confusing linear growth (adding panels) with exponential growth (doubling)",
+        "Struggling to write expressions before evaluating them"
+      ],
+      "aiIntro": "Hi! I'm Zippy! \ud83c\udf89\n\nSo we start with 1 solar panel that makes 5 kWh per day, and the panels double each year...\n\nAfter 4 years, the panels double 4 times, so that's 2 \u00d7 4 = 8 panels? And 8 \u00d7 5 = 40 kWh!\n\nWait, my friend said it should be way more than 40... \ud83e\udd14\n\nCan you help me figure out how \"doubling\" really works?",
+      "aiIntroES": "\u00a1Hola! \u00a1Soy Zippy! \ud83c\udf89\n\nEmpezamos con 1 panel solar que produce 5 kWh por d\u00eda, y los paneles se duplican cada a\u00f1o...\n\nDespu\u00e9s de 4 a\u00f1os, los paneles se duplican 4 veces, \u00bfas\u00ed que son 2 \u00d7 4 = 8 paneles? \u00a1Y 8 \u00d7 5 = 40 kWh!\n\nEspera, mi amigo dijo que deber\u00eda ser mucho m\u00e1s que 40... \ud83e\udd14\n\n\u00bfPuedes ayudarme a entender c\u00f3mo funciona realmente \"duplicar\"?",
+      "sections": {
+        "studentPrompt": "A solar panel produces energy based on hours of sunlight. Write an expression to calculate total energy production over different time periods.",
+        "misconceptions": [
+          "Students may not understand order of operations with exponents",
+          "Students might treat exponents as multiplication",
+          "Students may struggle with writing expressions before evaluating them"
+        ],
+        "patternRecognition": "How does doubling the number of solar panels affect total energy? What pattern do you see?",
+        "generalization": "Always/Sometimes/Never: Increasing the exponent in an expression always increases the value.",
+        "inference": "If we add 3 more solar panels, predict how the expression would change.",
+        "mappingData": {
+          "claims": [
+            "Energy production grows exponentially with more panels",
+            "Time affects total output linearly"
+          ],
+          "evidence": "Expression shows 2^n \u00d7 hours, where n is number of panels",
+          "criticalThinking": "Student connects exponential growth to real-world context"
+        }
+      }
+    },
+    "unit_rates": {
+      "id": "unit_rates",
+      "slug": "6_rp_a_3_unit_rates",
+      "title": "Comparing Unit Rates",
+      "titleES": "Comparando Tasas Unitarias",
+      "grade": "Grade 6",
+      "domain": "Ratios & Proportions",
+      "standard": "CCSS.MATH.6.RP.A.3",
+      "standardId": "",
+      "standardDescription": "Use ratio and rate reasoning to solve problems",
+      "description": "Find and compare unit rates to determine the better buy",
+      "descriptionES": "Encontrar y comparar tasas unitarias para determinar la mejor compra",
+      "imageUrl": "/images/shopping.jpg",
+      "problemStatement": "Store A sells 3 notebooks for $4.50. Store B sells 5 notebooks for $7.00. Which store has the better price per notebook? How do you know?",
+      "teachingPrompt": "Help Zippy understand what a unit rate is, how to calculate it by dividing, and how to use it to compare deals fairly.",
+      "targetConcepts": [
+        "Unit rate",
+        "Division to find rate",
+        "Ratio comparison",
+        "Proportional reasoning"
+      ],
+      "correctSolutionPathway": "Store A: $4.50 \u00f7 3 = $1.50 per notebook. Store B: $7.00 \u00f7 5 = $1.40 per notebook. Store B is cheaper per notebook. The unit rate lets you compare fairly even when the quantities differ.",
+      "misconceptions": [
+        "Comparing total prices instead of unit rates (Store A is cheaper because $4.50 < $7.00)",
+        "Dividing the wrong way (3 \u00f7 $4.50 instead of $4.50 \u00f7 3)",
+        "Not understanding that lower unit price = better deal",
+        "Thinking you need the same quantity to compare"
+      ],
+      "aiIntro": "Hi! I'm Zippy! \ud83c\udf89\n\nStore A has 3 notebooks for $4.50 and Store B has 5 notebooks for $7.00.\n\nWell, $4.50 is less than $7.00, so Store A must be the better deal... right? \ud83e\udd14\n\nBut Store B gives you more notebooks... I'm confused about how to compare when the amounts are different!\n\nCan you teach me a fair way to compare these?",
+      "aiIntroES": "\u00a1Hola! \u00a1Soy Zippy! \ud83c\udf89\n\nLa Tienda A tiene 3 cuadernos por $4.50 y la Tienda B tiene 5 cuadernos por $7.00.\n\nBueno, $4.50 es menos que $7.00, as\u00ed que la Tienda A debe ser la mejor oferta... \u00bfverdad? \ud83e\udd14\n\nPero la Tienda B te da m\u00e1s cuadernos... \u00a1Estoy confundido sobre c\u00f3mo comparar cuando las cantidades son diferentes!\n\n\u00bfPuedes ense\u00f1arme una forma justa de comparar estas?",
+      "sections": {
+        "studentPrompt": "Store A sells 3 notebooks for $4.50. Store B sells 5 notebooks for $7.00. Which store has the better price per notebook?",
+        "misconceptions": [
+          "Students may compare total prices instead of unit rates",
+          "Students might not divide correctly to find unit price",
+          "Students may not understand that lower unit rate means better deal"
+        ],
+        "patternRecognition": "What relationship do you see between the number of items and total cost?",
+        "generalization": "Always/Sometimes/Never: Buying more items always results in a lower unit price.",
+        "inference": "If Store A offered 4 notebooks for $6.00, predict whether this would be better or worse than Store B.",
+        "mappingData": {
+          "claims": [
+            "Store A has a unit rate of $1.50 per notebook",
+            "Store B has a unit rate of $1.40 per notebook"
+          ],
+          "evidence": "Store B: $7.00 \u00f7 5 = $1.40; Store A: $4.50 \u00f7 3 = $1.50",
+          "criticalThinking": "Student uses unit rate reasoning to make informed consumer decisions"
+        }
+      }
+    },
+    "snack_pack_distribution": {
+      "id": "snack_pack_distribution",
+      "slug": "snack_pack_distribution",
+      "title": "Snack Pack Distribution",
+      "grade": "Grade 6",
+      "domain": "Expressions & Equations",
+      "standard": "CCSS.MATH.6.EE.A.3",
+      "standardDescription": "6.EE.A.3",
+      "description": "A school is packing snack bags for a field trip. Each bag has 4 apple slices and 3 grape bunches. If the school makes 5 bags, explain how you could fi",
+      "imageUrl": "",
+      "problemStatement": "A school is packing snack bags for a field trip. Each bag has 4 apple slices and 3 grape bunches. If the school makes 5 bags, explain how you could find the total number of fruit pieces without counting them one by one. Describe two different ways to think about how the total is calculated.\n2. Possible Misconceptions\n1. Partial Distribution: A student might multiply the number of bags by the first item (apples) but only add the second item (grapes) once (e.g., calculating $5 \\times 4 + 3$).\n2. A",
+      "teachingPrompt": "Help Zippy understand the concepts in Snack Pack Distribution.",
+      "targetConcepts": [],
+      "correctSolutionPathway": "",
+      "misconceptions": [
+        "Partial Distribution: A student might multiply the number of bags by the first item (apples) but only add the second item (grapes) once (e.g., calculating $5 \\times 4 + 3$).",
+        "Additive Reasoning: A student might add the number of bags to the count of items in a single bag (e.g., $5 + 4 + 3$) instead of using multiplication for the groups.",
+        "Item Confusion: A student might believe they cannot add apples and grapes together to find a 'per-bag' total because the items are different types, missing the common unit of 'fruit pieces'."
+      ],
+      "aiIntro": "Hi! I'm Zippy! \ud83c\udf89\n\nI'm looking at this problem: A school is packing snack bags for a field trip. Each bag has 4 apple slices and 3 grape bunches. If the school makes 5 bags, explain how you could find the total number of fruit pieces without counti\n\nHmm, I think A student might multiply the number of bags by the first item (apples) but only add the second item (grapes) once (e.g., calculating $5 \\times 4 + ... \ud83e\udd14\n\nCan you help me understand this better?",
+      "sections": {
+        "studentPrompt": "A school is packing snack bags for a field trip. Each bag has 4 apple slices and 3 grape bunches. If the school makes 5 bags, explain how you could find the total number of fruit pieces without counting them one by one. Describe two different ways to think about how the total is calculated.\n2. Possible Misconceptions\n1. Partial Distribution: A student might multiply the number of bags by the first item (apples) but only add the second item (grapes) once (e.g., calculating $5 \\times 4 + 3$).\n2. Additive Reasoning: A student might add the number of bags to the count of items in a single bag (e.g., $5 + 4 + 3$) instead of using multiplication for the groups.\n3. Item Confusion: A student might believe they cannot add apples and grapes together to find a 'per-bag' total because the items are different types, missing the common unit of 'fruit pieces'.",
+        "misconceptions": [
+          "Partial Distribution: A student might multiply the number of bags by the first item (apples) but only add the second item (grapes) once (e.g., calculating $5 \\times 4 + 3$).",
+          "Additive Reasoning: A student might add the number of bags to the count of items in a single bag (e.g., $5 + 4 + 3$) instead of using multiplication for the groups.",
+          "Item Confusion: A student might believe they cannot add apples and grapes together to find a 'per-bag' total because the items are different types, missing the common unit of 'fruit pieces'."
+        ],
+        "patternRecognition": "",
+        "generalization": "Think about any situation where you have several identical groups, and each group contains two different types of items.'Calculating the total of one group first and then multiplying by the number of groups results in the same total as multiplying each item type by the number of groups and then adding the results together.'Is this statement always, sometimes, or never true? Use your own examples or reasoning to justify your answer.",
+        "inference": "A store sells 'Mystery Boxes.' Each box has some toy cars and 2 stickers. We don't know how many cars are in a box, but we know every box is the same. If a customer buys 10 boxes, explain how the total number of items in their purchase would change if the store decided to put one extra sticker in every box. How can you be sure of the change even if you don't know the number of cars?",
+        "mappingData": {
+          "claims": [],
+          "evidence": "",
+          "criticalThinking": ""
+        }
+      }
+    },
+    "equivalent_expressions_team_jersey_order": {
+      "id": "equivalent_expressions_team_jersey_order",
+      "slug": "equivalent_expressions_team_jersey_order",
+      "title": "Equivalent Expressions Team Jersey Order",
+      "grade": "Grade 6",
+      "domain": "Expressions & Equations",
+      "standard": "CCSS.MATH.6.EE.A.4",
+      "standardDescription": "6.EE.A.4 - Identify when two expressions are equivalent.",
+      "description": "A soccer coach is buying jerseys for the team. Each jersey costs a certain amount of money, but we don't know the exact price yet. The coach needs to ",
+      "imageUrl": "",
+      "problemStatement": "A soccer coach is buying jerseys for the team. Each jersey costs a certain amount of money, but we don't know the exact price yet. The coach needs to buy 3 jerseys for the goalies and 3 jerseys for the strikers.One player says the total cost is 'three times the price, plus another three times the price.'Another player says the total cost is 'six times the price.'If the price of one jersey is $10, do both players get the same total? What if the price is $20? Explain why this happens.\n2. Possible ",
+      "teachingPrompt": "Help Zippy understand the concepts in Equivalent Expressions Team Jersey Order.",
+      "targetConcepts": [
+        "When two expressions are equivalent"
+      ],
+      "correctSolutionPathway": "",
+      "misconceptions": [
+        "Operation Confusion: A student might believe that $3p + 3p$ is $6p^2$ because they think they must multiply the variables as well as the coefficients.",
+        "Variable Misinterpretation: A student might think $3p + 3$ is the same as $3p + 3p$, failing to realize that a constant cannot be combined with a variable term.",
+        "Single-Value Equivalence: A student might think two expressions are equivalent just because they produce the same result for one specific number (like zero), without checking if they work for all values."
+      ],
+      "aiIntro": "Hi! I'm Zippy! \ud83c\udf89\n\nI'm looking at this problem: A soccer coach is buying jerseys for the team. Each jersey costs a certain amount of money, but we don't know the exact price yet. The coach needs to buy 3 jerseys for the goalies and 3 jerseys for th\n\nHmm, I think A student might believe that $3p + 3p$ is $6p^2$ because they think they must multiply the variables as well as the coefficients. \ud83e\udd14\n\nCan you help me understand this better?",
+      "sections": {
+        "studentPrompt": "A soccer coach is buying jerseys for the team. Each jersey costs a certain amount of money, but we don't know the exact price yet. The coach needs to buy 3 jerseys for the goalies and 3 jerseys for the strikers.One player says the total cost is 'three times the price, plus another three times the price.'Another player says the total cost is 'six times the price.'If the price of one jersey is $10, do both players get the same total? What if the price is $20? Explain why this happens.\n2. Possible Misconceptions\n1. Operation Confusion: A student might believe that $3p + 3p$ is $6p^2$ because they think they must multiply the variables as well as the coefficients.\n2. Variable Misinterpretation: A student might think $3p + 3$ is the same as $3p + 3p$, failing to realize that a constant cannot be combined with a variable term.\n3. Single-Value Equivalence: A student might think two expressions are equivalent just because they produce the same result for one specific number (like zero), without checking if they work for all values.",
+        "misconceptions": [
+          "Operation Confusion: A student might believe that $3p + 3p$ is $6p^2$ because they think they must multiply the variables as well as the coefficients.",
+          "Variable Misinterpretation: A student might think $3p + 3$ is the same as $3p + 3p$, failing to realize that a constant cannot be combined with a variable term.",
+          "Single-Value Equivalence: A student might think two expressions are equivalent just because they produce the same result for one specific number (like zero), without checking if they work for all values."
+        ],
+        "patternRecognition": "",
+        "generalization": "Consider the statement: 'If two expressions give you the same answer when you plug in the number 2, then the expressions must be equivalent.'Is this statement Always, Sometimes, or Never true? Provide an example to support your reasoning.",
+        "inference": "The coach decides to add a $5 shipping fee to the total order of 6 jerseys. Player A writes the new total as: 6(p + 5)Player B writes the new total as: 6p + 5One of these players has made a mistake. Based on the real-world scenario of shipping a single box, which expression represents the total cost? How would the other expression change the scenario (what would have to happen for that expression to be correct)?",
+        "mappingData": {
+          "claims": [],
+          "evidence": "",
+          "criticalThinking": ""
+        }
+      }
+    },
+    "the_community_garden_fence": {
+      "id": "the_community_garden_fence",
+      "slug": "the_community_garden_fence",
+      "title": "The Community Garden Fence",
+      "grade": "Grade 6",
+      "domain": "Expressions & Equations",
+      "standard": "CCSS.MATH.6.EE.B.5",
+      "standardDescription": "6.EE.B.5 - Understand solving an equation or inequality as a process of answering a question.",
+      "description": "A neighborhood is building a small community garden. They have 24 feet of decorative wood to use for the border. They are looking at several different",
+      "imageUrl": "",
+      "problemStatement": "A neighborhood is building a small community garden. They have 24 feet of decorative wood to use for the border. They are looking at several different pre-made garden frames at the store.The lengths of the frames available are: 4 feet, 6 feet, 8 feet, and 10 feet.If the garden must be a square, which of these frame lengths can the neighborhood choose so they use exactly all 24 feet of wood? Explain how you know which length works and why the others do not.\n2. Possible Misconceptions\n1. Area vs. ",
+      "teachingPrompt": "Help Zippy understand the concepts in The Community Garden Fence.",
+      "targetConcepts": [
+        "Solving an equation or inequality as a process of answering a question"
+      ],
+      "correctSolutionPathway": "",
+      "misconceptions": [
+        "Area vs. Perimeter: A student might try to find a number that, when multiplied by itself (squared), equals 24, rather than multiplying by 4 for the four sides of a square.",
+        "Ignoring the 'Exactly' Constraint: A student might pick a length that uses less than 24 feet (like the 4-foot frame), thinking it 'fits' without realizing the equation requires equality.",
+        "Calculation Error in Substitution: A student might incorrectly substitute a value (e.g., thinking $4 imes 8 = 24$) and declare it a solution because they aren't double-checking the product."
+      ],
+      "aiIntro": "Hi! I'm Zippy! \ud83c\udf89\n\nI'm looking at this problem: A neighborhood is building a small community garden. They have 24 feet of decorative wood to use for the border. They are looking at several different pre-made garden frames at the store.The lengths o\n\nHmm, I think A student might try to find a number that, when multiplied by itself (squared), equals 24, rather than multiplying by 4 for the four sides of a squ... \ud83e\udd14\n\nCan you help me understand this better?",
+      "sections": {
+        "studentPrompt": "A neighborhood is building a small community garden. They have 24 feet of decorative wood to use for the border. They are looking at several different pre-made garden frames at the store.The lengths of the frames available are: 4 feet, 6 feet, 8 feet, and 10 feet.If the garden must be a square, which of these frame lengths can the neighborhood choose so they use exactly all 24 feet of wood? Explain how you know which length works and why the others do not.\n2. Possible Misconceptions\n1. Area vs. Perimeter: A student might try to find a number that, when multiplied by itself (squared), equals 24, rather than multiplying by 4 for the four sides of a square.\n2. Ignoring the 'Exactly' Constraint: A student might pick a length that uses less than 24 feet (like the 4-foot frame), thinking it 'fits' without realizing the equation requires equality.\n3. Calculation Error in Substitution: A student might incorrectly substitute a value (e.g., thinking $4 imes 8 = 24$) and declare it a solution because they aren't double-checking the product.",
+        "misconceptions": [
+          "Area vs. Perimeter: A student might try to find a number that, when multiplied by itself (squared), equals 24, rather than multiplying by 4 for the four sides of a square.",
+          "Ignoring the 'Exactly' Constraint: A student might pick a length that uses less than 24 feet (like the 4-foot frame), thinking it 'fits' without realizing the equation requires equality.",
+          "Calculation Error in Substitution: A student might incorrectly substitute a value (e.g., thinking $4 imes 8 = 24$) and declare it a solution because they aren't double-checking the product."
+        ],
+        "patternRecognition": "",
+        "generalization": "Consider this statement: 'An equation can have many different numbers as a solution, but an inequality can only ever have one correct solution.'Is this statement Always, Sometimes, or Never true? Use the garden frame examples to explain your thinking.",
+        "inference": "A new shipment of frames arrives with lengths of 5.5 feet, 6.1 feet, and 7 feet. Without doing the full math for every single one, predict which of these frames would make the inequality 'Total Wood \u2264 24' true. How does knowing the solution to the first question (the 6-foot frame) help you make this prediction?",
+        "mappingData": {
+          "claims": [],
+          "evidence": "",
+          "criticalThinking": ""
+        }
+      }
+    },
+    "the_digital_music_subscription": {
+      "id": "the_digital_music_subscription",
+      "slug": "the_digital_music_subscription",
+      "title": "The Digital Music Subscription",
+      "grade": "Grade 6",
+      "domain": "Expressions & Equations",
+      "standard": "CCSS.MATH.6.EE.B.6",
+      "standardDescription": "6.EE.B.6 - Use variables to represent numbers and write expressions.",
+      "description": "A music service charges a flat monthly fee of $10. In addition to the fee, each song you download costs a certain amount. We don't know the cost of a ",
+      "imageUrl": "",
+      "problemStatement": "A music service charges a flat monthly fee of $10. In addition to the fee, each song you download costs a certain amount. We don't know the cost of a song yet, but we know it's the same for every song.If a person downloads 8 songs, describe how you would calculate their total bill for the month without using a single final number. Just explain the steps you would take.\n2. Possible Misconceptions\n1. Misplacing the Variable: A student might attach the variable to the flat fee instead of the per-it",
+      "teachingPrompt": "Help Zippy understand the concepts in The Digital Music Subscription.",
+      "targetConcepts": [
+        "Variables to represent numbers and write expressions"
+      ],
+      "correctSolutionPathway": "",
+      "misconceptions": [
+        "Misplacing the Variable: A student might attach the variable to the flat fee instead of the per-item cost (e.g., thinking the $10 is what changes per song).",
+        "Additive Variable: A student might think the relationship is additive (Fee + Song Cost) rather than realizing the song cost must be multiplied by the quantity of songs.",
+        "Ignoring the Fixed Cost: A student might only focus on the cost of the songs and forget to include the starting 'flat fee' in their logic."
+      ],
+      "aiIntro": "Hi! I'm Zippy! \ud83c\udf89\n\nI'm looking at this problem: A music service charges a flat monthly fee of $10. In addition to the fee, each song you download costs a certain amount. We don't know the cost of a song yet, but we know it's the same for every song\n\nHmm, I think A student might attach the variable to the flat fee instead of the per-item cost (e.g., thinking the $10 is what changes per song). \ud83e\udd14\n\nCan you help me understand this better?",
+      "sections": {
+        "studentPrompt": "A music service charges a flat monthly fee of $10. In addition to the fee, each song you download costs a certain amount. We don't know the cost of a song yet, but we know it's the same for every song.If a person downloads 8 songs, describe how you would calculate their total bill for the month without using a single final number. Just explain the steps you would take.\n2. Possible Misconceptions\n1. Misplacing the Variable: A student might attach the variable to the flat fee instead of the per-item cost (e.g., thinking the $10 is what changes per song).\n2. Additive Variable: A student might think the relationship is additive (Fee + Song Cost) rather than realizing the song cost must be multiplied by the quantity of songs.\n3. Ignoring the Fixed Cost: A student might only focus on the cost of the songs and forget to include the starting 'flat fee' in their logic.",
+        "misconceptions": [
+          "Misplacing the Variable: A student might attach the variable to the flat fee instead of the per-item cost (e.g., thinking the $10 is what changes per song).",
+          "Additive Variable: A student might think the relationship is additive (Fee + Song Cost) rather than realizing the song cost must be multiplied by the quantity of songs.",
+          "Ignoring the Fixed Cost: A student might only focus on the cost of the songs and forget to include the starting 'flat fee' in their logic."
+        ],
+        "patternRecognition": "",
+        "generalization": "Consider the statement: 'In a math expression, a variable can only ever stand for one specific secret number that we are trying to find.'Is this statement Always, Sometimes, or Never true? Use the music subscription example to justify your answer. Think about whether the variable represents one specific unknown song price or if it could represent the number of songs a customer chooses to buy.",
+        "inference": "The music service changes its policy. Now, the first 5 songs every month are free, but you still pay the $10 monthly fee. If a customer downloads more than 5 songs, how does this change the way you would describe the total bill? Predict whether a person who downloads 20 songs will pay more or less under this new plan compared to the old plan, and explain why.",
+        "mappingData": {
+          "claims": [],
+          "evidence": "",
+          "criticalThinking": ""
+        }
+      }
+    },
+    "the_greenhouse_fundraising_goal": {
+      "id": "the_greenhouse_fundraising_goal",
+      "slug": "the_greenhouse_fundraising_goal",
+      "title": "The Greenhouse Fundraising Goal",
+      "grade": "Grade 6",
+      "domain": "Expressions & Equations",
+      "standard": "CCSS.MATH.6.EE.B.7",
+      "standardDescription": "6.EE.B.7 - Solve real-world and mathematical problems by writing and solving equations of the form x + p = q and px = q.",
+      "description": "A school garden club is raising money to buy a small greenhouse. The greenhouse costs exactly $300. So far, the club has raised $120 through a bake sa",
+      "imageUrl": "",
+      "problemStatement": "A school garden club is raising money to buy a small greenhouse. The greenhouse costs exactly $300. So far, the club has raised $120 through a bake sale.Explain how you would find out how much more money they still need to raise. Describe your steps without providing a final answer.\n2. Possible Misconceptions\n1. Incorrect Operation: A student might add the current amount to the goal ($300 + $120$) instead of subtracting to find the difference.\n2. Multiplicative Confusion: In a multiplication sce",
+      "teachingPrompt": "Help Zippy understand the concepts in The Greenhouse Fundraising Goal.",
+      "targetConcepts": [
+        "Real-world and mathematical problems by writing and solving equations of the form x + p = q and px = q"
+      ],
+      "correctSolutionPathway": "",
+      "misconceptions": [
+        "Incorrect Operation: A student might add the current amount to the goal ($300 + $120$) instead of subtracting to find the difference.",
+        "Multiplicative Confusion: In a multiplication scenario (like px = q), a student might multiply the total by the rate (e.g., $300 \\times 120$) instead of dividing to find the missing variable.",
+        "Term Misplacement: A student might set up an equation where the total is treated as a part (e.g., $x + 300 = 120$), leading to a negative result which is not possible in this context."
+      ],
+      "aiIntro": "Hi! I'm Zippy! \ud83c\udf89\n\nI'm looking at this problem: A school garden club is raising money to buy a small greenhouse. The greenhouse costs exactly $300. So far, the club has raised $120 through a bake sale.Explain how you would find out how much more mo\n\nHmm, I think A student might add the current amount to the goal ($300 + $120$) instead of subtracting to find the difference. \ud83e\udd14\n\nCan you help me understand this better?",
+      "sections": {
+        "studentPrompt": "A school garden club is raising money to buy a small greenhouse. The greenhouse costs exactly $300. So far, the club has raised $120 through a bake sale.Explain how you would find out how much more money they still need to raise. Describe your steps without providing a final answer.\n2. Possible Misconceptions\n1. Incorrect Operation: A student might add the current amount to the goal ($300 + $120$) instead of subtracting to find the difference.\n2. Multiplicative Confusion: In a multiplication scenario (like px = q), a student might multiply the total by the rate (e.g., $300 \\times 120$) instead of dividing to find the missing variable.\n3. Term Misplacement: A student might set up an equation where the total is treated as a part (e.g., $x + 300 = 120$), leading to a negative result which is not possible in this context.",
+        "misconceptions": [
+          "Incorrect Operation: A student might add the current amount to the goal ($300 + $120$) instead of subtracting to find the difference.",
+          "Multiplicative Confusion: In a multiplication scenario (like px = q), a student might multiply the total by the rate (e.g., $300 \\times 120$) instead of dividing to find the missing variable.",
+          "Term Misplacement: A student might set up an equation where the total is treated as a part (e.g., $x + 300 = 120$), leading to a negative result which is not possible in this context."
+        ],
+        "patternRecognition": "",
+        "generalization": "Consider the statement: 'To find the missing value in an addition equation (x + p = q), you should use subtraction. To find the missing value in a multiplication equation (px = q), you should use division.'Is this statement Always, Sometimes, or Never true for the math problems we are solving? Use an example with the garden kits to justify your answer.",
+        "inference": "The club finds a cheaper greenhouse for $250, but they also realize they only have $100 from the bake sale instead of $120. Before doing any math, predict if the 'money still needed' will stay the same, increase, or decrease compared to the original goal. Explain how you can know this just by looking at how both numbers changed.",
+        "mappingData": {
+          "claims": [],
+          "evidence": "",
+          "criticalThinking": ""
+        }
+      }
+    },
+    "the_movie_theater_age_limit": {
+      "id": "the_movie_theater_age_limit",
+      "slug": "the_movie_theater_age_limit",
+      "title": "The Movie Theater Age Limit",
+      "grade": "Grade 6",
+      "domain": "Expressions & Equations",
+      "standard": "CCSS.MATH.6.EE.B.8",
+      "standardDescription": "6.EE.B.8 - Write an inequality of the form x > c or x < c to represent a constraint or condition in a real-world or mathematical problem.",
+      "description": "A movie theater has a rule for their 'Late Night Mystery' films: You must be older than 13 to buy a ticket.List three different ages that would be all",
+      "imageUrl": "",
+      "problemStatement": "A movie theater has a rule for their 'Late Night Mystery' films: You must be older than 13 to buy a ticket.List three different ages that would be allowed to watch the movie. Is a person who is exactly 13 years old allowed to watch? Explain why or why not.\n2. Possible Misconceptions\n1. Inclusion of the Boundary: Thinking 'older than 13' includes the number 13 itself (confusing > with \u2265).\n2. Directional Error: Reversing the inequality (e.g., thinking x < 13 represents being older than 13).\n3. Dis",
+      "teachingPrompt": "Help Zippy understand the concepts in The Movie Theater Age Limit.",
+      "targetConcepts": [
+        "An inequality of the form x > c or x < c to represent a constraint or condition in a real-world or mathematical problem"
+      ],
+      "correctSolutionPathway": "",
+      "misconceptions": [
+        "Inclusion of the Boundary: Thinking 'older than 13' includes the number 13 itself (confusing > with \u2265).",
+        "Directional Error: Reversing the inequality (e.g., thinking x < 13 represents being older than 13).",
+        "Discrete vs. Continuous: Believing only whole numbers (14, 15, 16) count as solutions, forgetting that 13.5 or 13 years and 1 day also satisfy the condition 'older than 13'."
+      ],
+      "aiIntro": "Hi! I'm Zippy! \ud83c\udf89\n\nI'm looking at this problem: A movie theater has a rule for their 'Late Night Mystery' films: You must be older than 13 to buy a ticket.List three different ages that would be allowed to watch the movie. Is a person who is exactl\n\nHmm, I think Thinking 'older than 13' includes the number 13 itself (confusing > with \u2265). \ud83e\udd14\n\nCan you help me understand this better?",
+      "sections": {
+        "studentPrompt": "A movie theater has a rule for their 'Late Night Mystery' films: You must be older than 13 to buy a ticket.List three different ages that would be allowed to watch the movie. Is a person who is exactly 13 years old allowed to watch? Explain why or why not.\n2. Possible Misconceptions\n1. Inclusion of the Boundary: Thinking 'older than 13' includes the number 13 itself (confusing > with \u2265).\n2. Directional Error: Reversing the inequality (e.g., thinking x < 13 represents being older than 13).\n3. Discrete vs. Continuous: Believing only whole numbers (14, 15, 16) count as solutions, forgetting that 13.5 or 13 years and 1 day also satisfy the condition 'older than 13'.",
+        "misconceptions": [
+          "Inclusion of the Boundary: Thinking 'older than 13' includes the number 13 itself (confusing > with \u2265).",
+          "Directional Error: Reversing the inequality (e.g., thinking x < 13 represents being older than 13).",
+          "Discrete vs. Continuous: Believing only whole numbers (14, 15, 16) count as solutions, forgetting that 13.5 or 13 years and 1 day also satisfy the condition 'older than 13'."
+        ],
+        "patternRecognition": "",
+        "generalization": "Consider the statement: 'An inequality like x > 13 has an infinite number of solutions.'Is this statement Always, Sometimes, or Never true in the real world? Explain your reasoning by thinking about the movie theater age limit. Are there any ages that are mathematically 'greater than 13' but wouldn't make sense for a human being?",
+        "inference": "The theater introduces a new 'Kids Club' discount. To get the discount, your age must be less than 10 (x < 10).If a child turns 10 today, do they still get the discount? Predict how the graph of the allowed ages for the 'Late Night' movie (x > 13) would look different from the graph of the 'Kids Club' discount (x < 10). Which one would have an arrow pointing to the right, and which one would point to the left?",
+        "mappingData": {
+          "claims": [],
+          "evidence": "",
+          "criticalThinking": ""
+        }
+      }
+    },
+    "the_battery_life_mystery": {
+      "id": "the_battery_life_mystery",
+      "slug": "the_battery_life_mystery",
+      "title": "The Battery Life Mystery",
+      "grade": "Grade 6",
+      "domain": "Expressions & Equations",
+      "standard": "CCSS.MATH.6.EE.C.9",
+      "standardDescription": "6.EE.C.9 - Use variables to represent two quantities that change in relationship to one another.",
+      "description": "A person is using a high-powered flashlight. Every hour the flashlight is left on, it uses up exactly 15% of its total battery life.If the flashlight ",
+      "imageUrl": "",
+      "problemStatement": "A person is using a high-powered flashlight. Every hour the flashlight is left on, it uses up exactly 15% of its total battery life.If the flashlight starts at 100% battery, how much battery life is left after 1 hour? How much is left after 2 hours? Describe what is happening to the battery percentage as the time increases.\n2. Possible Misconceptions\n1. Dependent/Independent Swap: Thinking that the battery level determines how much time has passed, rather than the time passed determining the bat",
+      "teachingPrompt": "Help Zippy understand the concepts in The Battery Life Mystery.",
+      "targetConcepts": [
+        "Variables to represent two quantities that change in relationship to one another"
+      ],
+      "correctSolutionPathway": "",
+      "misconceptions": [
+        "Dependent/Independent Swap: Thinking that the battery level determines how much time has passed, rather than the time passed determining the battery level.",
+        "Additive instead of Subtractive: Assuming the battery life increases by 15% each hour (starting from 100% and going to 115%).",
+        "Rate Application Error: Applying 15% to the *current* battery level each time (exponential decay) instead of the *original* total (linear), which is common when students see percentages."
+      ],
+      "aiIntro": "Hi! I'm Zippy! \ud83c\udf89\n\nI'm looking at this problem: A person is using a high-powered flashlight. Every hour the flashlight is left on, it uses up exactly 15% of its total battery life.If the flashlight starts at 100% battery, how much battery life is l\n\nHmm, I think Thinking that the battery level determines how much time has passed, rather than the time passed determining the battery level. \ud83e\udd14\n\nCan you help me understand this better?",
+      "sections": {
+        "studentPrompt": "A person is using a high-powered flashlight. Every hour the flashlight is left on, it uses up exactly 15% of its total battery life.If the flashlight starts at 100% battery, how much battery life is left after 1 hour? How much is left after 2 hours? Describe what is happening to the battery percentage as the time increases.\n2. Possible Misconceptions\n1. Dependent/Independent Swap: Thinking that the battery level determines how much time has passed, rather than the time passed determining the battery level.\n2. Additive instead of Subtractive: Assuming the battery life increases by 15% each hour (starting from 100% and going to 115%).\n3. Rate Application Error: Applying 15% to the *current* battery level each time (exponential decay) instead of the *original* total (linear), which is common when students see percentages.",
+        "misconceptions": [
+          "Dependent/Independent Swap: Thinking that the battery level determines how much time has passed, rather than the time passed determining the battery level.",
+          "Additive instead of Subtractive: Assuming the battery life increases by 15% each hour (starting from 100% and going to 115%).",
+          "Rate Application Error: Applying 15% to the *current* battery level each time (exponential decay) instead of the *original* total (linear), which is common when students see percentages."
+        ],
+        "patternRecognition": "",
+        "generalization": "Consider this statement: 'In a relationship between two quantities, the dependent variable is the one that we choose or control, and the independent variable is the one that changes because of our choice.'Is this statement Always, Sometimes, or Never true? Use the flashlight example to explain which variable is 'independent' and which is 'dependent'.",
+        "inference": "The person switches to a 'Power Saver' bulb. Now, the flashlight only uses 10% of its battery life every hour.Predict how the graph of the 'Power Saver' bulb would look compared to the original bulb. Which line would be steeper? Which bulb would allow the flashlight to stay on for more hours before reaching 0%? Explain your reasoning.",
+        "mappingData": {
+          "claims": [],
+          "evidence": "",
+          "criticalThinking": ""
+        }
+      }
+    },
+    "the_custom_patio_design": {
+      "id": "the_custom_patio_design",
+      "slug": "the_custom_patio_design",
+      "title": "The Custom Patio Design",
+      "grade": "Grade 6",
+      "domain": "Geometry",
+      "standard": "CCSS.MATH.6.G.A.1",
+      "standardDescription": "6.G.A.1 - Find the area of right triangles, other triangles, special quadrilaterals, and polygons by composing into rectangles or decomposing into triangles and other shapes.",
+      "description": "A homeowner is planning a rectangular patio that is 8 feet long and 6 feet wide. Describe how you could determine the total amount of stone needed to ",
+      "imageUrl": "",
+      "problemStatement": "A homeowner is planning a rectangular patio that is 8 feet long and 6 feet wide. Describe how you could determine the total amount of stone needed to cover the surface of the patio without counting every single square foot.\n2. Possible Misconceptions\n1. Perimeter Confusion: A student might add the lengths of all four sides ($8+6+8+6$) instead of multiplying, confusing the boundary with the surface area.\n2. Slant Height Error: In shapes like parallelograms or triangles, a student might use the le",
+      "teachingPrompt": "Help Zippy understand the concepts in The Custom Patio Design.",
+      "targetConcepts": [
+        "The area of right triangles"
+      ],
+      "correctSolutionPathway": "",
+      "misconceptions": [
+        "Perimeter Confusion: A student might add the lengths of all four sides ($8+6+8+6$) instead of multiplying, confusing the boundary with the surface area.",
+        "Slant Height Error: In shapes like parallelograms or triangles, a student might use the length of a slanted side instead of the vertical height to calculate area.",
+        "Dimension Overload: A student might multiply all four side lengths together ($8 \\times 6 \\times 8 \\times 6$) believing that every side must be included in an area calculation."
+      ],
+      "aiIntro": "Hi! I'm Zippy! \ud83c\udf89\n\nI'm looking at this problem: A homeowner is planning a rectangular patio that is 8 feet long and 6 feet wide. Describe how you could determine the total amount of stone needed to cover the surface of the patio without counting ev\n\nHmm, I think A student might add the lengths of all four sides ($8+6+8+6$) instead of multiplying, confusing the boundary with the surface area. \ud83e\udd14\n\nCan you help me understand this better?",
+      "sections": {
+        "studentPrompt": "A homeowner is planning a rectangular patio that is 8 feet long and 6 feet wide. Describe how you could determine the total amount of stone needed to cover the surface of the patio without counting every single square foot.\n2. Possible Misconceptions\n1. Perimeter Confusion: A student might add the lengths of all four sides ($8+6+8+6$) instead of multiplying, confusing the boundary with the surface area.\n2. Slant Height Error: In shapes like parallelograms or triangles, a student might use the length of a slanted side instead of the vertical height to calculate area.\n3. Dimension Overload: A student might multiply all four side lengths together ($8 \\times 6 \\times 8 \\times 6$) believing that every side must be included in an area calculation.",
+        "misconceptions": [
+          "Perimeter Confusion: A student might add the lengths of all four sides ($8+6+8+6$) instead of multiplying, confusing the boundary with the surface area.",
+          "Slant Height Error: In shapes like parallelograms or triangles, a student might use the length of a slanted side instead of the vertical height to calculate area.",
+          "Dimension Overload: A student might multiply all four side lengths together ($8 \\times 6 \\times 8 \\times 6$) believing that every side must be included in an area calculation."
+        ],
+        "patternRecognition": "",
+        "generalization": "Consider the statement: 'Any shape made of straight lines (a polygon) can be measured by breaking it apart into a collection of simpler rectangles and triangles.'Is this statement Always, Sometimes, or Never true? Use your own reasoning to explain why this strategy works for complex shapes like an L-shaped pool or a house-shaped garden.",
+        "inference": "A designer is making a large triangular flower bed. They know that this triangle is exactly half of a 12-foot by 8-foot rectangle. If the designer decides to double the length and the width of that rectangle, how will the size of the new triangular flower bed compare to the original one? Explain your prediction without providing a final area number.",
+        "mappingData": {
+          "claims": [],
+          "evidence": "",
+          "criticalThinking": ""
+        }
+      }
+    },
+    "the_sandbox_filling_challenge": {
+      "id": "the_sandbox_filling_challenge",
+      "slug": "the_sandbox_filling_challenge",
+      "title": "The Sandbox Filling Challenge",
+      "grade": "Grade 6",
+      "domain": "Geometry",
+      "standard": "CCSS.MATH.6.G.A.2",
+      "standardDescription": "6.G.A.2 - Find the volume of a right rectangular prism with fractional edge lengths.",
+      "description": "A small sandbox is shaped like a rectangular box. It is 4 feet long, 3 feet wide, and 1 foot deep.Describe how you could find out how many 1-foot cube",
+      "imageUrl": "",
+      "problemStatement": "A small sandbox is shaped like a rectangular box. It is 4 feet long, 3 feet wide, and 1 foot deep.Describe how you could find out how many 1-foot cubes of sand would be needed to fill the sandbox completely without counting them one by one.\n2. Possible Misconceptions\n1. Area vs. Volume: A student might multiply only the length and width (4 \u00d7 3 = 12), forgetting to account for the depth/height of the box.\n2. Additive Reasoning: A student might add the dimensions ($4 + 3 + 1$) instead of using mul",
+      "teachingPrompt": "Help Zippy understand the concepts in The Sandbox Filling Challenge.",
+      "targetConcepts": [
+        "The volume of a right rectangular prism with fractional edge lengths"
+      ],
+      "correctSolutionPathway": "",
+      "misconceptions": [
+        "Area vs. Volume: A student might multiply only the length and width (4 \u00d7 3 = 12), forgetting to account for the depth/height of the box.",
+        "Additive Reasoning: A student might add the dimensions ($4 + 3 + 1$) instead of using multiplication to find the total capacity.",
+        "Fractional Misalignment: When dimensions are fractions (like 1/2 foot), a student might think they need fewer cubes than for a whole foot, failing to realize that smaller 'unit cubes' (like 1/2-ft cubes) would require more units to fill the same space."
+      ],
+      "aiIntro": "Hi! I'm Zippy! \ud83c\udf89\n\nI'm looking at this problem: A small sandbox is shaped like a rectangular box. It is 4 feet long, 3 feet wide, and 1 foot deep.Describe how you could find out how many 1-foot cubes of sand would be needed to fill the sandbox comp\n\nHmm, I think A student might multiply only the length and width (4 \u00d7 3 = 12), forgetting to account for the depth/height of the box. \ud83e\udd14\n\nCan you help me understand this better?",
+      "sections": {
+        "studentPrompt": "A small sandbox is shaped like a rectangular box. It is 4 feet long, 3 feet wide, and 1 foot deep.Describe how you could find out how many 1-foot cubes of sand would be needed to fill the sandbox completely without counting them one by one.\n2. Possible Misconceptions\n1. Area vs. Volume: A student might multiply only the length and width (4 \u00d7 3 = 12), forgetting to account for the depth/height of the box.\n2. Additive Reasoning: A student might add the dimensions ($4 + 3 + 1$) instead of using multiplication to find the total capacity.\n3. Fractional Misalignment: When dimensions are fractions (like 1/2 foot), a student might think they need fewer cubes than for a whole foot, failing to realize that smaller 'unit cubes' (like 1/2-ft cubes) would require more units to fill the same space.",
+        "misconceptions": [
+          "Area vs. Volume: A student might multiply only the length and width (4 \u00d7 3 = 12), forgetting to account for the depth/height of the box.",
+          "Additive Reasoning: A student might add the dimensions ($4 + 3 + 1$) instead of using multiplication to find the total capacity.",
+          "Fractional Misalignment: When dimensions are fractions (like 1/2 foot), a student might think they need fewer cubes than for a whole foot, failing to realize that smaller 'unit cubes' (like 1/2-ft cubes) would require more units to fill the same space."
+        ],
+        "patternRecognition": "",
+        "generalization": "Consider the statement: 'If you use smaller cubes (like 1/2-foot cubes) to measure the volume of a box, the final volume number you get will be the same as if you used 1-foot cubes.'Is this statement Always, Sometimes, or Never true? Explain your reasoning. Think about the difference between the *number of cubes* you count and the *actual amount of space* being measured.",
+        "inference": "A new sandbox is designed with the exact same length and width, but it is only half as deep ($1/2$ foot deep).Predict how the amount of sand needed for this new sandbox compares to the original sandbox. If you decided to double the length of the sandbox as well, how would that affect your prediction? Explain your logic without using final numbers.",
+        "mappingData": {
+          "claims": [],
+          "evidence": "",
+          "criticalThinking": ""
+        }
+      }
+    },
+    "mapping_the_school_courtyard": {
+      "id": "mapping_the_school_courtyard",
+      "slug": "mapping_the_school_courtyard",
+      "title": "Mapping the School Courtyard",
+      "grade": "Grade 6",
+      "domain": "Geometry",
+      "standard": "CCSS.MATH.6.G.A.3",
+      "standardDescription": "6.G.A.3 - Draw polygons in the coordinate plane given coordinates for the vertices; use coordinates to find the length of a side joining points with the same first coordinate or the same second coordinate.",
+      "description": "A school is mapping out a new rectangular courtyard on a coordinate grid. The four corners of the courtyard are located at (2, 2), (8, 2), (8, 6), and",
+      "imageUrl": "",
+      "problemStatement": "A school is mapping out a new rectangular courtyard on a coordinate grid. The four corners of the courtyard are located at (2, 2), (8, 2), (8, 6), and (2, 6).If you walk from the first corner (2, 2) to the second corner (8, 2) along the grid line, how many units long is that side of the courtyard? Explain how you can find this distance just by looking at the numbers in the coordinates.\n2. Possible Misconceptions\n1. Diagonal Distance Error: A student might try to use a 'counting' method that move",
+      "teachingPrompt": "Help Zippy understand the concepts in Mapping the School Courtyard.",
+      "targetConcepts": [
+        "Coordinates to find the length of a side joining points with the same first coordinate or the same second coordinate"
+      ],
+      "correctSolutionPathway": "",
+      "misconceptions": [
+        "Diagonal Distance Error: A student might try to use a 'counting' method that moves diagonally across the squares instead of staying on the grid lines (the side of the polygon).",
+        "Coordinate Confusion: A student might subtract the x-coordinate from the y-coordinate (e.g., 8 - 2 = 6) regardless of whether they are looking at the same axis, or subtract the wrong pair of numbers.",
+        "Absolute Value Neglect: If a shape crosses into negative quadrants (e.g., -3 to 4), a student might subtract the digits and get 1 instead of adding the absolute values to get the distance of 7."
+      ],
+      "aiIntro": "Hi! I'm Zippy! \ud83c\udf89\n\nI'm looking at this problem: A school is mapping out a new rectangular courtyard on a coordinate grid. The four corners of the courtyard are located at (2, 2), (8, 2), (8, 6), and (2, 6).If you walk from the first corner (2, 2) t\n\nHmm, I think A student might try to use a 'counting' method that moves diagonally across the squares instead of staying on the grid lines (the side of the polyg... \ud83e\udd14\n\nCan you help me understand this better?",
+      "sections": {
+        "studentPrompt": "A school is mapping out a new rectangular courtyard on a coordinate grid. The four corners of the courtyard are located at (2, 2), (8, 2), (8, 6), and (2, 6).If you walk from the first corner (2, 2) to the second corner (8, 2) along the grid line, how many units long is that side of the courtyard? Explain how you can find this distance just by looking at the numbers in the coordinates.\n2. Possible Misconceptions\n1. Diagonal Distance Error: A student might try to use a 'counting' method that moves diagonally across the squares instead of staying on the grid lines (the side of the polygon).\n2. Coordinate Confusion: A student might subtract the x-coordinate from the y-coordinate (e.g., 8 - 2 = 6) regardless of whether they are looking at the same axis, or subtract the wrong pair of numbers.\n3. Absolute Value Neglect: If a shape crosses into negative quadrants (e.g., -3 to 4), a student might subtract the digits and get 1 instead of adding the absolute values to get the distance of 7.",
+        "misconceptions": [
+          "Diagonal Distance Error: A student might try to use a 'counting' method that moves diagonally across the squares instead of staying on the grid lines (the side of the polygon).",
+          "Coordinate Confusion: A student might subtract the x-coordinate from the y-coordinate (e.g., 8 - 2 = 6) regardless of whether they are looking at the same axis, or subtract the wrong pair of numbers.",
+          "Absolute Value Neglect: If a shape crosses into negative quadrants (e.g., -3 to 4), a student might subtract the digits and get 1 instead of adding the absolute values to get the distance of 7."
+        ],
+        "patternRecognition": "",
+        "generalization": "Consider the statement: 'To find the distance between two points on a coordinate grid that are on the same horizontal or vertical line, you only need to find the difference between the coordinates that are different.'Is this statement Always, Sometimes, or Never true? Use an example of a horizontal side from the courtyard to justify your answer.",
+        "inference": "The school wants to add a smaller square flower bed inside the courtyard. The bottom-left corner of the flower bed is at (3, 3) and each side is 2 units long.Predict what the coordinates of the other three corners will be. If the school decided to move the entire courtyard 5 units to the right, how would that change the distance of the sides? Explain your reasoning without calculating every new point.",
+        "mappingData": {
+          "claims": [],
+          "evidence": "",
+          "criticalThinking": ""
+        }
+      }
+    },
+    "the_shipping_box_designer": {
+      "id": "the_shipping_box_designer",
+      "slug": "the_shipping_box_designer",
+      "title": "The Shipping Box Designer",
+      "grade": "Grade 6",
+      "domain": "Geometry",
+      "standard": "CCSS.MATH.6.G.A.4",
+      "standardDescription": "6.G.A.4 - Represent three-dimensional figures using nets made up of rectangles and triangles, and use the nets to find the surface area of these figures.",
+      "description": "A company is designing a simple cardboard box. The box is a cube where every side is 5 inches long. If you were to cut the box along some of its edges",
+      "imageUrl": "",
+      "problemStatement": "A company is designing a simple cardboard box. The box is a cube where every side is 5 inches long. If you were to cut the box along some of its edges and flatten it out completely on a table, describe what the flat shape would look like. How many squares would you see, and how would they be connected?\n2. Possible Misconceptions\n1. Volume vs. Surface Area: A student might try to calculate the space inside ($5 \\times 5 \\times 5$) instead of the area of the outer 'skin' of the box.\n2. Missing Face",
+      "teachingPrompt": "Help Zippy understand the concepts in The Shipping Box Designer.",
+      "targetConcepts": [
+        "Three-dimensional figures using nets made up of rectangles and triangles",
+        "The nets to find the surface area of these figures"
+      ],
+      "correctSolutionPathway": "",
+      "misconceptions": [
+        "Volume vs. Surface Area: A student might try to calculate the space inside ($5 \\times 5 \\times 5$) instead of the area of the outer 'skin' of the box.",
+        "Missing Faces: When imagining the flattened net, a student might only count 4 faces (the sides) and forget the top and bottom.",
+        "Net Layout Errors: A student might believe any arrangement of 6 squares forms a cube, failing to realize that some layouts would overlap rather than fold into a 3D shape."
+      ],
+      "aiIntro": "Hi! I'm Zippy! \ud83c\udf89\n\nI'm looking at this problem: A company is designing a simple cardboard box. The box is a cube where every side is 5 inches long. If you were to cut the box along some of its edges and flatten it out completely on a table, describ\n\nHmm, I think A student might try to calculate the space inside ($5 \\times 5 \\times 5$) instead of the area of the outer 'skin' of the box. \ud83e\udd14\n\nCan you help me understand this better?",
+      "sections": {
+        "studentPrompt": "A company is designing a simple cardboard box. The box is a cube where every side is 5 inches long. If you were to cut the box along some of its edges and flatten it out completely on a table, describe what the flat shape would look like. How many squares would you see, and how would they be connected?\n2. Possible Misconceptions\n1. Volume vs. Surface Area: A student might try to calculate the space inside ($5 \\times 5 \\times 5$) instead of the area of the outer 'skin' of the box.\n2. Missing Faces: When imagining the flattened net, a student might only count 4 faces (the sides) and forget the top and bottom.\n3. Net Layout Errors: A student might believe any arrangement of 6 squares forms a cube, failing to realize that some layouts would overlap rather than fold into a 3D shape.",
+        "misconceptions": [
+          "Volume vs. Surface Area: A student might try to calculate the space inside ($5 \\times 5 \\times 5$) instead of the area of the outer 'skin' of the box.",
+          "Missing Faces: When imagining the flattened net, a student might only count 4 faces (the sides) and forget the top and bottom.",
+          "Net Layout Errors: A student might believe any arrangement of 6 squares forms a cube, failing to realize that some layouts would overlap rather than fold into a 3D shape."
+        ],
+        "patternRecognition": "",
+        "generalization": "Consider the statement: 'To find the total surface area of any 3D shape made of flat faces, you can simply find the area of each individual shape in its flattened net and add them all together.'Is this statement Always, Sometimes, or Never true? Use the cube or pyramid example to justify your answer.",
+        "inference": "A designer is making a 'Tent Box' in the shape of a triangular prism. It has two triangular ends and three rectangular sides. If the designer decides to make the tent twice as long, which parts of the flattened net will get larger, and which parts will stay exactly the same? Predict how this change affects the total amount of cardboard needed compared to the original size.",
+        "mappingData": {
+          "claims": [],
+          "evidence": "",
+          "criticalThinking": ""
+        }
+      }
+    },
+    "the_trail_mix_party": {
+      "id": "the_trail_mix_party",
+      "slug": "the_trail_mix_party",
+      "title": "The Trail Mix Party",
+      "grade": "Grade 6",
+      "domain": "Number System",
+      "standard": "CCSS.MATH.6.NS.A.1",
+      "standardDescription": "6.NS.A.1 - Interpret and compute quotients of fractions, and solve word problems involving division of fractions by fractions.",
+      "description": "A group of friends is making snack bags. They have 4 cups of trail mix. If each snack bag holds 1/2 of a cup, explain how you could find out how many ",
+      "imageUrl": "",
+      "problemStatement": "A group of friends is making snack bags. They have 4 cups of trail mix. If each snack bag holds 1/2 of a cup, explain how you could find out how many snack bags they can fill. Describe what is happening to the total amount of trail mix as you fill each bag.\n2. Possible Misconceptions\n1. Inverting the Wrong Fraction: A student might multiply 1/4 by 1/2 instead of 4 by 2, or incorrectly invert the dividend instead of the divisor.\n2. Smaller Means Fewer: A student might think that because the divis",
+      "teachingPrompt": "Help Zippy understand the concepts in The Trail Mix Party.",
+      "targetConcepts": [
+        "And compute quotients of fractions",
+        "Word problems involving division of fractions by fractions"
+      ],
+      "correctSolutionPathway": "",
+      "misconceptions": [
+        "Inverting the Wrong Fraction: A student might multiply 1/4 by 1/2 instead of 4 by 2, or incorrectly invert the dividend instead of the divisor.",
+        "Smaller Means Fewer: A student might think that because the divisor is a small fraction (1/2), the answer must be smaller than the starting number (4), leading them to answer 2 instead of 8.",
+        "Operation Confusion: A student might try to subtract 1/2 from 4 once and stop, or try to find a common denominator and then add the numerators, confusing division with addition/subtraction."
+      ],
+      "aiIntro": "Hi! I'm Zippy! \ud83c\udf89\n\nI'm looking at this problem: A group of friends is making snack bags. They have 4 cups of trail mix. If each snack bag holds 1/2 of a cup, explain how you could find out how many snack bags they can fill. Describe what is happeni\n\nHmm, I think A student might multiply 1/4 by 1/2 instead of 4 by 2, or incorrectly invert the dividend instead of the divisor. \ud83e\udd14\n\nCan you help me understand this better?",
+      "sections": {
+        "studentPrompt": "A group of friends is making snack bags. They have 4 cups of trail mix. If each snack bag holds 1/2 of a cup, explain how you could find out how many snack bags they can fill. Describe what is happening to the total amount of trail mix as you fill each bag.\n2. Possible Misconceptions\n1. Inverting the Wrong Fraction: A student might multiply 1/4 by 1/2 instead of 4 by 2, or incorrectly invert the dividend instead of the divisor.\n2. Smaller Means Fewer: A student might think that because the divisor is a small fraction (1/2), the answer must be smaller than the starting number (4), leading them to answer 2 instead of 8.\n3. Operation Confusion: A student might try to subtract 1/2 from 4 once and stop, or try to find a common denominator and then add the numerators, confusing division with addition/subtraction.",
+        "misconceptions": [
+          "Inverting the Wrong Fraction: A student might multiply 1/4 by 1/2 instead of 4 by 2, or incorrectly invert the dividend instead of the divisor.",
+          "Smaller Means Fewer: A student might think that because the divisor is a small fraction (1/2), the answer must be smaller than the starting number (4), leading them to answer 2 instead of 8.",
+          "Operation Confusion: A student might try to subtract 1/2 from 4 once and stop, or try to find a common denominator and then add the numerators, confusing division with addition/subtraction."
+        ],
+        "patternRecognition": "",
+        "generalization": "Consider the statement: 'When you divide a whole number by a fraction that is less than 1, the answer will always be larger than the whole number you started with.'Is this statement Always, Sometimes, or Never true? Use your own examples or the trail mix scenario to justify your answer.",
+        "inference": "The friends only have 3/4 of a cup of trail mix left, and they want to make mini-bags that hold 1/8 of a cup each.Before doing any calculation, predict if they will be able to fill more than 5 mini-bags or fewer than 5 mini-bags. Explain how you can use the relationship between the fractions 3/4 and 1/8 to make this prediction.",
+        "mappingData": {
+          "claims": [],
+          "evidence": "",
+          "criticalThinking": ""
+        }
+      }
+    },
+    "the_farmers_market_booth": {
+      "id": "the_farmers_market_booth",
+      "slug": "the_farmers_market_booth",
+      "title": "The Farmer's Market Booth",
+      "grade": "Grade 6",
+      "domain": "Number System",
+      "standard": "CCSS.MATH.6.NS.B.3",
+      "standardDescription": "6.NS.B.3 - Fluently add, subtract, multiply, and divide multi-digit decimals using the standard algorithm for each operation.",
+      "description": "A farmer is selling honey at the market. One large jar of honey costs $12.50. A customer buys two jars and pays with a $50 bill.Describe the steps you",
+      "imageUrl": "",
+      "problemStatement": "A farmer is selling honey at the market. One large jar of honey costs $12.50. A customer buys two jars and pays with a $50 bill.Describe the steps you would take to find out how much change the customer should receive. Explain your thinking without providing the final answer.\n2. Possible Misconceptions\n1. Misalignment of Place Value: When subtracting $12.50$ from $50$, a student might line up the '5' in 50 with the '5' in 0.50, failing to treat 50 as 50.00.\n2. Ignoring the Decimal in Multiplicat",
+      "teachingPrompt": "Help Zippy understand the concepts in The Farmer's Market Booth.",
+      "targetConcepts": [
+        "The Farmer's Market Booth"
+      ],
+      "correctSolutionPathway": "",
+      "misconceptions": [
+        "Misalignment of Place Value: When subtracting $12.50$ from $50$, a student might line up the '5' in 50 with the '5' in 0.50, failing to treat 50 as 50.00.",
+        "Ignoring the Decimal in Multiplication: A student might multiply $1250 \\times 2$ and forget to place the decimal point back into the product, resulting in $2500$ instead of $25.00$.",
+        "Shifted Divisor in Division: If dividing a total by a decimal (e.g., $15 \\div 0.75$), a student might forget to move the decimal point in both the divisor and the dividend, leading to a quotient that is off by a factor of 10 or 100."
+      ],
+      "aiIntro": "Hi! I'm Zippy! \ud83c\udf89\n\nI'm looking at this problem: A farmer is selling honey at the market. One large jar of honey costs $12.50. A customer buys two jars and pays with a $50 bill.Describe the steps you would take to find out how much change the custom\n\nHmm, I think When subtracting $12.50$ from $50$, a student might line up the '5' in 50 with the '5' in 0.50, failing to treat 50 as 50.00. \ud83e\udd14\n\nCan you help me understand this better?",
+      "sections": {
+        "studentPrompt": "A farmer is selling honey at the market. One large jar of honey costs $12.50. A customer buys two jars and pays with a $50 bill.Describe the steps you would take to find out how much change the customer should receive. Explain your thinking without providing the final answer.\n2. Possible Misconceptions\n1. Misalignment of Place Value: When subtracting $12.50$ from $50$, a student might line up the '5' in 50 with the '5' in 0.50, failing to treat 50 as 50.00.\n2. Ignoring the Decimal in Multiplication: A student might multiply $1250 \\times 2$ and forget to place the decimal point back into the product, resulting in $2500$ instead of $25.00$.\n3. Shifted Divisor in Division: If dividing a total by a decimal (e.g., $15 \\div 0.75$), a student might forget to move the decimal point in both the divisor and the dividend, leading to a quotient that is off by a factor of 10 or 100.",
+        "misconceptions": [
+          "Misalignment of Place Value: When subtracting $12.50$ from $50$, a student might line up the '5' in 50 with the '5' in 0.50, failing to treat 50 as 50.00.",
+          "Ignoring the Decimal in Multiplication: A student might multiply $1250 \\times 2$ and forget to place the decimal point back into the product, resulting in $2500$ instead of $25.00$.",
+          "Shifted Divisor in Division: If dividing a total by a decimal (e.g., $15 \\div 0.75$), a student might forget to move the decimal point in both the divisor and the dividend, leading to a quotient that is off by a factor of 10 or 100."
+        ],
+        "patternRecognition": "",
+        "generalization": "Consider the statement: 'When you multiply two decimal numbers together, the number of decimal places in the answer is always equal to the total number of decimal places in the two numbers you started with.'Is this statement Always, Sometimes, or Never true? Use an example like $0.2 \\times 0.5$ to justify your answer. Think about what happens when the final digit of your answer ends in a zero.",
+        "inference": "The farmer decides to sell 'mini-honey' sticks for $0.25 each. A customer has $10.00 to spend.Without doing the long division, predict how many sticks they can buy. How does knowing that there are four $0.25 in $1.00 help you make this prediction? If the price of the sticks doubled, what would happen to the number of sticks the customer could afford?",
+        "mappingData": {
+          "claims": [],
+          "evidence": "",
+          "criticalThinking": ""
+        }
+      }
+    },
+    "the_community_gift_basket": {
+      "id": "the_community_gift_basket",
+      "slug": "the_community_gift_basket",
+      "title": "The Community Gift Basket",
+      "grade": "Grade 6",
+      "domain": "Number System",
+      "standard": "CCSS.MATH.6.NS.B.4",
+      "standardDescription": "6.NS.B.4 - Find the greatest common factor and least common multiple; use the distributive property to express a sum of two whole numbers.",
+      "description": "A volunteer group is making identical gift baskets for a local shelter. They have 18 jars of jam and 24 boxes of tea. They want to use all the items, ",
+      "imageUrl": "",
+      "problemStatement": "A volunteer group is making identical gift baskets for a local shelter. They have 18 jars of jam and 24 boxes of tea. They want to use all the items, and every basket must have the exact same number of jam jars and the exact same number of tea boxes.If they decide to make only 2 gift baskets, how many of each item would go into each basket? What if they wanted to make as many baskets as possible? Explain how you would figure that out.\n2. Possible Misconceptions\n1. GCF vs. LCM Confusion: A studen",
+      "teachingPrompt": "Help Zippy understand the concepts in The Community Gift Basket.",
+      "targetConcepts": [
+        "The greatest common factor and least common multiple",
+        "The distributive property to express a sum of two whole numbers"
+      ],
+      "correctSolutionPathway": "",
+      "misconceptions": [
+        "GCF vs. LCM Confusion: A student might try to find the Least Common Multiple (72) instead of the Greatest Common Factor (6), leading them to think they need 72 baskets.",
+        "Remainder Neglect: A student might pick a number that is a factor of one item but not the other (e.g., trying to make 4 baskets), resulting in leftover items.",
+        "Misinterpreting the Distributive Property: When rewriting $18 + 24$, a student might factor out a common factor but fail to divide both terms correctly (e.g., writing $2(9 + 24)$ instead of $2(9 + 12)$)."
+      ],
+      "aiIntro": "Hi! I'm Zippy! \ud83c\udf89\n\nI'm looking at this problem: A volunteer group is making identical gift baskets for a local shelter. They have 18 jars of jam and 24 boxes of tea. They want to use all the items, and every basket must have the exact same number o\n\nHmm, I think A student might try to find the Least Common Multiple (72) instead of the Greatest Common Factor (6), leading them to think they need 72 baskets. \ud83e\udd14\n\nCan you help me understand this better?",
+      "sections": {
+        "studentPrompt": "A volunteer group is making identical gift baskets for a local shelter. They have 18 jars of jam and 24 boxes of tea. They want to use all the items, and every basket must have the exact same number of jam jars and the exact same number of tea boxes.If they decide to make only 2 gift baskets, how many of each item would go into each basket? What if they wanted to make as many baskets as possible? Explain how you would figure that out.\n2. Possible Misconceptions\n1. GCF vs. LCM Confusion: A student might try to find the Least Common Multiple (72) instead of the Greatest Common Factor (6), leading them to think they need 72 baskets.\n2. Remainder Neglect: A student might pick a number that is a factor of one item but not the other (e.g., trying to make 4 baskets), resulting in leftover items.\n3. Misinterpreting the Distributive Property: When rewriting $18 + 24$, a student might factor out a common factor but fail to divide both terms correctly (e.g., writing $2(9 + 24)$ instead of $2(9 + 12)$).",
+        "misconceptions": [
+          "GCF vs. LCM Confusion: A student might try to find the Least Common Multiple (72) instead of the Greatest Common Factor (6), leading them to think they need 72 baskets.",
+          "Remainder Neglect: A student might pick a number that is a factor of one item but not the other (e.g., trying to make 4 baskets), resulting in leftover items.",
+          "Misinterpreting the Distributive Property: When rewriting $18 + 24$, a student might factor out a common factor but fail to divide both terms correctly (e.g., writing $2(9 + 24)$ instead of $2(9 + 12)$)."
+        ],
+        "patternRecognition": "",
+        "generalization": "Consider the statement: 'The greatest number of identical groups you can make is always the Greatest Common Factor (GCF) of the two amounts.'Is this statement Always, Sometimes, or Never true? Use the jam and tea example to justify your answer. What would happen if the two numbers had no common factors other than 1?",
+        "inference": "The volunteer group gets a donation of 12 more jars of jam, so they now have 30 jars of jam and 24 boxes of tea. Without doing all the math again, predict if they can now make more baskets than they did before, or fewer. How does the new total $(30 + 24)$ change the 'greatest common factor' compared to the original $(18 + 24)$?",
+        "mappingData": {
+          "claims": [],
+          "evidence": "",
+          "criticalThinking": ""
+        }
+      }
+    },
+    "the_frozen_tundra_expedition": {
+      "id": "the_frozen_tundra_expedition",
+      "slug": "the_frozen_tundra_expedition",
+      "title": "The Frozen Tundra Expedition",
+      "grade": "Grade 6",
+      "domain": "Number System",
+      "standard": "CCSS.MATH.6.NS.C.5",
+      "standardDescription": "6.NS.C.5 - Understand that positive and negative numbers are used together to describe quantities having opposite directions or values.",
+      "description": "A scientist is measuring temperatures at a research station. On Monday, the temperature was 10 degrees above zero. On Tuesday, the temperature was 10 ",
+      "imageUrl": "",
+      "problemStatement": "A scientist is measuring temperatures at a research station. On Monday, the temperature was 10 degrees above zero. On Tuesday, the temperature was 10 degrees below zero.Describe how you would use numbers to record these two temperatures so that someone else could tell which day was warmer just by looking at the numbers. In this situation, what would a temperature of 0 degrees represent?\n2. Possible Misconceptions\n1. Magnitude Confusion: Thinking that -10 is 'larger' than 5 because the digit 10 i",
+      "teachingPrompt": "Help Zippy understand the concepts in The Frozen Tundra Expedition.",
+      "targetConcepts": [
+        "That positive and negative numbers are used together to describe quantities having opposite directions or values"
+      ],
+      "correctSolutionPathway": "",
+      "misconceptions": [
+        "Magnitude Confusion: Thinking that -10 is 'larger' than 5 because the digit 10 is bigger than 5, failing to recognize that negative numbers further from zero represent lower values.",
+        "Misinterpreting Zero: Believing that 0 means 'nothing' or 'no temperature,' rather than acting as a specific reference point on a scale.",
+        "Sign Neglect: Recording '10' for both 'above' and 'below' zero, assuming the context will be remembered without the mathematical sign (+ or -)."
+      ],
+      "aiIntro": "Hi! I'm Zippy! \ud83c\udf89\n\nI'm looking at this problem: A scientist is measuring temperatures at a research station. On Monday, the temperature was 10 degrees above zero. On Tuesday, the temperature was 10 degrees below zero.Describe how you would use numb\n\nHmm, I think Thinking that -10 is 'larger' than 5 because the digit 10 is bigger than 5, failing to recognize that negative numbers further from zero represent ... \ud83e\udd14\n\nCan you help me understand this better?",
+      "sections": {
+        "studentPrompt": "A scientist is measuring temperatures at a research station. On Monday, the temperature was 10 degrees above zero. On Tuesday, the temperature was 10 degrees below zero.Describe how you would use numbers to record these two temperatures so that someone else could tell which day was warmer just by looking at the numbers. In this situation, what would a temperature of 0 degrees represent?\n2. Possible Misconceptions\n1. Magnitude Confusion: Thinking that -10 is 'larger' than 5 because the digit 10 is bigger than 5, failing to recognize that negative numbers further from zero represent lower values.\n2. Misinterpreting Zero: Believing that 0 means 'nothing' or 'no temperature,' rather than acting as a specific reference point on a scale.\n3. Sign Neglect: Recording '10' for both 'above' and 'below' zero, assuming the context will be remembered without the mathematical sign (+ or -).",
+        "misconceptions": [
+          "Magnitude Confusion: Thinking that -10 is 'larger' than 5 because the digit 10 is bigger than 5, failing to recognize that negative numbers further from zero represent lower values.",
+          "Misinterpreting Zero: Believing that 0 means 'nothing' or 'no temperature,' rather than acting as a specific reference point on a scale.",
+          "Sign Neglect: Recording '10' for both 'above' and 'below' zero, assuming the context will be remembered without the mathematical sign (+ or -)."
+        ],
+        "patternRecognition": "",
+        "generalization": "Consider the statement: 'Zero always represents the absolute absence of something, like having no money or no distance.'Is this statement Always, Sometimes, or Never true? Use the 'sea level' or 'temperature' examples to justify your answer. Think about whether being at 0 feet of elevation means there is no land there.",
+        "inference": "A submarine is currently at -300 feet (300 feet below sea level). It sees a school of fish at -100 feet. Does the submarine need to move 'up' toward the surface or 'down' deeper into the ocean to reach the fish? Explain how you can tell which location is 'higher' just by comparing the two negative numbers. What would happen to the number representing the submarine's position if it dove even deeper?",
+        "mappingData": {
+          "claims": [],
+          "evidence": "",
+          "criticalThinking": ""
+        }
+      }
+    },
+    "the_treasure_map_coordinates": {
+      "id": "the_treasure_map_coordinates",
+      "slug": "the_treasure_map_coordinates",
+      "title": "The Treasure Map Coordinates",
+      "grade": "Grade 6",
+      "domain": "Number System",
+      "standard": "CCSS.MATH.6.NS.C.6",
+      "standardDescription": "6.NS.C.6 - Understand a rational number as a point on the number line. Extend number line diagrams and coordinate axes familiar from previous grades to represent points on the line and in the plane with negative number coordinates.",
+      "description": "Imagine a giant number line drawn on the playground. You are standing at 0. If you walk 4 steps to the right, you reach the number 4. If you walk 4 st",
+      "imageUrl": "",
+      "problemStatement": "Imagine a giant number line drawn on the playground. You are standing at 0. If you walk 4 steps to the right, you reach the number 4. If you walk 4 steps to the left of 0, what number are you standing on? How can you describe your position to someone who can't see you, so they know exactly which side of 0 you are on?\n2. Possible Misconceptions\n1. Mirror Confusion: A student might think that the number to the left of 0 is still '4' because they are only counting the distance (magnitude) and ignor",
+      "teachingPrompt": "Help Zippy understand the concepts in The Treasure Map Coordinates.",
+      "targetConcepts": [
+        "A rational number as a point on the number line",
+        "Points on the line and in the plane with negative number coordinates"
+      ],
+      "correctSolutionPathway": "",
+      "misconceptions": [
+        "Mirror Confusion: A student might think that the number to the left of 0 is still '4' because they are only counting the distance (magnitude) and ignoring the direction (sign).",
+        "Quadrant Reversal: When moving to a coordinate plane, a student might think $(-3, 2)$ is the same as $(3, -2)$, failing to realize that the order of x and y determines the specific quadrant.",
+        "Fractional Placement: A student might place $-1.5$ between $0$ and $-1$, thinking that because $1.5$ is 'bigger' than $1$, it must be closer to zero on the negative side."
+      ],
+      "aiIntro": "Hi! I'm Zippy! \ud83c\udf89\n\nI'm looking at this problem: Imagine a giant number line drawn on the playground. You are standing at 0. If you walk 4 steps to the right, you reach the number 4. If you walk 4 steps to the left of 0, what number are you standing\n\nHmm, I think A student might think that the number to the left of 0 is still '4' because they are only counting the distance (magnitude) and ignoring the direct... \ud83e\udd14\n\nCan you help me understand this better?",
+      "sections": {
+        "studentPrompt": "Imagine a giant number line drawn on the playground. You are standing at 0. If you walk 4 steps to the right, you reach the number 4. If you walk 4 steps to the left of 0, what number are you standing on? How can you describe your position to someone who can't see you, so they know exactly which side of 0 you are on?\n2. Possible Misconceptions\n1. Mirror Confusion: A student might think that the number to the left of 0 is still '4' because they are only counting the distance (magnitude) and ignoring the direction (sign).\n2. Quadrant Reversal: When moving to a coordinate plane, a student might think $(-3, 2)$ is the same as $(3, -2)$, failing to realize that the order of x and y determines the specific quadrant.\n3. Fractional Placement: A student might place $-1.5$ between $0$ and $-1$, thinking that because $1.5$ is 'bigger' than $1$, it must be closer to zero on the negative side.",
+        "misconceptions": [
+          "Mirror Confusion: A student might think that the number to the left of 0 is still '4' because they are only counting the distance (magnitude) and ignoring the direction (sign).",
+          "Quadrant Reversal: When moving to a coordinate plane, a student might think $(-3, 2)$ is the same as $(3, -2)$, failing to realize that the order of x and y determines the specific quadrant.",
+          "Fractional Placement: A student might place $-1.5$ between $0$ and $-1$, thinking that because $1.5$ is 'bigger' than $1$, it must be closer to zero on the negative side."
+        ],
+        "patternRecognition": "",
+        "generalization": "Consider the statement: 'The negative version of a number is always located the same distance from zero as the positive version, just in the opposite direction.'Is this statement Always, Sometimes, or Never true? Use a number line or coordinate grid example to justify your answer. What does this tell you about the relationship between a number and its 'opposite'?",
+        "inference": "A treasure is hidden at the point (2, -3) on a coordinate map. If you reflect this point across the x-axis, what do you predict the new coordinates will be? Explain how you can know the new location without drawing the map. What would happen to the coordinates if you reflected the original treasure across the y-axis instead?",
+        "mappingData": {
+          "claims": [],
+          "evidence": "",
+          "criticalThinking": ""
+        }
+      }
+    },
+    "the_winter_lake_depth": {
+      "id": "the_winter_lake_depth",
+      "slug": "the_winter_lake_depth",
+      "title": "The Winter Lake Depth",
+      "grade": "Grade 6",
+      "domain": "Number System",
+      "standard": "CCSS.MATH.6.NS.C.7",
+      "standardDescription": "6.NS.C.7 - Understand ordering and absolute value of rational numbers.",
+      "description": "A team of scientists is measuring the water levels of three different lakes compared to their normal levels. Lake A is at -4 feet, Lake B is at -12 fe",
+      "imageUrl": "",
+      "problemStatement": "A team of scientists is measuring the water levels of three different lakes compared to their normal levels. Lake A is at -4 feet, Lake B is at -12 feet, and Lake C is at 2 feet.Which lake's water level is the lowest? Describe how you know just by looking at the numbers.\n2. Possible Misconceptions\n1. Magnitude vs. Value: A student might think -12 is 'higher' than -4 because 12 is a larger digit, failing to realize that a larger negative number indicates a lower position.\n2. Absolute Value Confus",
+      "teachingPrompt": "Help Zippy understand the concepts in The Winter Lake Depth.",
+      "targetConcepts": [
+        "Ordering and absolute value of rational numbers"
+      ],
+      "correctSolutionPathway": "",
+      "misconceptions": [
+        "Magnitude vs. Value: A student might think -12 is 'higher' than -4 because 12 is a larger digit, failing to realize that a larger negative number indicates a lower position.",
+        "Absolute Value Confusion: A student might confuse 'lowest level' (the value) with 'greatest change' (the absolute value), incorrectly identifying Lake C as the lowest because it is a positive number.",
+        "Symbol Misinterpretation: A student might interpret the inequality -12 < -4 as '12 is less than 4' and get confused when they see the negative signs, leading to an incorrect ordering of values on a vertical scale."
+      ],
+      "aiIntro": "Hi! I'm Zippy! \ud83c\udf89\n\nI'm looking at this problem: A team of scientists is measuring the water levels of three different lakes compared to their normal levels. Lake A is at -4 feet, Lake B is at -12 feet, and Lake C is at 2 feet.Which lake's water lev\n\nHmm, I think A student might think -12 is 'higher' than -4 because 12 is a larger digit, failing to realize that a larger negative number indicates a lower posi... \ud83e\udd14\n\nCan you help me understand this better?",
+      "sections": {
+        "studentPrompt": "A team of scientists is measuring the water levels of three different lakes compared to their normal levels. Lake A is at -4 feet, Lake B is at -12 feet, and Lake C is at 2 feet.Which lake's water level is the lowest? Describe how you know just by looking at the numbers.\n2. Possible Misconceptions\n1. Magnitude vs. Value: A student might think -12 is 'higher' than -4 because 12 is a larger digit, failing to realize that a larger negative number indicates a lower position.\n2. Absolute Value Confusion: A student might confuse 'lowest level' (the value) with 'greatest change' (the absolute value), incorrectly identifying Lake C as the lowest because it is a positive number.\n3. Symbol Misinterpretation: A student might interpret the inequality -12 < -4 as '12 is less than 4' and get confused when they see the negative signs, leading to an incorrect ordering of values on a vertical scale.",
+        "misconceptions": [
+          "Magnitude vs. Value: A student might think -12 is 'higher' than -4 because 12 is a larger digit, failing to realize that a larger negative number indicates a lower position.",
+          "Absolute Value Confusion: A student might confuse 'lowest level' (the value) with 'greatest change' (the absolute value), incorrectly identifying Lake C as the lowest because it is a positive number.",
+          "Symbol Misinterpretation: A student might interpret the inequality -12 < -4 as '12 is less than 4' and get confused when they see the negative signs, leading to an incorrect ordering of values on a vertical scale."
+        ],
+        "patternRecognition": "",
+        "generalization": "Consider the statement: 'The absolute value of a number tells you how far it is from zero, but it doesn't tell you if the number is positive or negative.'Is this statement Always, Sometimes, or Never true? Use the lake levels to explain. If a lake is at -15 feet and another is at 15 feet, what is the same about them and what is different?",
+        "inference": "A fourth lake, Lake D, has a water level of 'x' feet. We are told that $|x| = 8$.What are the two possible levels for Lake D? If you are also told that Lake D is lower than Lake A (-4 feet), which level must it be? Explain how using both the absolute value and an inequality helps you find the exact location.",
+        "mappingData": {
+          "claims": [],
+          "evidence": "",
+          "criticalThinking": ""
+        }
+      }
+    },
+    "the_neighborhood_delivery_map": {
+      "id": "the_neighborhood_delivery_map",
+      "slug": "the_neighborhood_delivery_map",
+      "title": "The Neighborhood Delivery Map",
+      "grade": "Grade 6",
+      "domain": "Number System",
+      "standard": "CCSS.MATH.6.NS.C.8",
+      "standardDescription": "6.NS.C.8 - Solve real-world and mathematical problems by graphing points in all four quadrants of the coordinate plane. Include use of coordinates and absolute value to find distances between points with the same first coordinate or the same second coordinate.",
+      "description": "A delivery driver uses a coordinate grid to navigate a neighborhood. The local Bakery is located at (4, 3) and the Grocery Store is located at (4, -5)",
+      "imageUrl": "",
+      "problemStatement": "A delivery driver uses a coordinate grid to navigate a neighborhood. The local Bakery is located at (4, 3) and the Grocery Store is located at (4, -5).If the driver travels in a straight line from the Bakery to the Grocery Store, which direction are they traveling? Describe how you would find the total distance of this trip without counting every single square on the grid.\n2. Possible Misconceptions\n1. Subtraction Error across Quadrants: A student might subtract the absolute values (5 - 3 = 2) i",
+      "teachingPrompt": "Help Zippy understand the concepts in The Neighborhood Delivery Map.",
+      "targetConcepts": [
+        "Real-world and mathematical problems by graphing points in all four quadrants of the coordinate plane",
+        "Of coordinates and absolute value to find distances between points with the same first coordinate or the same second coordinate"
+      ],
+      "correctSolutionPathway": "",
+      "misconceptions": [
+        "Subtraction Error across Quadrants: A student might subtract the absolute values (5 - 3 = 2) instead of adding them (3 + 5 = 8), failing to realize that crossing an axis requires adding distances from zero.",
+        "Coordinate Swap: Attempting to find the distance between the x-values (4 and 4) which results in zero, rather than focusing on the changing y-values.",
+        "Diagonal Thinking: Thinking the driver can take a shortcut diagonally, which would require the Pythagorean theorem, rather than following the grid-based 'Manhattan distance' required by the standard."
+      ],
+      "aiIntro": "Hi! I'm Zippy! \ud83c\udf89\n\nI'm looking at this problem: A delivery driver uses a coordinate grid to navigate a neighborhood. The local Bakery is located at (4, 3) and the Grocery Store is located at (4, -5).If the driver travels in a straight line from the\n\nHmm, I think A student might subtract the absolute values (5 - 3 = 2) instead of adding them (3 + 5 = 8), failing to realize that crossing an axis requires addi... \ud83e\udd14\n\nCan you help me understand this better?",
+      "sections": {
+        "studentPrompt": "A delivery driver uses a coordinate grid to navigate a neighborhood. The local Bakery is located at (4, 3) and the Grocery Store is located at (4, -5).If the driver travels in a straight line from the Bakery to the Grocery Store, which direction are they traveling? Describe how you would find the total distance of this trip without counting every single square on the grid.\n2. Possible Misconceptions\n1. Subtraction Error across Quadrants: A student might subtract the absolute values (5 - 3 = 2) instead of adding them (3 + 5 = 8), failing to realize that crossing an axis requires adding distances from zero.\n2. Coordinate Swap: Attempting to find the distance between the x-values (4 and 4) which results in zero, rather than focusing on the changing y-values.\n3. Diagonal Thinking: Thinking the driver can take a shortcut diagonally, which would require the Pythagorean theorem, rather than following the grid-based 'Manhattan distance' required by the standard.",
+        "misconceptions": [
+          "Subtraction Error across Quadrants: A student might subtract the absolute values (5 - 3 = 2) instead of adding them (3 + 5 = 8), failing to realize that crossing an axis requires adding distances from zero.",
+          "Coordinate Swap: Attempting to find the distance between the x-values (4 and 4) which results in zero, rather than focusing on the changing y-values.",
+          "Diagonal Thinking: Thinking the driver can take a shortcut diagonally, which would require the Pythagorean theorem, rather than following the grid-based 'Manhattan distance' required by the standard."
+        ],
+        "patternRecognition": "",
+        "generalization": "Consider the statement: 'To find the distance between two points on the same line, you should add their absolute values together.'Is this statement Always, Sometimes, or Never true? Use an example where both points are on the same side of zero (like (4, 3) and (4, 7)) to justify your answer.",
+        "inference": "A new Coffee Shop is built. It is exactly 10 units away from the Bakery (4, 3) and sits on the same vertical line.Without graphing it, predict the two possible locations (coordinates) for the Coffee Shop. If you are told the Coffee Shop is in the 4th Quadrant (where x is positive and y is negative), which location must it be? Explain how you can be sure of your answer using what you know about distance and absolute value.",
+        "mappingData": {
+          "claims": [],
+          "evidence": "",
+          "criticalThinking": ""
+        }
+      }
+    },
+    "the_weekend_volunteer_crew": {
+      "id": "the_weekend_volunteer_crew",
+      "slug": "the_weekend_volunteer_crew",
+      "title": "The Weekend Volunteer Crew",
+      "grade": "Grade 6",
+      "domain": "Ratios & Proportions",
+      "standard": "CCSS.MATH.6.RP.A.1",
+      "standardDescription": "6.RP.A.1 - Understand the concept of a ratio and use ratio language to describe a ratio relationship between two quantities.",
+      "description": "A local park cleanup crew has 6 students and 2 adult supervisors. Describe the relationship between the number of students and the number of adults in",
+      "imageUrl": "",
+      "problemStatement": "A local park cleanup crew has 6 students and 2 adult supervisors. Describe the relationship between the number of students and the number of adults in this group. What is one way to compare these two groups using numbers?\n2. Possible Misconceptions\n1. Additive vs. Multiplicative: A student might describe the relationship as 'there are 4 more students than adults' (additive) instead of recognizing the 3:1 ratio (multiplicative).\n2. Order Irrelevance: A student might think the ratio 6:2 and 2:6 ar",
+      "teachingPrompt": "Help Zippy understand the concepts in The Weekend Volunteer Crew.",
+      "targetConcepts": [
+        "The concept of a ratio and use ratio language to describe a ratio relationship between two quantities"
+      ],
+      "correctSolutionPathway": "",
+      "misconceptions": [
+        "Additive vs. Multiplicative: A student might describe the relationship as 'there are 4 more students than adults' (additive) instead of recognizing the 3:1 ratio (multiplicative).",
+        "Order Irrelevance: A student might think the ratio 6:2 and 2:6 are exactly the same, not realizing that the order of the numbers must match the order of the words 'students' and 'adults'.",
+        "Part-Whole Confusion: A student might write a ratio comparing students to the *total* group (6:8) when asked for the relationship between students and adults (6:2)."
+      ],
+      "aiIntro": "Hi! I'm Zippy! \ud83c\udf89\n\nI'm looking at this problem: A local park cleanup crew has 6 students and 2 adult supervisors. Describe the relationship between the number of students and the number of adults in this group. What is one way to compare these two \n\nHmm, I think 1 ratio (multiplicative). \ud83e\udd14\n\nCan you help me understand this better?",
+      "sections": {
+        "studentPrompt": "A local park cleanup crew has 6 students and 2 adult supervisors. Describe the relationship between the number of students and the number of adults in this group. What is one way to compare these two groups using numbers?\n2. Possible Misconceptions\n1. Additive vs. Multiplicative: A student might describe the relationship as 'there are 4 more students than adults' (additive) instead of recognizing the 3:1 ratio (multiplicative).\n2. Order Irrelevance: A student might think the ratio 6:2 and 2:6 are exactly the same, not realizing that the order of the numbers must match the order of the words 'students' and 'adults'.\n3. Part-Whole Confusion: A student might write a ratio comparing students to the *total* group (6:8) when asked for the relationship between students and adults (6:2).",
+        "misconceptions": [
+          "Additive vs. Multiplicative: A student might describe the relationship as 'there are 4 more students than adults' (additive) instead of recognizing the 3:1 ratio (multiplicative).",
+          "Order Irrelevance: A student might think the ratio 6:2 and 2:6 are exactly the same, not realizing that the order of the numbers must match the order of the words 'students' and 'adults'.",
+          "Part-Whole Confusion: A student might write a ratio comparing students to the *total* group (6:8) when asked for the relationship between students and adults (6:2)."
+        ],
+        "patternRecognition": "",
+        "generalization": "Consider the statement: 'If the ratio of students to adults is 3 to 1, then for every 3 students that join the crew, exactly 1 adult must also join to keep the relationship the same.'Is this statement Always, Sometimes, or Never true? Use your own example to justify your answer. What does the phrase 'for every' tell you about the relationship between the two quantities?",
+        "inference": "A very large city-wide cleanup is happening. They want to keep the same '3 students for every 1 adult' ratio. If 300 students sign up, predict how many adults will be needed.How does the ratio 3:1 help you figure this out without having to draw 300 students? What would happen to the number of adults needed if the city decided they wanted a ratio of 5 students for every 1 adult instead?",
+        "mappingData": {
+          "claims": [],
+          "evidence": "",
+          "criticalThinking": ""
+        }
+      }
+    },
+    "the_virtual_runner_training": {
+      "id": "the_virtual_runner_training",
+      "slug": "the_virtual_runner_training",
+      "title": "The Virtual Runner Training",
+      "grade": "Grade 6",
+      "domain": "Ratios & Proportions",
+      "standard": "CCSS.MATH.6.RP.A.2",
+      "standardDescription": "6.RP.A.2 - Understand the concept of a unit rate a/b associated with a ratio a:b with b != 0, and use rate language in the context of a ratio relationship.",
+      "description": "A virtual reality fitness game tracks how far you run. In the game, your character runs 12 miles in 3 hours. Describe how many miles your character co",
+      "imageUrl": "",
+      "problemStatement": "A virtual reality fitness game tracks how far you run. In the game, your character runs 12 miles in 3 hours. Describe how many miles your character covers in just a single hour. Explain what this number tells you about your character's speed during the workout.\n2. Possible Misconceptions\n1. Inverting the Rate: A student might divide 3 by 12 (3/12 = 0.25) and claim the rate is 0.25 miles per hour, confusing the 'hours per mile' with 'miles per hour'.\n2. Additive Reasoning: Thinking that if you su",
+      "teachingPrompt": "Help Zippy understand the concepts in The Virtual Runner Training.",
+      "targetConcepts": [
+        "The concept of a unit rate a/b associated with a ratio a:b with b != 0",
+        "Rate language in the context of a ratio relationship"
+      ],
+      "correctSolutionPathway": "",
+      "misconceptions": [
+        "Inverting the Rate: A student might divide 3 by 12 (3/12 = 0.25) and claim the rate is 0.25 miles per hour, confusing the 'hours per mile' with 'miles per hour'.",
+        "Additive Reasoning: Thinking that if you subtract 2 hours to get to 1 hour, you should also subtract 2 miles (12 - 2 = 10), resulting in 10 miles per hour.",
+        "Unit Confusion: Failing to recognize that a 'unit rate' must specifically compare a quantity to exactly one unit of another quantity, perhaps providing '24 miles per 6 hours' as an answer."
+      ],
+      "aiIntro": "Hi! I'm Zippy! \ud83c\udf89\n\nI'm looking at this problem: A virtual reality fitness game tracks how far you run. In the game, your character runs 12 miles in 3 hours. Describe how many miles your character covers in just a single hour. Explain what this numb\n\nHmm, I think A student might divide 3 by 12 (3/12 = 0.25) and claim the rate is 0.25 miles per hour, confusing the 'hours per mile' with 'miles per hour'. \ud83e\udd14\n\nCan you help me understand this better?",
+      "sections": {
+        "studentPrompt": "A virtual reality fitness game tracks how far you run. In the game, your character runs 12 miles in 3 hours. Describe how many miles your character covers in just a single hour. Explain what this number tells you about your character's speed during the workout.\n2. Possible Misconceptions\n1. Inverting the Rate: A student might divide 3 by 12 (3/12 = 0.25) and claim the rate is 0.25 miles per hour, confusing the 'hours per mile' with 'miles per hour'.\n2. Additive Reasoning: Thinking that if you subtract 2 hours to get to 1 hour, you should also subtract 2 miles (12 - 2 = 10), resulting in 10 miles per hour.\n3. Unit Confusion: Failing to recognize that a 'unit rate' must specifically compare a quantity to exactly one unit of another quantity, perhaps providing '24 miles per 6 hours' as an answer.",
+        "misconceptions": [
+          "Inverting the Rate: A student might divide 3 by 12 (3/12 = 0.25) and claim the rate is 0.25 miles per hour, confusing the 'hours per mile' with 'miles per hour'.",
+          "Additive Reasoning: Thinking that if you subtract 2 hours to get to 1 hour, you should also subtract 2 miles (12 - 2 = 10), resulting in 10 miles per hour.",
+          "Unit Confusion: Failing to recognize that a 'unit rate' must specifically compare a quantity to exactly one unit of another quantity, perhaps providing '24 miles per 6 hours' as an answer."
+        ],
+        "patternRecognition": "",
+        "generalization": "Consider the statement: 'Every ratio relationship has a unit rate that describes how much of the first quantity there is for exactly one unit of the second quantity.'Is this statement Always, Sometimes, or Never true? Use the runner example to justify your answer. Why is the unit rate often more helpful than the original ratio when comparing two different runners?",
+        "inference": "A new 'Sprint Mode' is added to the game. In this mode, characters run at a unit rate of 6 miles per hour. If a character runs for 10 hours in Sprint Mode, predict how their total distance will compare to Runner A (who ran 12 miles in 3 hours). How does the unit rate help you predict the total distance for any amount of time, even for very long trips?",
+        "mappingData": {
+          "claims": [],
+          "evidence": "",
+          "criticalThinking": ""
+        }
+      }
+    },
+    "the_perfect_purple_paint": {
+      "id": "the_perfect_purple_paint",
+      "slug": "the_perfect_purple_paint",
+      "title": "The Perfect Purple Paint",
+      "grade": "Grade 6",
+      "domain": "Ratios & Proportions",
+      "standard": "CCSS.MATH.6.RP.A.3",
+      "standardDescription": "6.RP.A.3 - Use ratio and rate reasoning to solve real-world and mathematical problems, e.g., by using tables of equivalent ratios, tape diagrams, double number line diagrams, or equations.",
+      "description": "An artist is mixing a specific shade of purple paint. To get the perfect color, they mix 3 cups of blue paint for every 2 cups of red paint.If the art",
+      "imageUrl": "",
+      "problemStatement": "An artist is mixing a specific shade of purple paint. To get the perfect color, they mix 3 cups of blue paint for every 2 cups of red paint.If the artist wants to make a larger batch using 6 cups of blue paint, how many cups of red paint will they need? Explain how you can be sure the color will stay exactly the same shade.\n2. Possible Misconceptions\n1. Additive Reasoning: A student might think that since the blue paint increased by 3 cups (6 - 3 = 3), the red paint should also increase by 3 cup",
+      "teachingPrompt": "Help Zippy understand the concepts in The Perfect Purple Paint.",
+      "targetConcepts": [
+        "Ratio and rate reasoning to solve real-world and mathematical problems"
+      ],
+      "correctSolutionPathway": "",
+      "misconceptions": [
+        "Additive Reasoning: A student might think that since the blue paint increased by 3 cups (6 - 3 = 3), the red paint should also increase by 3 cups (2 + 3 = 5), resulting in a different shade of purple.",
+        "Part-Whole Confusion: A student might confuse the ratio of Blue:Red (3:2) with Blue:Total (3:5), leading them to calculate for the wrong relationship.",
+        "Scale Factor Mismatch: A student might multiply one part of the ratio by a factor (e.g., times 2) but forget to multiply the other part by the same factor."
+      ],
+      "aiIntro": "Hi! I'm Zippy! \ud83c\udf89\n\nI'm looking at this problem: An artist is mixing a specific shade of purple paint. To get the perfect color, they mix 3 cups of blue paint for every 2 cups of red paint.If the artist wants to make a larger batch using 6 cups of b\n\nHmm, I think A student might think that since the blue paint increased by 3 cups (6 - 3 = 3), the red paint should also increase by 3 cups (2 + 3 = 5), resultin... \ud83e\udd14\n\nCan you help me understand this better?",
+      "sections": {
+        "studentPrompt": "An artist is mixing a specific shade of purple paint. To get the perfect color, they mix 3 cups of blue paint for every 2 cups of red paint.If the artist wants to make a larger batch using 6 cups of blue paint, how many cups of red paint will they need? Explain how you can be sure the color will stay exactly the same shade.\n2. Possible Misconceptions\n1. Additive Reasoning: A student might think that since the blue paint increased by 3 cups (6 - 3 = 3), the red paint should also increase by 3 cups (2 + 3 = 5), resulting in a different shade of purple.\n2. Part-Whole Confusion: A student might confuse the ratio of Blue:Red (3:2) with Blue:Total (3:5), leading them to calculate for the wrong relationship.\n3. Scale Factor Mismatch: A student might multiply one part of the ratio by a factor (e.g., times 2) but forget to multiply the other part by the same factor.",
+        "misconceptions": [
+          "Additive Reasoning: A student might think that since the blue paint increased by 3 cups (6 - 3 = 3), the red paint should also increase by 3 cups (2 + 3 = 5), resulting in a different shade of purple.",
+          "Part-Whole Confusion: A student might confuse the ratio of Blue:Red (3:2) with Blue:Total (3:5), leading them to calculate for the wrong relationship.",
+          "Scale Factor Mismatch: A student might multiply one part of the ratio by a factor (e.g., times 2) but forget to multiply the other part by the same factor."
+        ],
+        "patternRecognition": "",
+        "generalization": "Consider the statement: 'If you double the amount of every ingredient in a mixture, the total amount of mixture doubles, but the relationship (ratio) between the ingredients stays the same.'Is this statement Always, Sometimes, or Never true? Use the paint example to justify your answer. How does this 'doubling' rule help you predict how a mixture will behave in any situation?",
+        "inference": "A hardware store sells 'Quick Mix' purple paint in 20-cup containers. They use the same 3:2 ratio of blue to red.Predict how many cups of blue and how many cups of red are inside a full 20-cup container. Explain how knowing the 'total' amount of 5 cups in the original recipe (3 blue + 2 red) helps you figure out the amounts for a 20-cup batch. What would happen to the shade if you added one extra cup of blue to the 20-cup container?",
+        "mappingData": {
+          "claims": [],
+          "evidence": "",
+          "criticalThinking": ""
+        }
+      }
+    },
+    "the_school_cafeteria_survey": {
+      "id": "the_school_cafeteria_survey",
+      "slug": "the_school_cafeteria_survey",
+      "title": "The School Cafeteria Survey",
+      "grade": "Grade 6",
+      "domain": "Statistics & Probability",
+      "standard": "CCSS.MATH.6.SP.A.1",
+      "standardDescription": "6.SP.A.1 - Recognize a statistical question as one that anticipates variability in the data related to the question and accounts for it in the answers.",
+      "description": "A student is curious about lunch at school. They come up with two different questions to ask:Question A: 'What did the principal eat for lunch today?'",
+      "imageUrl": "",
+      "problemStatement": "A student is curious about lunch at school. They come up with two different questions to ask:Question A: 'What did the principal eat for lunch today?'Question B: 'What did the students in the 6th grade eat for lunch today?'If you asked 20 different people Question A, how many different answers would you expect to get? If you asked 20 different people Question B, would you expect all the answers to be the same? Why or why not?\n2. Possible Misconceptions\n1. Topic vs. Structure: A student might thi",
+      "teachingPrompt": "Help Zippy understand the concepts in The School Cafeteria Survey.",
+      "targetConcepts": [
+        "A statistical question as one that anticipates variability in the data related to the question and accounts for it in the answers"
+      ],
+      "correctSolutionPathway": "",
+      "misconceptions": [
+        "Topic vs. Structure: A student might think a question is statistical just because it is about a 'mathy' topic (like height or grades), even if the question only has one fixed answer (e.g., 'How tall is the teacher?').",
+        "Variability as Error: A student might view different answers as 'wrong' or 'mistakes' rather than a natural spread of data (variability).",
+        "Sample Size Confusion: Thinking a question only becomes statistical if you ask a lot of people, rather than recognizing that the nature of the question itself must allow for multiple possible answers."
+      ],
+      "aiIntro": "Hi! I'm Zippy! \ud83c\udf89\n\nI'm looking at this problem: A student is curious about lunch at school. They come up with two different questions to ask:Question A: 'What did the principal eat for lunch today?'Question B: 'What did the students in the 6th grad\n\nHmm, I think A student might think a question is statistical just because it is about a 'mathy' topic (like height or grades), even if the question only has one... \ud83e\udd14\n\nCan you help me understand this better?",
+      "sections": {
+        "studentPrompt": "A student is curious about lunch at school. They come up with two different questions to ask:Question A: 'What did the principal eat for lunch today?'Question B: 'What did the students in the 6th grade eat for lunch today?'If you asked 20 different people Question A, how many different answers would you expect to get? If you asked 20 different people Question B, would you expect all the answers to be the same? Why or why not?\n2. Possible Misconceptions\n1. Topic vs. Structure: A student might think a question is statistical just because it is about a 'mathy' topic (like height or grades), even if the question only has one fixed answer (e.g., 'How tall is the teacher?').\n2. Variability as Error: A student might view different answers as 'wrong' or 'mistakes' rather than a natural spread of data (variability).\n3. Sample Size Confusion: Thinking a question only becomes statistical if you ask a lot of people, rather than recognizing that the nature of the question itself must allow for multiple possible answers.",
+        "misconceptions": [
+          "Topic vs. Structure: A student might think a question is statistical just because it is about a 'mathy' topic (like height or grades), even if the question only has one fixed answer (e.g., 'How tall is the teacher?').",
+          "Variability as Error: A student might view different answers as 'wrong' or 'mistakes' rather than a natural spread of data (variability).",
+          "Sample Size Confusion: Thinking a question only becomes statistical if you ask a lot of people, rather than recognizing that the nature of the question itself must allow for multiple possible answers."
+        ],
+        "patternRecognition": "",
+        "generalization": "Consider the statement: 'A statistical question must be about a group of people or objects, rather than just one individual thing.'Is this statement Always, Sometimes, or Never true? Use the 'pets' or 'lunch' example to justify your answer. Explain why asking about a group naturally leads to 'variability' in the data.",
+        "inference": "A scientist wants to study the height of trees in a local park. They write down the question: 'How tall is the tallest oak tree in the park?'Is this a statistical question? Why or why not? Predict how the scientist could change this question so that it becomes statistical. How would the data they collect change after they rewrite the question?",
+        "mappingData": {
+          "claims": [],
+          "evidence": "",
+          "criticalThinking": ""
+        }
+      }
+    },
+    "the_weekend_weather_report": {
+      "id": "the_weekend_weather_report",
+      "slug": "the_weekend_weather_report",
+      "title": "The Weekend Weather Report",
+      "grade": "Grade 6",
+      "domain": "Statistics & Probability",
+      "standard": "CCSS.MATH.6.SP.A.3",
+      "standardDescription": "6.SP.A.3 - Recognize that a measure of center for a numerical data set summarizes all of its values with a single number, while a measure of variation describes how its values vary with a single number.",
+      "description": "A weather station recorded the high temperatures for two different cities over 5 days.City 1: 70, 70, 70, 70, 70 (degrees)City 2: 60, 65, 70, 75, 80 (",
+      "imageUrl": "",
+      "problemStatement": "A weather station recorded the high temperatures for two different cities over 5 days.City 1: 70, 70, 70, 70, 70 (degrees)City 2: 60, 65, 70, 75, 80 (degrees)If you had to pick just one 'middle' number to represent the temperature for each city, what would it be? In which city does that one number tell you the 'whole story' about the weather, and in which city is there more to the story?\n2. Possible Misconceptions\n1. Measure Confusion: Thinking that the 'variation' (spread) is just another way t",
+      "teachingPrompt": "Help Zippy understand the concepts in The Weekend Weather Report.",
+      "targetConcepts": [
+        "That a measure of center for a numerical data set summarizes all of its values with a single number"
+      ],
+      "correctSolutionPathway": "",
+      "misconceptions": [
+        "Measure Confusion: Thinking that the 'variation' (spread) is just another way to find the 'center' (average), rather than understanding they describe two different characteristics of the data.",
+        "Variation as Inaccuracy: Believing that a high measure of variation (like in City 2) means the data is 'wrong' or unreliable, rather than simply being diverse.",
+        "Single-Number Sufficiency: Assuming that if two cities have the same mean, their weather patterns are identical, ignoring the impact of extremes (very hot or very cold days)."
+      ],
+      "aiIntro": "Hi! I'm Zippy! \ud83c\udf89\n\nI'm looking at this problem: A weather station recorded the high temperatures for two different cities over 5 days.City 1: 70, 70, 70, 70, 70 (degrees)City 2: 60, 65, 70, 75, 80 (degrees)If you had to pick just one 'middle' numbe\n\nHmm, I think Thinking that the 'variation' (spread) is just another way to find the 'center' (average), rather than understanding they describe two different ch... \ud83e\udd14\n\nCan you help me understand this better?",
+      "sections": {
+        "studentPrompt": "A weather station recorded the high temperatures for two different cities over 5 days.City 1: 70, 70, 70, 70, 70 (degrees)City 2: 60, 65, 70, 75, 80 (degrees)If you had to pick just one 'middle' number to represent the temperature for each city, what would it be? In which city does that one number tell you the 'whole story' about the weather, and in which city is there more to the story?\n2. Possible Misconceptions\n1. Measure Confusion: Thinking that the 'variation' (spread) is just another way to find the 'center' (average), rather than understanding they describe two different characteristics of the data.\n2. Variation as Inaccuracy: Believing that a high measure of variation (like in City 2) means the data is 'wrong' or unreliable, rather than simply being diverse.\n3. Single-Number Sufficiency: Assuming that if two cities have the same mean, their weather patterns are identical, ignoring the impact of extremes (very hot or very cold days).",
+        "misconceptions": [
+          "Measure Confusion: Thinking that the 'variation' (spread) is just another way to find the 'center' (average), rather than understanding they describe two different characteristics of the data.",
+          "Variation as Inaccuracy: Believing that a high measure of variation (like in City 2) means the data is 'wrong' or unreliable, rather than simply being diverse.",
+          "Single-Number Sufficiency: Assuming that if two cities have the same mean, their weather patterns are identical, ignoring the impact of extremes (very hot or very cold days)."
+        ],
+        "patternRecognition": "",
+        "generalization": "Consider the statement: 'The measure of center summarizes the data, but the measure of variation explains how much you can trust that summary to predict any single day.'Is this statement Always, Sometimes, or Never true? Use the weather examples to justify your answer. What is the difference between what a 'single number' for center tells you versus a 'single number' for variation?",
+        "inference": "A new city, City 4, has a mean temperature of 70 degrees but a very high measure of variation (spread).Predict what the list of temperatures might look like for City 4. If a person likes consistent weather that stays the same every day, would they prefer a city with a low measure of variation or a high measure of variation? Explain how the 'single number' for variation helps them make this choice.",
+        "mappingData": {
+          "claims": [],
+          "evidence": "",
+          "criticalThinking": ""
+        }
+      }
+    },
+    "the_daily_step_challenge": {
+      "id": "the_daily_step_challenge",
+      "slug": "the_daily_step_challenge",
+      "title": "The Daily Step Challenge",
+      "grade": "Grade 6",
+      "domain": "Statistics & Probability",
+      "standard": "CCSS.MATH.6.SP.B.4",
+      "standardDescription": "6.SP.B.4 - Display numerical data in plots on a number line, including dot plots, histograms, and box plots.",
+      "description": "A group of friends tracked how many thousands of steps they took yesterday. The results were: 3, 5, 5, 6, 8, 8, 8, 10, 12, 15 (thousand steps).If you ",
+      "imageUrl": "",
+      "problemStatement": "A group of friends tracked how many thousands of steps they took yesterday. The results were: 3, 5, 5, 6, 8, 8, 8, 10, 12, 15 (thousand steps).If you wanted to show this data to someone so they could quickly see which number of steps was the most common, how would you organize the numbers? Describe what it would look like if you placed a mark for every person above a number line.\n2. Possible Misconceptions\n1. Frequency vs. Value: A student might confuse the height of a bar (frequency) with the a",
+      "teachingPrompt": "Help Zippy understand the concepts in The Daily Step Challenge.",
+      "targetConcepts": [
+        "Numerical data in plots on a number line"
+      ],
+      "correctSolutionPathway": "",
+      "misconceptions": [
+        "Frequency vs. Value: A student might confuse the height of a bar (frequency) with the actual data value (e.g., thinking a bar at height 3 means the number 3 is in the data set, rather than a value appearing 3 times).",
+        "Ignoring Scale: When drawing a number line or histogram, a student might skip numbers that have no data (e.g., going from 10 to 12 and leaving no space for 11), resulting in a distorted view of the distribution.",
+        "Histogram Binning: Thinking that a value on the edge of a bin (like 10 in a 5-10 and 10-15 range) belongs in both bars, leading to 'double counting' of data points."
+      ],
+      "aiIntro": "Hi! I'm Zippy! \ud83c\udf89\n\nI'm looking at this problem: A group of friends tracked how many thousands of steps they took yesterday. The results were: 3, 5, 5, 6, 8, 8, 8, 10, 12, 15 (thousand steps).If you wanted to show this data to someone so they could \n\nHmm, I think A student might confuse the height of a bar (frequency) with the actual data value (e.g., thinking a bar at height 3 means the number 3 is in the d... \ud83e\udd14\n\nCan you help me understand this better?",
+      "sections": {
+        "studentPrompt": "A group of friends tracked how many thousands of steps they took yesterday. The results were: 3, 5, 5, 6, 8, 8, 8, 10, 12, 15 (thousand steps).If you wanted to show this data to someone so they could quickly see which number of steps was the most common, how would you organize the numbers? Describe what it would look like if you placed a mark for every person above a number line.\n2. Possible Misconceptions\n1. Frequency vs. Value: A student might confuse the height of a bar (frequency) with the actual data value (e.g., thinking a bar at height 3 means the number 3 is in the data set, rather than a value appearing 3 times).\n2. Ignoring Scale: When drawing a number line or histogram, a student might skip numbers that have no data (e.g., going from 10 to 12 and leaving no space for 11), resulting in a distorted view of the distribution.\n3. Histogram Binning: Thinking that a value on the edge of a bin (like 10 in a 5-10 and 10-15 range) belongs in both bars, leading to 'double counting' of data points.",
+        "misconceptions": [
+          "Frequency vs. Value: A student might confuse the height of a bar (frequency) with the actual data value (e.g., thinking a bar at height 3 means the number 3 is in the data set, rather than a value appearing 3 times).",
+          "Ignoring Scale: When drawing a number line or histogram, a student might skip numbers that have no data (e.g., going from 10 to 12 and leaving no space for 11), resulting in a distorted view of the distribution.",
+          "Histogram Binning: Thinking that a value on the edge of a bin (like 10 in a 5-10 and 10-15 range) belongs in both bars, leading to 'double counting' of data points."
+        ],
+        "patternRecognition": "",
+        "generalization": "Consider the statement: 'A box plot is the only display that shows you the exact value of every single piece of data collected.'Is this statement Always, Sometimes, or Never true? Use the step challenge example to justify your answer. Why might a scientist choose a box plot over a dot plot if they were looking at 1,000 people instead of just 10?",
+        "inference": "A new student joins the challenge and took 25,000 steps yesterday. Predict how this 'outlier' would change the look of a Histogram (with bins of 5) versus a Box Plot. Which display would 'stretch' more to the right? If the box in the box plot represents the middle of the group, would that box move significantly because of this one new student? Explain your reasoning.",
+        "mappingData": {
+          "claims": [],
+          "evidence": "",
+          "criticalThinking": ""
+        }
+      }
+    },
+    "the_community_garden_harvest": {
+      "id": "the_community_garden_harvest",
+      "slug": "the_community_garden_harvest",
+      "title": "The Community Garden Harvest",
+      "grade": "Grade 6",
+      "domain": "Statistics & Probability",
+      "standard": "CCSS.MATH.6.SP.B.5",
+      "standardDescription": "6.SP.B.5 - Summarize numerical data sets in relation to their context.",
+      "description": "A school garden grows watermelons. The weights of the watermelons harvested this week are: 8, 9, 9, 10, 11, 12, 12, 12, 25 (pounds).",
+      "imageUrl": "",
+      "problemStatement": "A school garden grows watermelons. The weights of the watermelons harvested this week are: 8, 9, 9, 10, 11, 12, 12, 12, 25 (pounds).\nWhat weight would  you say as a 'typical' watermelon from this harvest?\n2. Possible Misconceptions\n1. Outlier Over-influence: A student might calculate the mean and find it is 12 lbs, but fail to notice that the 25-lb 'giant' watermelon is pulling the average away from the most common cluster (9-12 lbs).\n2. Ignoring Context: A student might provide a measure of cen",
+      "teachingPrompt": "Help Zippy understand the concepts in The Community Garden Harvest.",
+      "targetConcepts": [
+        "Numerical data sets in relation to their context"
+      ],
+      "correctSolutionPathway": "",
+      "misconceptions": [
+        "Outlier Over-influence: A student might calculate the mean and find it is 12 lbs, but fail to notice that the 25-lb 'giant' watermelon is pulling the average away from the most common cluster (9-12 lbs).",
+        "Ignoring Context: A student might provide a measure of center (like the median) without units or without explaining what it means for the garden (e.g., 'The answer is 11' vs. 'Most watermelons are about 11 lbs').",
+        "Mean vs. Median Appropriateness: Thinking the mean is always the 'best' summary, even when a data set is heavily skewed by a single unusual value."
+      ],
+      "aiIntro": "Hi! I'm Zippy! \ud83c\udf89\n\nI'm looking at this problem: A school garden grows watermelons. The weights of the watermelons harvested this week are: 8, 9, 9, 10, 11, 12, 12, 12, 25 (pounds).\n\nHmm, I think A student might calculate the mean and find it is 12 lbs, but fail to notice that the 25-lb 'giant' watermelon is pulling the average away from the... \ud83e\udd14\n\nCan you help me understand this better?",
+      "sections": {
+        "studentPrompt": "A school garden grows watermelons. The weights of the watermelons harvested this week are: 8, 9, 9, 10, 11, 12, 12, 12, 25 (pounds).\nWhat weight would  you say as a 'typical' watermelon from this harvest?\n2. Possible Misconceptions\n1. Outlier Over-influence: A student might calculate the mean and find it is 12 lbs, but fail to notice that the 25-lb 'giant' watermelon is pulling the average away from the most common cluster (9-12 lbs).\n2. Ignoring Context: A student might provide a measure of center (like the median) without units or without explaining what it means for the garden (e.g., 'The answer is 11' vs. 'Most watermelons are about 11 lbs').\n3. Mean vs. Median Appropriateness: Thinking the mean is always the 'best' summary, even when a data set is heavily skewed by a single unusual value.",
+        "misconceptions": [
+          "Outlier Over-influence: A student might calculate the mean and find it is 12 lbs, but fail to notice that the 25-lb 'giant' watermelon is pulling the average away from the most common cluster (9-12 lbs).",
+          "Ignoring Context: A student might provide a measure of center (like the median) without units or without explaining what it means for the garden (e.g., 'The answer is 11' vs. 'Most watermelons are about 11 lbs').",
+          "Mean vs. Median Appropriateness: Thinking the mean is always the 'best' summary, even when a data set is heavily skewed by a single unusual value."
+        ],
+        "patternRecognition": "",
+        "generalization": "Consider the statement: 'The best way to summarize a data set is to find the mean, because it uses every single number in the calculation.'Is this statement Always, Sometimes, or Never true? Use the 'giant watermelon' (25 lbs) to justify your answer. Under what conditions might the median be a better summary than the mean?",
+        "inference": "Next week, the garden harvests 10 more watermelons. Most weigh about 10 lbs, but one is a tiny 'mini' watermelon weighing only 1 lb. Predict how this tiny watermelon will affect the Mean compared to the Median. If the garden wants to advertise that they grow 'big' watermelons, which measure of center would they likely show on their poster? Explain how the context of 'advertising' might change which math summary someone chooses to use.",
+        "mappingData": {
+          "claims": [],
+          "evidence": "",
+          "criticalThinking": ""
+        }
+      }
+    },
+    "snack_stand_expressions": {
+      "id": "snack_stand_expressions",
+      "slug": "snack_stand_expressions",
+      "title": "Snack Stand Expressions",
+      "grade": "Grade 6",
+      "domain": "Expressions & Equations",
+      "standard": "CCSS.MATH.6.EE.A.2",
+      "standardDescription": "6.EE.A.2",
+      "description": "A snack stand sells \"Game Day Packs.\" Each pack contains 1 bag of popcorn and 2 juice boxes. Imagine a customer walks up and buys several of these pac",
+      "imageUrl": "",
+      "problemStatement": "A snack stand sells \"Game Day Packs.\" Each pack contains 1 bag of popcorn and 2 juice boxes. Imagine a customer walks up and buys several of these packs. Describe what is inside their bag and how you know what the contents are.\n2. Possible Misconceptions\nThe following misconceptions could be addressed in later prompts:\n\u2022 The \"One-Time Addition\" Error: A student believes that no matter how many packs are bought, you only add 2 juice boxes once (e.g., for 5 packs, they calculate 5 + 2 = 7 items).\n",
+      "teachingPrompt": "Help Zippy understand the concepts in Snack Stand Expressions.",
+      "targetConcepts": [],
+      "correctSolutionPathway": "",
+      "misconceptions": [
+        "The following misconceptions could be addressed in later prompts:",
+        "\u2022 The \"One-Time Addition\" Error: A student believes that no matter how many packs are bought, you only add 2 juice boxes once (e.g., for 5 packs, they calculate 5 + 2 = 7 items).",
+        "\u2022 The \"Type vs. Quantity\" Error: A student thinks there are only 3 items total in the bag because they only count the types of items mentioned (1 popcorn and 2 juices), regardless of the number of packs.",
+        "\u2022 The \"Fixed Total\" Error: A student assumes there is a specific number of packs intended (like 1 pack) and cannot describe the contents without being given a specific number of packs first."
+      ],
+      "aiIntro": "Hi! I'm Zippy! \ud83c\udf89\n\nI'm looking at this problem: A snack stand sells \"Game Day Packs.\" Each pack contains 1 bag of popcorn and 2 juice boxes. Imagine a customer walks up and buys several of these packs. Describe what is inside their bag and how you \n\nHmm, I think  \ud83e\udd14\n\nCan you help me understand this better?",
+      "sections": {
+        "studentPrompt": "A snack stand sells \"Game Day Packs.\" Each pack contains 1 bag of popcorn and 2 juice boxes. Imagine a customer walks up and buys several of these packs. Describe what is inside their bag and how you know what the contents are.\n2. Possible Misconceptions\nThe following misconceptions could be addressed in later prompts:\n\u2022 The \"One-Time Addition\" Error: A student believes that no matter how many packs are bought, you only add 2 juice boxes once (e.g., for 5 packs, they calculate 5 + 2 = 7 items).\n\u2022 The \"Type vs. Quantity\" Error: A student thinks there are only 3 items total in the bag because they only count the types of items mentioned (1 popcorn and 2 juices), regardless of the number of packs.\n\u2022 The \"Fixed Total\" Error: A student assumes there is a specific number of packs intended (like 1 pack) and cannot describe the contents without being given a specific number of packs first.",
+        "misconceptions": [
+          "The following misconceptions could be addressed in later prompts:",
+          "\u2022 The \"One-Time Addition\" Error: A student believes that no matter how many packs are bought, you only add 2 juice boxes once (e.g., for 5 packs, they calculate 5 + 2 = 7 items).",
+          "\u2022 The \"Type vs. Quantity\" Error: A student thinks there are only 3 items total in the bag because they only count the types of items mentioned (1 popcorn and 2 juices), regardless of the number of packs.",
+          "\u2022 The \"Fixed Total\" Error: A student assumes there is a specific number of packs intended (like 1 pack) and cannot describe the contents without being given a specific number of packs first."
+        ],
+        "patternRecognition": "",
+        "generalization": "\"No matter how many packs are bought, the number of juice boxes will always be double the number of packs.\" Is this statement true? Explain why the relationship between the number of packs and the total number of juice boxes stays the same even when the number of packs changes.",
+        "inference": "The snack stand introduces a \"Mystery Pack.\" In this pack, the number of popcorn bags is a secret until you open it, but every pack still has exactly 2 juice boxes. If a customer buys 4 Mystery Packs, explain the process you would use to find the total number of items they have once the secret is revealed.",
+        "mappingData": {
+          "claims": [],
+          "evidence": "",
+          "criticalThinking": ""
+        }
+      }
+    },
+    "harvest_packing_challenge": {
+      "id": "harvest_packing_challenge",
+      "slug": "harvest_packing_challenge",
+      "title": "The Harvest Packing Challenge",
+      "grade": "Grade 6",
+      "domain": "Number System",
+      "standard": "CCSS.MATH.6.NS.B.2",
+      "standardDescription": "6.NS.B.2",
+      "description": "A local farm has 4,320 apples to pack for a community market. Each crate holds 18 apples. How many crates will be completely filled?",
+      "imageUrl": "",
+      "problemStatement": "A local farm has 4,320 apples to pack for a community market. Each crate holds 18 apples. How many crates will be completely filled?\n2. Potential Misconceptions\nLater prompts will address these common errors:\nPlace Value Omission: Forgetting to record a zero in the quotient when the divisor does not fit into a brought-down digit (e.g., getting 24 instead of 240).\nEstimation Ignorance: Not checking if the answer is 'reasonable' (e.g., realizing that 24 crates of 18 is far less than 4,000).\nSubtra",
+      "teachingPrompt": "Help Zippy understand the concepts in The Harvest Packing Challenge.",
+      "targetConcepts": [],
+      "correctSolutionPathway": "",
+      "misconceptions": [
+        "Later prompts will address these common errors:",
+        "Place Value Omission: Forgetting to record a zero in the quotient when the divisor does not fit into a brought-down digit (e.g., getting 24 instead of 240).",
+        "Estimation Ignorance: Not checking if the answer is 'reasonable' (e.g., realizing that 24 crates of 18 is far less than 4,000).",
+        "Subtraction/Bring-down Errors: Misaligning columns during the standard algorithm process."
+      ],
+      "aiIntro": "Hi! I'm Zippy! \ud83c\udf89\n\nI'm looking at this problem: A local farm has 4,320 apples to pack for a community market. Each crate holds 18 apples. How many crates will be completely filled?\n\nHmm, I think  \ud83e\udd14\n\nCan you help me understand this better?",
+      "sections": {
+        "studentPrompt": "A local farm has 4,320 apples to pack for a community market. Each crate holds 18 apples. How many crates will be completely filled?\n2. Potential Misconceptions\nLater prompts will address these common errors:\nPlace Value Omission: Forgetting to record a zero in the quotient when the divisor does not fit into a brought-down digit (e.g., getting 24 instead of 240).\nEstimation Ignorance: Not checking if the answer is 'reasonable' (e.g., realizing that 24 crates of 18 is far less than 4,000).\nSubtraction/Bring-down Errors: Misaligning columns during the standard algorithm process.",
+        "misconceptions": [
+          "Later prompts will address these common errors:",
+          "Place Value Omission: Forgetting to record a zero in the quotient when the divisor does not fit into a brought-down digit (e.g., getting 24 instead of 240).",
+          "Estimation Ignorance: Not checking if the answer is 'reasonable' (e.g., realizing that 24 crates of 18 is far less than 4,000).",
+          "Subtraction/Bring-down Errors: Misaligning columns during the standard algorithm process."
+        ],
+        "patternRecognition": "",
+        "generalization": "Consider this claim: 'If the number of items stays the same, doubling the size of the crate will always cut the number of crates needed in half.'Is this claim Always, Sometimes, or Never true? Explain your reasoning using evidence from the previous patterns.\n5. New Case Prediction\nThe farm receives a late delivery of 180 more apples. They are still using crates of 18. Without restarting the long division algorithm, how many total crates are now needed? What if they received 200 more apples instead?",
+        "inference": "The farm receives a late delivery of 180 more apples. They are still using crates of 18. Without restarting the long division algorithm, how many total crates are now needed? What if they received 200 more apples instead?",
+        "mappingData": {
+          "claims": [],
+          "evidence": "",
+          "criticalThinking": ""
+        }
+      }
+    }
+  }
+}
