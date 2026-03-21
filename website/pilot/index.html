@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Join Our Pilot - Cognality Learning</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary-blue: #0A4d8c;
+            --primary-light: #f8fafc;
+            --accent-teal: #00a896;
+            --accent-coral: #ff6b4a;
+            --neutral-white: #ffffff;
+            --neutral-dark: #212b36;
+            --gray-light: #f3f4f6;
+            --gray-medium: #9ca3af;
+            --gray-dark: #4b5563;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Inter', sans-serif;
+            background: var(--primary-light);
+            color: var(--neutral-dark);
+            line-height: 1.6;
+        }
+
+        nav {
+            background: var(--neutral-white);
+            box-shadow: var(--shadow);
+            padding: 1rem 0;
+        }
+
+        .nav-container {
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--primary-blue);
+            text-decoration: none;
+        }
+
+        .logo-icon img {
+            height: 40px;
+            width: auto;
+        }
+
+        .back-link {
+            color: var(--primary-blue);
+            text-decoration: none;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .back-link:hover {
+            text-decoration: underline;
+        }
+
+        .pilot-page {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 3rem 2rem;
+        }
+
+        .pilot-header {
+            text-align: center;
+            margin-bottom: 2.5rem;
+        }
+
+        .pilot-header h1 {
+            font-size: 2.25rem;
+            color: var(--primary-blue);
+            margin-bottom: 1rem;
+        }
+
+        .pilot-header p {
+            font-size: 1.125rem;
+            color: var(--gray-dark);
+            max-width: 650px;
+            margin: 0 auto;
+        }
+
+        .form-container {
+            background: var(--neutral-white);
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            overflow: hidden;
+        }
+
+        .form-container iframe {
+            width: 100%;
+            min-height: 1200px;
+            border: none;
+        }
+
+        footer {
+            text-align: center;
+            padding: 2rem;
+            color: var(--gray-medium);
+            font-size: 0.875rem;
+        }
+
+        @media (max-width: 768px) {
+            .pilot-header h1 {
+                font-size: 1.75rem;
+            }
+
+            .pilot-page {
+                padding: 2rem 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <div class="nav-container">
+            <a href="/" class="logo">
+                <div class="logo-icon">
+                    <img src="../logo_transparent.png" alt="Cognality Learning Logo">
+                </div>
+                Cognality Learning
+            </a>
+            <a href="/" class="back-link">← Back to Home</a>
+        </div>
+    </nav>
+
+    <div class="pilot-page">
+        <div class="pilot-header">
+            <h1>Join Our Pilot Program</h1>
+            <p>Be among the first educators to experience a new class of assessment. Sign up below to join our pilot and help shape the future of how students show what they know.</p>
+        </div>
+
+        <div class="form-container">
+            <iframe
+                src="https://docs.google.com/forms/d/e/1FAIpQLSeeqFjIDYUi2egwad3rW_q8Y5644QQMKF9-14NB9xbN9iYRWw/viewform?embedded=true"
+                title="Cognality Pilot Program Sign Up"
+                loading="lazy">
+                Loading…
+            </iframe>
+        </div>
+    </div>
+
+    <footer>
+        <p>&copy; 2025 Cognality Learning. All rights reserved.</p>
+    </footer>
+</body>
+</html>
