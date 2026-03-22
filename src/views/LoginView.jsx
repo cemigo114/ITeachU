@@ -1,5 +1,6 @@
 import React from 'react';
 import { Users, BookOpen, UserCircle, ChevronRight } from 'lucide-react';
+import { motion } from 'motion/react';
 import LumoMascot from '../components/LumoMascot';
 import Card from '../components/ui/Card';
 
@@ -40,23 +41,43 @@ const LoginView = ({ mascotEmotion, onLogin }) => {
 
       <Card variant="elevated" padding="lg" className="relative max-w-md w-full">
         <div className="flex flex-col items-center mb-8">
-          <div className="w-[70px] h-[70px] mb-4 animate-float">
+          <motion.div
+            initial={{ scale: 0, rotate: -20 }}
+            animate={{ scale: 1, rotate: 0 }}
+            transition={{ type: 'spring', stiffness: 400, damping: 20 }}
+            className="w-[70px] h-[70px] mb-4 animate-float"
+          >
             <LumoMascot emotion={mascotEmotion} size="small" />
-          </div>
-          <h1 className="text-3xl font-display font-bold text-neutral-900">
+          </motion.div>
+          <motion.h1
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ type: 'spring', stiffness: 200, damping: 25, delay: 0.1 }}
+            className="text-3xl font-display font-bold text-neutral-900"
+          >
             Cognality Learning
-          </h1>
-          <p className="text-neutral-500 mt-2 font-body">
+          </motion.h1>
+          <motion.p
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ type: 'spring', stiffness: 200, damping: 25, delay: 0.2 }}
+            className="text-neutral-500 mt-2 font-body"
+          >
             Transform assessment by teaching AI
-          </p>
+          </motion.p>
         </div>
 
-        <div className="space-y-3 stagger-children">
-          {roles.map((role) => {
+        <div className="space-y-3">
+          {roles.map((role, index) => {
             const Icon = role.icon;
             return (
-              <button
+              <motion.button
                 key={role.key}
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ type: 'spring', stiffness: 300, damping: 25, delay: 0.25 + index * 0.08 }}
+                whileHover={{ scale: 1.02, x: 4 }}
+                whileTap={{ scale: 0.98 }}
                 onClick={() => onLogin(role.key, role.user)}
                 className={`w-full flex items-center justify-between p-4 rounded-xl transition-all duration-200 shadow-soft hover:shadow-card focus-ring ${role.colorClasses}`}
               >
@@ -68,7 +89,7 @@ const LoginView = ({ mascotEmotion, onLogin }) => {
                   </div>
                 </div>
                 <ChevronRight className="w-5 h-5 opacity-70" />
-              </button>
+              </motion.button>
             );
           })}
         </div>
