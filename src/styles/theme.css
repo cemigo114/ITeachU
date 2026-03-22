@@ -1,0 +1,192 @@
+/* ============================================
+   ITeachU Design System — Theme Tokens
+   ============================================ */
+
+:root {
+  /* Brand palette as CSS custom properties (for non-Tailwind contexts) */
+  --color-brand: #0A4D8C;
+  --color-teal: #00A896;
+  --color-coral: #FF6B4A;
+  --color-plum: #7C3AED;
+  --color-neutral-dark: #212B36;
+  --color-neutral-light: #f8f9fb;
+
+  /* Role colors */
+  --color-teacher: var(--color-brand);
+  --color-student: var(--color-teal);
+  --color-parent: var(--color-plum);
+
+  /* Surfaces */
+  --surface-primary: #ffffff;
+  --surface-secondary: var(--color-neutral-light);
+  --surface-elevated: #ffffff;
+
+  /* Typography scale */
+  --text-xs: 0.75rem;
+  --text-sm: 0.875rem;
+  --text-base: 1rem;
+  --text-lg: 1.125rem;
+  --text-xl: 1.25rem;
+  --text-2xl: 1.5rem;
+  --text-3xl: 1.875rem;
+  --text-4xl: 2.25rem;
+  --text-5xl: 3rem;
+
+  /* Spacing rhythm */
+  --space-xs: 0.25rem;
+  --space-sm: 0.5rem;
+  --space-md: 1rem;
+  --space-lg: 1.5rem;
+  --space-xl: 2rem;
+  --space-2xl: 3rem;
+  --space-3xl: 4rem;
+
+  /* Transitions */
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --duration-fast: 150ms;
+  --duration-normal: 250ms;
+  --duration-slow: 400ms;
+
+  /* Border radius */
+  --radius-sm: 0.375rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.75rem;
+  --radius-xl: 1rem;
+  --radius-2xl: 1.25rem;
+  --radius-full: 9999px;
+}
+
+/* ============================================
+   Stagger Utilities
+   Child elements get cascading animation delays
+   ============================================ */
+
+.stagger-children > * {
+  animation: slideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.stagger-children > *:nth-child(1) { animation-delay: 0ms; }
+.stagger-children > *:nth-child(2) { animation-delay: 60ms; }
+.stagger-children > *:nth-child(3) { animation-delay: 120ms; }
+.stagger-children > *:nth-child(4) { animation-delay: 180ms; }
+.stagger-children > *:nth-child(5) { animation-delay: 240ms; }
+.stagger-children > *:nth-child(6) { animation-delay: 300ms; }
+.stagger-children > *:nth-child(7) { animation-delay: 360ms; }
+.stagger-children > *:nth-child(8) { animation-delay: 420ms; }
+
+@keyframes slideUp {
+  0% { opacity: 0; transform: translateY(16px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+/* ============================================
+   Focus Styles
+   ============================================ */
+
+.focus-ring {
+  outline: none;
+}
+
+.focus-ring:focus-visible {
+  outline: 2px solid var(--color-brand);
+  outline-offset: 2px;
+  border-radius: var(--radius-md);
+}
+
+/* ============================================
+   Interactive Card Hover
+   ============================================ */
+
+.card-interactive {
+  transition:
+    transform var(--duration-normal) var(--ease-out-expo),
+    box-shadow var(--duration-normal) var(--ease-out-expo),
+    border-color var(--duration-fast) ease;
+}
+
+.card-interactive:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px -4px rgba(13, 40, 71, 0.12);
+}
+
+.card-interactive:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 8px -2px rgba(13, 40, 71, 0.08);
+}
+
+/* ============================================
+   Role-colored Accent Bars
+   Used on PageHeader and Cards
+   ============================================ */
+
+.accent-teacher { border-top: 3px solid var(--color-teacher); }
+.accent-student { border-top: 3px solid var(--color-student); }
+.accent-parent { border-top: 3px solid var(--color-parent); }
+
+/* ============================================
+   View Transitions
+   ============================================ */
+
+.view-enter {
+  animation: viewEnter 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes viewEnter {
+  0% {
+    opacity: 0;
+    transform: translateY(8px) scale(0.99);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* ============================================
+   Chat Emotion Tints
+   Subtle background color shifts for teaching session
+   ============================================ */
+
+.emotion-tint-curious    { background-color: rgba(0, 168, 150, 0.03); }
+.emotion-tint-confused   { background-color: rgba(255, 107, 74, 0.04); }
+.emotion-tint-excited    { background-color: rgba(255, 107, 74, 0.03); }
+.emotion-tint-thinking   { background-color: rgba(10, 77, 140, 0.03); }
+.emotion-tint-confident  { background-color: rgba(0, 168, 150, 0.05); }
+.emotion-tint-encouraging { background-color: rgba(0, 168, 150, 0.04); }
+.emotion-tint-listening  { background-color: rgba(10, 77, 140, 0.03); }
+
+/* ============================================
+   Celebration Animation (for feedback view)
+   ============================================ */
+
+@keyframes celebrate {
+  0% { transform: scale(0.8) rotate(-5deg); opacity: 0; }
+  50% { transform: scale(1.1) rotate(3deg); opacity: 1; }
+  100% { transform: scale(1) rotate(0deg); opacity: 1; }
+}
+
+.animate-celebrate {
+  animation: celebrate 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+/* ============================================
+   Scrollbar Styling
+   ============================================ */
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background-color: rgba(161, 169, 183, 0.4);
+  border-radius: 3px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(161, 169, 183, 0.6);
+}

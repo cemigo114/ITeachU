@@ -27,7 +27,7 @@ const StandardBadge = ({ standardId, standardCode }) => {
   return (
     <div className="inline-block relative">
       <div
-        className="inline-flex items-center gap-1.5 px-3 py-1 bg-indigo-100 text-indigo-800 rounded-full text-sm font-medium cursor-help"
+        className="inline-flex items-center gap-1.5 px-3 py-1 bg-brand-100 text-brand-800 rounded-full text-sm font-medium cursor-help"
         onMouseEnter={() => setShowTooltip(true)}
         onMouseLeave={() => setShowTooltip(false)}
       >
@@ -37,12 +37,12 @@ const StandardBadge = ({ standardId, standardCode }) => {
       </div>
 
       {showTooltip && description && (
-        <div className="absolute z-50 w-80 p-4 bg-gray-900 text-white text-sm rounded-lg shadow-xl bottom-full left-1/2 transform -translate-x-1/2 mb-2">
-          <div className="font-semibold mb-2">CCSS.MATH.{code}</div>
-          <div className="text-gray-200 leading-relaxed">{description}</div>
+        <div className="absolute z-50 w-80 p-4 bg-neutral-900 text-white text-sm rounded-xl shadow-dramatic bottom-full left-1/2 transform -translate-x-1/2 mb-2">
+          <div className="font-display font-semibold mb-2">CCSS.MATH.{code}</div>
+          <div className="text-neutral-200 leading-relaxed">{description}</div>
 
           {standard?.domain && (
-            <div className="mt-3 pt-3 border-t border-gray-700 text-xs text-gray-400">
+            <div className="mt-3 pt-3 border-t border-neutral-700 text-xs text-neutral-400">
               <div><strong>Domain:</strong> {standard.domain}</div>
               {standard.cluster && (
                 <div className="mt-1"><strong>Cluster:</strong> {standard.cluster}</div>
@@ -50,8 +50,7 @@ const StandardBadge = ({ standardId, standardCode }) => {
             </div>
           )}
 
-          {/* Arrow pointing down */}
-          <div className="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-8 border-r-8 border-t-8 border-transparent border-t-gray-900"></div>
+          <div className="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-8 border-r-8 border-t-8 border-transparent border-t-neutral-900"></div>
         </div>
       )}
     </div>

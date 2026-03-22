@@ -400,8 +400,8 @@ const LumoMascot = ({ emotion = 'happy', size = 'medium', showControls = false }
               onClick={() => setCurrentEmotion(em.id)}
               className={`p-3 rounded-lg border-2 transition-all text-sm ${
                 currentEmotion === em.id
-                  ? 'bg-indigo-500/20 border-indigo-400 text-indigo-900'
-                  : 'bg-white/50 border-gray-200 text-gray-700 hover:bg-indigo-50'
+                  ? 'bg-brand-500/20 border-brand-400 text-brand-900'
+                  : 'bg-white/50 border-neutral-200 text-neutral-700 hover:bg-brand-50'
               }`}
             >
               <div className="font-semibold mb-1">{em.label}</div>
