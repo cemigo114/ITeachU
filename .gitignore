@@ -32,3 +32,6 @@ data/knowledge-graph/*.csv
 data/*.db
 data/*.db-shm
 data/*.db-wal
+
+# Git worktrees for design variants
+.worktrees
