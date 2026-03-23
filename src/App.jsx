@@ -204,9 +204,10 @@ const App = () => {
     setView('teaching');
   };
 
-  const sendMessage = async () => {
-    if (!input.trim() || loading) return;
-    const userMessage = { role: 'user', content: input };
+  const sendMessage = async (textOverride) => {
+    const messageText = textOverride || input;
+    if (!messageText.trim() || loading) return;
+    const userMessage = { role: 'user', content: messageText };
     const updatedMessages = [...messages, userMessage];
     setMessages(updatedMessages);
     setInput('');

@@ -9,6 +9,7 @@ export default {
       fontFamily: {
         display: ['Outfit', 'system-ui', 'sans-serif'],
         body: ['DM Sans', 'system-ui', 'sans-serif'],
+        handwriting: ['Kalam', 'cursive'],
       },
       colors: {
         brand: {
