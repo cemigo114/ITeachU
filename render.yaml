@@ -1,15 +1,21 @@
+databases:
+  - name: iteachu-db
+    plan: free
+    databaseName: iteachu
+    user: iteachu
+
 services:
   - type: web
     name: iteachu-backend
-    env: node
-    buildCommand: npm install
+    runtime: node
+    buildCommand: npm install && npx prisma migrate deploy
     startCommand: node server.js
-    disk:
-      name: iteachu-data
-      mountPath: /opt/render/project/src/data
-      sizeGB: 1
     envVars:
       - key: NODE_ENV
         value: production
+      - key: DATABASE_URL
+        fromDatabase:
+          name: iteachu-db
+          property: connectionString
       - key: VITE_ANTHROPIC_API_KEY
-        sync: false  # This will need to be set manually in Render dashboard
+        sync: false

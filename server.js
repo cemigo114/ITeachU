@@ -4,6 +4,11 @@ import 'dotenv/config';
 import fs from 'fs';
 import path from 'path';
 import { generateEvaluatorPrompt } from './src/utils/evaluatorPrompt.js';
+import {
+  connectDatabase, disconnectDatabase, useDatabase,
+  upsertConversation, getAllConversations,
+  upsertEvaluation, getEvaluation
+} from './db.js';
 
 const app = express();
 const PORT = process.env.PORT || 3002;
@@ -97,6 +102,30 @@ const sessions = new Map(sessionsData); // sessionId -> session data
 
 console.log(`📊 Loaded ${conversationLogs.length} conversations, ${sessions.size} sessions, ${evaluationCache.size} evaluations`);
 
+function saveConversationToJson(sessionId, anthropicRequest, apiResponse, taskMetadata) {
+  let conversationLog = conversationLogs.find(log => log.sessionId === sessionId);
+  if (conversationLog) {
+    conversationLog.messages = anthropicRequest.messages;
+    conversationLog.lastResponse = apiResponse.content[0].text;
+    conversationLog.updatedAt = new Date().toISOString();
+    console.log(`📝 Updated existing conversation (JSON) for session ${sessionId}`);
+  } else {
+    conversationLog = {
+      sessionId,
+      timestamp: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      messages: anthropicRequest.messages,
+      lastResponse: apiResponse.content[0].text,
+      model: anthropicRequest.model,
+      system: anthropicRequest.system,
+      taskMetadata: taskMetadata || {}
+    };
+    conversationLogs.push(conversationLog);
+    console.log(`📊 New conversation (JSON) for session ${sessionId} (${conversationLogs.length} total)`);
+  }
+  saveToFile(CONVERSATIONS_FILE, conversationLogs);
+}
+
 app.post('/api/chat', async (req, res) => {
   try {
     console.log('📨 Received chat request:', {
@@ -155,33 +184,25 @@ app.post('/api/chat', async (req, res) => {
       stopReason: data.stop_reason
     });
 
-    // Find or create conversation log for this session
-    let conversationLog = conversationLogs.find(log => log.sessionId === currentSessionId);
-
-    if (conversationLog) {
-      // Update existing conversation
-      conversationLog.messages = anthropicRequest.messages;
-      conversationLog.lastResponse = data.content[0].text;
-      conversationLog.updatedAt = new Date().toISOString();
-      console.log(`📝 Updated existing conversation for session ${currentSessionId}`);
+    // Persist conversation — database if available, JSON fallback otherwise
+    if (useDatabase) {
+      try {
+        await upsertConversation({
+          sessionId: currentSessionId,
+          model: anthropicRequest.model,
+          systemPrompt: anthropicRequest.system,
+          taskMetadata: taskMetadata || {},
+          messages: anthropicRequest.messages,
+          lastResponse: data.content[0].text
+        });
+        console.log(`🗄️  Conversation saved to database for session ${currentSessionId}`);
+      } catch (dbError) {
+        console.error('⚠️  Database save failed, falling back to JSON:', dbError.message);
+        saveConversationToJson(currentSessionId, anthropicRequest, data, taskMetadata);
+      }
     } else {
-      // Create new conversation log
-      conversationLog = {
-        sessionId: currentSessionId,
-        timestamp: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-        messages: anthropicRequest.messages,
-        lastResponse: data.content[0].text,
-        model: anthropicRequest.model,
-        system: anthropicRequest.system, // Store system prompt for context
-        taskMetadata: taskMetadata || {} // Store task metadata if provided (extracted earlier)
-      };
-      conversationLogs.push(conversationLog);
-      console.log(`📊 New conversation created for session ${currentSessionId} (${conversationLogs.length} total)`);
+      saveConversationToJson(currentSessionId, anthropicRequest, data, taskMetadata);
     }
-
-    // Save conversations to file after update
-    saveToFile(CONVERSATIONS_FILE, conversationLogs);
 
     // Return sessionId with response so frontend can track it
     res.json({
@@ -210,9 +231,16 @@ app.post('/api/chat', async (req, res) => {
  */
 async function evaluateConversation(conversationLog, sessionId) {
   try {
-    // Check cache first
+    // Check database cache first, then in-memory cache
+    if (useDatabase) {
+      const dbEval = await getEvaluation(sessionId);
+      if (dbEval) {
+        console.log(`📋 Using database-cached evaluation for session ${sessionId}`);
+        return dbEval;
+      }
+    }
     if (evaluationCache.has(sessionId)) {
-      console.log(`📋 Using cached evaluation for session ${sessionId}`);
+      console.log(`📋 Using memory-cached evaluation for session ${sessionId}`);
       return evaluationCache.get(sessionId);
     }
 
@@ -299,10 +327,16 @@ Please provide your evaluation in the specified JSON format.`;
 
     console.log(`✅ Evaluation complete for session ${sessionId}: ${evaluation.totalScore}/100`);
 
-    // Cache the result
+    // Cache the result — database + in-memory + JSON file
+    if (useDatabase) {
+      try {
+        await upsertEvaluation(sessionId, evaluation);
+        console.log(`🗄️  Evaluation saved to database for session ${sessionId}`);
+      } catch (dbError) {
+        console.error('⚠️  Database evaluation save failed:', dbError.message);
+      }
+    }
     evaluationCache.set(sessionId, evaluation);
-
-    // Save evaluations cache to file
     saveToFile(EVALUATIONS_FILE, Array.from(evaluationCache.entries()));
 
     return evaluation;
@@ -332,13 +366,47 @@ Please provide your evaluation in the specified JSON format.`;
 // Teacher-only endpoint to get conversation logs and assessments
 app.get('/api/teacher/conversations', async (req, res) => {
   try {
-    // In production: Add authentication middleware
-    console.log(`📊 Teacher dashboard requested: ${conversationLogs.length} conversations to evaluate`);
+    let logs;
 
-    // Evaluate all conversations (in parallel for performance)
+    if (useDatabase) {
+      try {
+        const dbConversations = await getAllConversations();
+        logs = dbConversations.map(conv => ({
+          sessionId: conv.sessionId,
+          timestamp: conv.createdAt.toISOString(),
+          updatedAt: conv.updatedAt.toISOString(),
+          messages: conv.messages.map(m => ({ role: m.role, content: m.content })),
+          taskMetadata: conv.taskMetadata || {},
+          _dbEvaluation: conv.evaluation
+        }));
+        console.log(`📊 Teacher dashboard requested: ${logs.length} conversations from database`);
+      } catch (dbError) {
+        console.error('⚠️  Database read failed, falling back to JSON:', dbError.message);
+        logs = conversationLogs.map(log => ({ ...log, _dbEvaluation: null }));
+      }
+    } else {
+      logs = conversationLogs.map(log => ({ ...log, _dbEvaluation: null }));
+      console.log(`📊 Teacher dashboard requested: ${logs.length} conversations from JSON`);
+    }
+
     const conversationsWithEvaluations = await Promise.all(
-      conversationLogs.map(async (log) => {
-        const evaluation = await evaluateConversation(log, log.sessionId);
+      logs.map(async (log) => {
+        let evaluation;
+        if (log._dbEvaluation) {
+          const e = log._dbEvaluation;
+          evaluation = {
+            categoryScores: {
+              conceptArticulation: e.conceptArticulation,
+              logicCoherence: e.logicCoherence,
+              misconceptionCorrection: e.misconceptionCorrection,
+              cognitiveResilience: e.cognitiveResilience
+            },
+            justifications: e.justifications,
+            totalScore: e.totalScore
+          };
+        } else {
+          evaluation = await evaluateConversation(log, log.sessionId);
+        }
 
         return {
           sessionId: log.sessionId,
@@ -357,7 +425,7 @@ app.get('/api/teacher/conversations', async (req, res) => {
     );
 
     res.json({
-      count: conversationLogs.length,
+      count: logs.length,
       conversations: conversationsWithEvaluations
     });
   } catch (error) {
@@ -531,11 +599,26 @@ app.get('/api/standards/:id/prerequisites', (req, res) => {
   }
 });
 
-app.listen(PORT, () => {
-  console.log(`🚀 Proxy server running on http://localhost:${PORT}`);
-  console.log(`📊 Backend assessment enabled - logs hidden from frontend`);
-  console.log(`💾 Session persistence enabled`);
-  console.log(`📚 Task collections API ready`);
-  console.log(`📝 Tasks API ready`);
-  console.log(`🎯 Standards alignment API ready`);
-});
+async function startServer() {
+  if (useDatabase) {
+    await connectDatabase();
+  }
+
+  app.listen(PORT, () => {
+    console.log(`🚀 Proxy server running on http://localhost:${PORT}`);
+    console.log(`🗄️  Storage: ${useDatabase ? 'PostgreSQL' : 'JSON files'}`);
+    console.log(`📊 Backend assessment enabled - logs hidden from frontend`);
+    console.log(`💾 Session persistence enabled`);
+    console.log(`📚 Task collections API ready`);
+    console.log(`📝 Tasks API ready`);
+    console.log(`🎯 Standards alignment API ready`);
+  });
+
+  process.on('SIGTERM', async () => {
+    console.log('🛑 SIGTERM received, shutting down...');
+    await disconnectDatabase();
+    process.exit(0);
+  });
+}
+
+startServer();
