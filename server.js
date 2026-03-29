@@ -55,6 +55,30 @@ app.use((req, res, next) => {
   next();
 });
 
+// Health/diagnostic endpoint
+app.get('/api/health', async (req, res) => {
+  const { prisma } = await import('./db.js');
+  let dbStatus = 'no prisma client';
+  let dbConvCount = null;
+  if (prisma) {
+    try {
+      const count = await prisma.conversation.count();
+      dbStatus = 'connected';
+      dbConvCount = count;
+    } catch (e) {
+      dbStatus = `error: ${e.message}`;
+    }
+  }
+  res.json({
+    storage: useDatabase ? 'postgresql' : 'json',
+    hasDatabaseUrl: !!process.env.DATABASE_URL,
+    databaseUrlPrefix: process.env.DATABASE_URL ? process.env.DATABASE_URL.substring(0, 30) + '...' : null,
+    dbStatus,
+    dbConversationCount: dbConvCount,
+    jsonConversationCount: conversationLogs.length
+  });
+});
+
 // File-based persistence paths
 const DATA_DIR = path.join(process.cwd(), 'data');
 const CONVERSATIONS_FILE = path.join(DATA_DIR, 'conversations.json');
