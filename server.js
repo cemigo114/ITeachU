@@ -673,6 +673,14 @@ app.get('/api/standards/:id/prerequisites', (req, res) => {
 
 async function startServer() {
   if (useDatabase) {
+    try {
+      const { execSync } = await import('child_process');
+      console.log('🔄 Running database migrations...');
+      execSync('npx prisma migrate deploy', { stdio: 'inherit' });
+      console.log('✅ Migrations complete');
+    } catch (e) {
+      console.error('⚠️  Migration failed:', e.message);
+    }
     await connectDatabase();
   }
 
