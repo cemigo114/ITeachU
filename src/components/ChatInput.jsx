@@ -12,10 +12,22 @@ const ChatInput = ({
   loading = false,
   isRevising = false,
   onCancelRevision,
+  voiceRecordingHint,
 }) => {
   const [isRecording, setIsRecording] = useState(false);
   const recognitionRef = useRef(null);
-  const interimRef = useRef('');
+  const onVoiceTranscriptRef = useRef(onVoiceTranscript);
+  /** Final segments accumulated while the mic is on (browser fires isFinal on phrase pauses). */
+  const accumulatedFinalRef = useRef('');
+  /** Latest combined display: accumulated finals + current interim. */
+  const latestDisplayRef = useRef('');
+  /** User clicked stop — flush full utterance once in onend. */
+  const shouldFlushOnEndRef = useRef(false);
+  const endedWithErrorRef = useRef(false);
+
+  useEffect(() => {
+    onVoiceTranscriptRef.current = onVoiceTranscript;
+  }, [onVoiceTranscript]);
 
   const initRecognition = useCallback(() => {
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -38,31 +50,60 @@ const ChatInput = ({
         }
       }
 
-      if (final && onVoiceTranscript) {
-        onVoiceTranscript(final.trim(), false);
+      if (final) {
+        accumulatedFinalRef.current = `${accumulatedFinalRef.current} ${final}`.trim();
       }
-      if (interim && onVoiceTranscript) {
-        interimRef.current = interim;
-        onVoiceTranscript(interim.trim(), true);
+
+      const display = [accumulatedFinalRef.current, interim].filter(Boolean).join(' ').trim();
+      latestDisplayRef.current = display;
+
+      if (display && onVoiceTranscriptRef.current) {
+        onVoiceTranscriptRef.current(display, true);
       }
     };
 
     recognition.onerror = (event) => {
       console.warn('Speech recognition error:', event.error);
+      endedWithErrorRef.current = true;
+      shouldFlushOnEndRef.current = false;
+      accumulatedFinalRef.current = '';
+      latestDisplayRef.current = '';
+      onVoiceTranscriptRef.current?.('', true);
       setIsRecording(false);
     };
 
     recognition.onend = () => {
       setIsRecording(false);
+      if (endedWithErrorRef.current) {
+        endedWithErrorRef.current = false;
+        accumulatedFinalRef.current = '';
+        latestDisplayRef.current = '';
+        return;
+      }
+
+      if (shouldFlushOnEndRef.current) {
+        shouldFlushOnEndRef.current = false;
+        const full = latestDisplayRef.current.trim();
+        accumulatedFinalRef.current = '';
+        latestDisplayRef.current = '';
+        if (full) {
+          onVoiceTranscriptRef.current?.(full, false);
+        } else {
+          onVoiceTranscriptRef.current?.('', true);
+        }
+      } else {
+        accumulatedFinalRef.current = '';
+        latestDisplayRef.current = '';
+      }
     };
 
     return recognition;
-  }, [onVoiceTranscript]);
+  }, []);
 
   const toggleRecording = useCallback(() => {
     if (isRecording) {
+      shouldFlushOnEndRef.current = true;
       recognitionRef.current?.stop();
-      setIsRecording(false);
       return;
     }
 
@@ -72,6 +113,11 @@ const ChatInput = ({
       return;
     }
 
+    accumulatedFinalRef.current = '';
+    latestDisplayRef.current = '';
+    shouldFlushOnEndRef.current = false;
+    endedWithErrorRef.current = false;
+
     recognitionRef.current = recognition;
     recognition.start();
     setIsRecording(true);
@@ -79,6 +125,7 @@ const ChatInput = ({
 
   useEffect(() => {
     return () => {
+      shouldFlushOnEndRef.current = false;
       recognitionRef.current?.stop();
     };
   }, []);
@@ -136,10 +183,15 @@ const ChatInput = ({
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="flex items-center justify-center gap-2 text-sm text-[#FF6B4A]"
+          className="flex flex-col items-center gap-1 text-sm text-[#FF6B4A]"
         >
-          <div className="w-2 h-2 bg-[#FF6B4A] rounded-full animate-pulse" />
-          <span className="font-medium">Listening...</span>
+          <div className="flex items-center justify-center gap-2">
+            <div className="w-2 h-2 bg-[#FF6B4A] rounded-full animate-pulse" />
+            <span className="font-medium">Listening…</span>
+          </div>
+          <span className="text-xs text-gray-500 font-normal text-center px-2">
+            {voiceRecordingHint || "Tap the mic again when you're done — your message sends then"}
+          </span>
         </motion.div>
       )}
 

@@ -65,7 +65,7 @@ const TeachingSession = ({
   const perception = useZippyPerception(whiteboardItems, drawingStrokes, isTranscribing);
   const thinkingChunks = useThinkingChunks(
     drawingStrokes, whiteboardItems, isTranscribing,
-    { inactivityDelay: 2000, enabled: !isCompleted }
+    { inactivityDelay: 10000, enabled: !isCompleted }
   );
 
   useEffect(() => {
@@ -164,11 +164,19 @@ const TeachingSession = ({
 
   const handleVoiceTranscript = (transcript, isInterim) => {
     if (isInterim) {
+      const t = transcript.trim();
+      if (!t) {
+        setIsTranscribing(false);
+        setTranscribingWords([]);
+        return;
+      }
       setIsTranscribing(true);
-      setTranscribingWords(transcript.split(' '));
+      setTranscribingWords(t.split(/\s+/).filter(Boolean));
     } else {
       setTranscribingWords([]);
       setIsTranscribing(false);
+
+      if (!transcript.trim()) return;
 
       setShowThinkingDots(true);
       setCurrentZippyMood('thinking');
@@ -399,6 +407,7 @@ const TeachingSession = ({
                         onSend={handleTextSubmit}
                         onVoiceTranscript={handleVoiceTranscript}
                         placeholder={tl('placeholder')}
+                        voiceRecordingHint={tl('tapMicWhenDone')}
                         disabled={loading || isCompleted}
                         loading={loading}
                         isRevising={!!selectedItemForRevision}
