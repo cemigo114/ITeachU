@@ -204,13 +204,7 @@ const App = () => {
     setView('teaching');
   };
 
-  const sendMessage = async (textOverride) => {
-    const messageText = textOverride || input;
-    if (!messageText.trim() || loading) return;
-    const userMessage = { role: 'user', content: messageText };
-    const updatedMessages = [...messages, userMessage];
-    setMessages(updatedMessages);
-    setInput('');
+  const completeChatTurn = async (conversationAfterUser, lastUserContent, { isEdit = false } = {}) => {
     setLoading(true);
     try {
       const taskKey = activeAssignment.taskId.replace(/_([a-z])/g, (g) => g[1].toUpperCase());
@@ -222,7 +216,7 @@ const App = () => {
         body: JSON.stringify({
           model: 'claude-sonnet-4-5-20250929', max_tokens: 1024,
           system: getTaskSystemPrompt(taskKey, language),
-          messages: updatedMessages.map(m => ({ role: m.role === 'assistant' ? 'assistant' : 'user', content: m.content })),
+          messages: conversationAfterUser.map(m => ({ role: m.role === 'assistant' ? 'assistant' : 'user', content: m.content })),
           sessionId,
           taskMetadata: { title: getTaskField(task, 'title', language), problemStatement: task.problemStatement, teachingPrompt: task.teachingPrompt, targetConcepts: task.targetConcepts, correctSolutionPathway: task.correctSolutionPathway, misconceptions: task.misconceptions },
         }),
@@ -235,13 +229,18 @@ const App = () => {
       if (data.sessionId && !sessionId) setSessionId(data.sessionId);
       if (data.content && data.content[0]) {
         const aiMessage = { role: 'assistant', content: data.content[0].text };
-        setMessages([...updatedMessages, aiMessage]);
+        setMessages([...conversationAfterUser, aiMessage]);
         const isSessionComplete = aiMessage.content.includes('Thanks so much for teaching me today') || aiMessage.content.includes('Thanks for teaching me today');
         if (isSessionComplete) {
-          setProgress({ turnCount: updatedMessages.length, evidenceCollected: { usedExamples: true, definedTerms: true, checkedUnderstanding: true, explainedWhy: true } });
+          setProgress({ turnCount: conversationAfterUser.length, evidenceCollected: { usedExamples: true, definedTerms: true, checkedUnderstanding: true, explainedWhy: true } });
         } else {
-          const newEvidence = detectEvidence(userMessage.content, progress.evidenceCollected);
-          setProgress(prev => ({ turnCount: prev.turnCount + 1, evidenceCollected: { ...prev.evidenceCollected, ...newEvidence } }));
+          setProgress(prev => {
+            const newEvidence = detectEvidence(lastUserContent, prev.evidenceCollected);
+            return {
+              turnCount: isEdit ? prev.turnCount : prev.turnCount + 1,
+              evidenceCollected: { ...prev.evidenceCollected, ...newEvidence },
+            };
+          });
         }
       } else throw new Error('Invalid response format');
     } catch (error) {
@@ -251,8 +250,29 @@ const App = () => {
         errorMessage = "I couldn't reach the server. Please check if the backend is running.";
       else if (error.message.includes('API Error: 500'))
         errorMessage = 'The server encountered an error. Please check backend logs.';
-      setMessages([...updatedMessages, { role: 'assistant', content: errorMessage }]);
-    } finally { setLoading(false); }
+      setMessages([...conversationAfterUser, { role: 'assistant', content: errorMessage }]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const sendMessage = async (textOverride) => {
+    const messageText = (textOverride || input).trim();
+    if (!messageText || loading) return;
+    const userMessage = { role: 'user', content: messageText };
+    const updatedMessages = [...messages, userMessage];
+    setMessages(updatedMessages);
+    setInput('');
+    await completeChatTurn(updatedMessages, messageText, { isEdit: false });
+  };
+
+  const editUserMessage = async (messageIndex, newContent) => {
+    const trimmed = newContent.trim();
+    if (!trimmed || loading) return;
+    if (messages[messageIndex]?.role !== 'user') return;
+    const updatedMessages = [...messages.slice(0, messageIndex), { role: 'user', content: trimmed }];
+    setMessages(updatedMessages);
+    await completeChatTurn(updatedMessages, trimmed, { isEdit: true });
   };
 
   const completeSession = () => {
@@ -330,7 +350,7 @@ const App = () => {
   if (view === 'teaching' && activeAssignment) {
     const taskKey = activeAssignment.taskId.replace(/_([a-z])/g, (g) => g[1].toUpperCase());
     const task = TASKS[taskKey];
-    return <TeachingSession task={task} messages={messages} input={input} setInput={setInput} loading={loading} onSendMessage={sendMessage} onCompleteSession={completeSession} onBack={() => setView('studentDashboard')} progress={progress} language={language} setLanguage={setLanguage} getTaskField={getTaskField} />;
+    return <TeachingSession task={task} messages={messages} input={input} setInput={setInput} loading={loading} onSendMessage={sendMessage} onEditUserMessage={editUserMessage} onCompleteSession={completeSession} onBack={() => setView('studentDashboard')} progress={progress} language={language} setLanguage={setLanguage} getTaskField={getTaskField} />;
   }
 
   if (view === 'feedback') {

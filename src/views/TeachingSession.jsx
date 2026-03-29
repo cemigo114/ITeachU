@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { Check, Globe, ChevronDown, MessageCircle, Eye, Sparkles, ArrowRight } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { t } from '../utils/translations';
@@ -32,6 +32,7 @@ const TeachingSession = ({
   setInput,
   loading,
   onSendMessage,
+  onEditUserMessage,
   onCompleteSession,
   onBack,
   progress,
@@ -47,7 +48,7 @@ const TeachingSession = ({
   const [selectedItemForRevision, setSelectedItemForRevision] = useState(null);
   const [revisionCount, setRevisionCount] = useState(0);
 
-  const [zippyMessages, setZippyMessages] = useState([]);
+  const [localZippyExtras, setLocalZippyExtras] = useState([]);
   const [currentZippyMood, setCurrentZippyMood] = useState('confused');
   const [showThinkingDots, setShowThinkingDots] = useState(false);
 
@@ -68,20 +69,15 @@ const TeachingSession = ({
   );
 
   useEffect(() => {
-    if (messages.length > 0) {
-      const assistantMsgs = messages.filter(m => m.role === 'assistant');
-      setZippyMessages(assistantMsgs.map((m, i) => ({
-        id: `api-${i}`,
-        content: m.content,
-        text: m.content,
-        mood: detectMood(m.content),
-        timestamp: new Date(),
-      })));
-      if (assistantMsgs.length > 0) {
-        setCurrentZippyMood(detectMood(assistantMsgs[assistantMsgs.length - 1].content));
-      }
-    }
+    const lastAssistant = [...messages].reverse().find(m => m.role === 'assistant');
+    if (lastAssistant) setCurrentZippyMood(detectMood(lastAssistant.content));
   }, [messages]);
+
+  const prevLoadingRef = useRef(loading);
+  useEffect(() => {
+    if (prevLoadingRef.current && !loading) setShowThinkingDots(false);
+    prevLoadingRef.current = loading;
+  }, [loading]);
 
   useEffect(() => {
     if (perception.isListening) setCurrentZippyMood('listening');
@@ -89,7 +85,7 @@ const TeachingSession = ({
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [zippyMessages, showThinkingDots]);
+  }, [messages, localZippyExtras, showThinkingDots]);
 
   function detectMood(content) {
     const lower = (content || '').toLowerCase();
@@ -98,6 +94,11 @@ const TeachingSession = ({
     if (lower.includes('hmm') || lower.includes('think')) return 'thinking';
     return 'curious';
   }
+
+  const handleEditUserMessage = useCallback(async (messageIndex, newContent) => {
+    setLocalZippyExtras([]);
+    await onEditUserMessage(messageIndex, newContent);
+  }, [onEditUserMessage]);
 
   const handleShareWithZippy = () => {
     const chunk = thinkingChunks.captureThinkingChunk();
@@ -116,7 +117,7 @@ const TeachingSession = ({
       setShowThinkingDots(false);
       if (contextMsg) {
         setCurrentZippyMood(contextMsg.mood);
-        setZippyMessages(prev => [...prev, { ...contextMsg, content: contextMsg.text }]);
+        setLocalZippyExtras(prev => [...prev, { id: `ctx-${Date.now()}`, ...contextMsg, content: contextMsg.text }]);
         if (contextMsg.referencedDrawingId) {
           perception.highlightDrawing(contextMsg.referencedDrawingId);
           setTimeout(() => perception.clearHighlight(), 5000);
@@ -129,7 +130,7 @@ const TeachingSession = ({
         ];
         const r = fallback[Math.floor(Math.random() * fallback.length)];
         setCurrentZippyMood(r.mood);
-        setZippyMessages(prev => [...prev, { id: Date.now().toString(), ...r, content: r.text, timestamp: new Date() }]);
+        setLocalZippyExtras(prev => [...prev, { id: Date.now().toString(), ...r, content: r.text, timestamp: new Date() }]);
       }
     }, 1200);
   };
@@ -138,24 +139,21 @@ const TeachingSession = ({
     if (!input.trim()) return;
     const currentInput = input;
 
-    const newItem = {
-      id: Date.now().toString(),
-      type: 'text',
-      content: selectedItemForRevision ? `${currentInput} (revised)` : currentInput,
-      isActive: true,
-      revisionNumber: selectedItemForRevision ? revisionCount + 1 : undefined,
-      revisedFrom: selectedItemForRevision ?? undefined,
-    };
-
     if (selectedItemForRevision) {
+      const newItem = {
+        id: Date.now().toString(),
+        type: 'text',
+        content: `${currentInput} (revised)`,
+        isActive: true,
+        revisionNumber: revisionCount + 1,
+        revisedFrom: selectedItemForRevision,
+      };
       setWhiteboardItems(prev => [
         ...prev.map(it => it.id === selectedItemForRevision ? { ...it, isActive: false } : it),
         newItem,
       ]);
       setRevisionCount(c => c + 1);
       setSelectedItemForRevision(null);
-    } else {
-      setWhiteboardItems(prev => [...prev, newItem]);
     }
 
     setShowThinkingDots(true);
@@ -169,12 +167,6 @@ const TeachingSession = ({
       setIsTranscribing(true);
       setTranscribingWords(transcript.split(' '));
     } else {
-      setWhiteboardItems(prev => [...prev, {
-        id: Date.now().toString(),
-        type: 'speech',
-        content: transcript,
-        isActive: true,
-      }]);
       setTranscribingWords([]);
       setIsTranscribing(false);
 
@@ -207,8 +199,8 @@ const TeachingSession = ({
       setCompletionFlash(false);
       setIsCompleted(true);
       setCurrentZippyMood('excited');
-      setZippyMessages(prev => [...prev, {
-        id: Date.now().toString(),
+      setLocalZippyExtras(prev => [...prev, {
+        id: `done-${Date.now()}`,
         text: tl('completedZippyMessage'),
         content: tl('completedZippyMessage'),
         mood: 'excited',
@@ -224,7 +216,7 @@ const TeachingSession = ({
     setWhiteboardItems([]); setDrawingStrokes([]);
     setRevisionCount(0); setIsCompleted(false); setShowPostOptions(false);
     setCurrentZippyMood('confused');
-    setZippyMessages([]);
+    setLocalZippyExtras([]);
   };
 
   if (!task) {
@@ -275,9 +267,35 @@ const TeachingSession = ({
 
           <div className="overflow-y-auto p-4 space-y-3 h-40 md:h-auto md:flex-1" style={{ minHeight: 0 }}>
             <AnimatePresence>
-              {zippyMessages.map((message) => (
+              {messages.map((m, i) => (
+                m.role === 'user' ? (
+                  <ChatBubble
+                    key={`msg-user-${i}`}
+                    role="user"
+                    message={{ content: m.content }}
+                    messageIndex={i}
+                    onEditSave={handleEditUserMessage}
+                    editDisabled={loading || isCompleted}
+                    labels={{
+                      you: tl('you'),
+                      editMessage: tl('editMessage'),
+                      saveEdit: tl('saveEdit'),
+                      cancelEdit: tl('cancelEdit'),
+                    }}
+                  />
+                ) : (
+                  <ChatBubble
+                    key={`msg-asst-${i}`}
+                    role="assistant"
+                    message={{ content: m.content }}
+                    mood={detectMood(m.content)}
+                  />
+                )
+              ))}
+              {localZippyExtras.map((message) => (
                 <ChatBubble
                   key={message.id}
+                  role="assistant"
                   message={message}
                   mood={message.mood || currentZippyMood}
                 />
@@ -387,7 +405,7 @@ const TeachingSession = ({
                         onCancelRevision={() => { setSelectedItemForRevision(null); setInput(''); }}
                       />
 
-                      {!isTranscribing && getActiveContent().length === 0 && (
+                      {!isTranscribing && getActiveContent().length === 0 && !messages.some(m => m.role === 'user') && (
                         <p className="text-center text-xs text-gray-400 mt-3">{tl('hint')}</p>
                       )}
                     </motion.div>
@@ -401,9 +419,9 @@ const TeachingSession = ({
                       <motion.div key="btn" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0, scale: 0.95 }}>
                         <motion.button
                           onClick={handleCompleted}
-                          disabled={getActiveContent().length === 0 || completionFlash}
-                          whileHover={getActiveContent().length > 0 ? { scale: 1.01 } : {}}
-                          whileTap={getActiveContent().length > 0 ? { scale: 0.98 } : {}}
+                          disabled={(!messages.some(m => m.role === 'user') && getActiveContent().length === 0) || completionFlash}
+                          whileHover={(messages.some(m => m.role === 'user') || getActiveContent().length > 0) ? { scale: 1.01 } : {}}
+                          whileTap={(messages.some(m => m.role === 'user') || getActiveContent().length > 0) ? { scale: 0.98 } : {}}
                           className={`w-full h-12 md:h-14 rounded-2xl flex items-center justify-center gap-3 text-white shadow-lg transition-all duration-300 disabled:opacity-40 disabled:cursor-not-allowed ${completionFlash ? 'bg-[#00A896]' : 'bg-[#0A4D8C] hover:bg-[#0A4D8C]/90 active:bg-[#083d70]'}`}
                         >
                           <AnimatePresence mode="wait">
