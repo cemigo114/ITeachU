@@ -1,9 +1,3 @@
-databases:
-  - name: iteachu-db
-    plan: free
-    databaseName: iteachu
-    user: iteachu
-
 services:
   - type: web
     name: iteachu-backend
@@ -14,8 +8,6 @@ services:
       - key: NODE_ENV
         value: production
       - key: DATABASE_URL
-        fromDatabase:
-          name: iteachu-db
-          property: connectionString
+        sync: false
       - key: VITE_ANTHROPIC_API_KEY
         sync: false
