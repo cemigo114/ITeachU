@@ -434,6 +434,54 @@ app.get('/api/teacher/conversations', async (req, res) => {
   }
 });
 
+// Get full conversation with messages by sessionId
+app.get('/api/teacher/conversations/:sessionId', async (req, res) => {
+  try {
+    const { sessionId } = req.params;
+
+    if (useDatabase) {
+      const { prisma } = await import('./db.js');
+      const conv = await prisma.conversation.findUnique({
+        where: { sessionId },
+        include: { messages: { orderBy: { sequenceNumber: 'asc' } }, evaluation: true }
+      });
+      if (!conv) return res.status(404).json({ error: 'Conversation not found' });
+
+      return res.json({
+        sessionId: conv.sessionId,
+        taskTitle: conv.taskTitle,
+        model: conv.model,
+        status: conv.status,
+        createdAt: conv.createdAt,
+        updatedAt: conv.updatedAt,
+        messages: conv.messages.map(m => ({
+          role: m.role,
+          content: m.content,
+          createdAt: m.createdAt,
+          sequenceNumber: m.sequenceNumber
+        })),
+        evaluation: conv.evaluation ? {
+          totalScore: conv.evaluation.totalScore,
+          categoryScores: {
+            conceptArticulation: conv.evaluation.conceptArticulation,
+            logicCoherence: conv.evaluation.logicCoherence,
+            misconceptionCorrection: conv.evaluation.misconceptionCorrection,
+            cognitiveResilience: conv.evaluation.cognitiveResilience
+          },
+          justifications: conv.evaluation.justifications
+        } : null
+      });
+    }
+
+    const log = conversationLogs.find(l => l.sessionId === sessionId);
+    if (!log) return res.status(404).json({ error: 'Conversation not found' });
+    res.json(log);
+  } catch (error) {
+    console.error('Conversation detail error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
 // Session management endpoints
 app.post('/api/sessions', (req, res) => {
   try {
