@@ -3,6 +3,7 @@ import PageHeader from '../components/ui/PageHeader';
 import Card from '../components/ui/Card';
 import Badge from '../components/ui/Badge';
 import Button from '../components/ui/Button';
+import MathText from '../components/MathText';
 
 function formatMisconception(m) {
   if (m == null) return { text: '' };
@@ -55,9 +56,9 @@ const TeacherTaskDetail = ({ task, onBack, onAssign }) => {
             <h2 className="text-lg font-display font-bold text-brand-900 mb-3">
               1. Student Prompt (Low Entry Point)
             </h2>
-            <p className="text-neutral-700 whitespace-pre-line">
+            <MathText className="text-neutral-700 whitespace-pre-line block">
               {sections.studentPrompt || task.problemStatement}
-            </p>
+            </MathText>
           </Card>
         )}
 
@@ -75,7 +76,7 @@ const TeacherTaskDetail = ({ task, onBack, onAssign }) => {
                   <li key={idx} className="flex gap-3">
                     <span className="text-brand-600 font-semibold shrink-0">{idx + 1}.</span>
                     <div>
-                      <span className="text-neutral-700">{text}</span>
+                      <MathText className="text-neutral-700">{text}</MathText>
                       {type && (
                         <span className="ml-2 text-xs text-neutral-400 italic">({type})</span>
                       )}
@@ -92,7 +93,7 @@ const TeacherTaskDetail = ({ task, onBack, onAssign }) => {
             <h2 className="text-lg font-display font-bold text-brand-900 mb-3">
               3. Pattern Recognition Prompt
             </h2>
-            <p className="text-neutral-700 whitespace-pre-line">{sections.patternRecognition}</p>
+            <MathText className="text-neutral-700 whitespace-pre-line block">{sections.patternRecognition}</MathText>
           </Card>
         )}
 
@@ -101,7 +102,7 @@ const TeacherTaskDetail = ({ task, onBack, onAssign }) => {
             <h2 className="text-lg font-display font-bold text-brand-900 mb-3">
               4. Generalization Question (Always/Sometimes/Never)
             </h2>
-            <p className="text-neutral-700 whitespace-pre-line">{sections.generalization}</p>
+            <MathText className="text-neutral-700 whitespace-pre-line block">{sections.generalization}</MathText>
           </Card>
         )}
 
@@ -110,7 +111,7 @@ const TeacherTaskDetail = ({ task, onBack, onAssign }) => {
             <h2 className="text-lg font-display font-bold text-brand-900 mb-3">
               5. Inference and Prediction
             </h2>
-            <p className="text-neutral-700 whitespace-pre-line">{sections.inference}</p>
+            <MathText className="text-neutral-700 whitespace-pre-line block">{sections.inference}</MathText>
           </Card>
         )}
 
@@ -125,7 +126,7 @@ const TeacherTaskDetail = ({ task, onBack, onAssign }) => {
                   <h3 className="font-display font-semibold text-neutral-900 mb-1">Claims:</h3>
                   <ul className="list-disc list-inside space-y-1">
                     {mappingData.claims.map((claim, idx) => (
-                      <li key={idx} className="text-neutral-700">{claim}</li>
+                      <li key={idx} className="text-neutral-700"><MathText>{claim}</MathText></li>
                     ))}
                   </ul>
                 </div>
@@ -133,7 +134,7 @@ const TeacherTaskDetail = ({ task, onBack, onAssign }) => {
               {mappingData.evidence && (
                 <div>
                   <h3 className="font-display font-semibold text-neutral-900 mb-1">Evidence:</h3>
-                  <p className="text-neutral-700">{mappingData.evidence}</p>
+                  <MathText className="text-neutral-700 block">{mappingData.evidence}</MathText>
                 </div>
               )}
               {mappingData.criticalThinking && (
@@ -141,7 +142,7 @@ const TeacherTaskDetail = ({ task, onBack, onAssign }) => {
                   <h3 className="font-display font-semibold text-neutral-900 mb-1">
                     Process Data Revealing Critical Thinking:
                   </h3>
-                  <p className="text-neutral-700">{mappingData.criticalThinking}</p>
+                  <MathText className="text-neutral-700 block">{mappingData.criticalThinking}</MathText>
                 </div>
               )}
             </div>

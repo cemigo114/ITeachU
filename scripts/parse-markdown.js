@@ -10,7 +10,7 @@ import matter from 'gray-matter';
 const SECTION_PATTERNS = [
   { key: 'studentPrompt',      re: /#{2,3}\s*1\.\s*Student\s*Prompt/i },
   { key: 'misconceptions',     re: /#{2,3}\s*2\.\s*(?:Possible\s+)?Misconceptions/i },
-  { key: 'patternRecognition', re: /#{2,3}\s*3\.\s*Pattern\s*Recognition\s*Prompt/i },
+  { key: 'patternRecognition', re: /#{2,3}\s*3\.\s*Pattern\s*Recognition\s*Prompts?/i },
   { key: 'generalization',     re: /#{2,3}\s*4\.\s*Generalization/i },
   { key: 'inferencePrediction', re: /#{2,3}\s*5\.\s*Inference\s*(?:and|&)\s*Prediction/i },
   { key: 'mappingData',        re: /#{2,3}\s*6\.\s*(?:Mapping|Task\s*Mapping)/i },
