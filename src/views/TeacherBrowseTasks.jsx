@@ -26,9 +26,11 @@ const TeacherBrowseTasks = ({
   const domains = [...new Set(EXAMPLE_TASKS.map((t) => t.domain))];
 
   const filteredTasks = EXAMPLE_TASKS.filter((task) => {
+    const q = searchQuery.toLowerCase();
     const matchesSearch =
-      task.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      task.standard.toLowerCase().includes(searchQuery.toLowerCase());
+      task.title.toLowerCase().includes(q) ||
+      (task.standard || '').toLowerCase().includes(q) ||
+      (task.ccssCode || '').toLowerCase().includes(q);
     const matchesGrade = selectedGrade === 'all' || task.grade === selectedGrade;
     const matchesDomain = selectedDomain === 'all' || task.domain === selectedDomain;
     return matchesSearch && matchesGrade && matchesDomain;
@@ -198,11 +200,11 @@ const TeacherBrowseTasks = ({
                     </Badge>
                     {task.standardId ? (
                       <StandardBadge standardId={task.standardId} standardCode={task.standard} />
-                    ) : (
+                    ) : (task.standard || task.ccssCode) ? (
                       <Badge variant="brand" size="sm">
-                        {task.standard}
+                        {task.standard || task.ccssCode}
                       </Badge>
-                    )}
+                    ) : null}
                   </div>
 
                   <div className="text-xs text-neutral-500 mb-4">{task.domain}</div>

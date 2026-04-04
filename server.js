@@ -3,12 +3,14 @@ import cors from 'cors';
 import 'dotenv/config';
 import fs from 'fs';
 import path from 'path';
+import multer from 'multer';
 import { generateEvaluatorPrompt } from './src/utils/evaluatorPrompt.js';
 import {
   connectDatabase, disconnectDatabase, useDatabase,
   upsertConversation, getAllConversations,
   upsertEvaluation, getEvaluation
 } from './db.js';
+import { parseMarkdown } from './scripts/parse-markdown.js';
 
 const app = express();
 const PORT = process.env.PORT || 3002;
@@ -568,41 +570,119 @@ app.delete('/api/sessions/:sessionId', (req, res) => {
   }
 });
 
-// Get all tasks
-app.get('/api/tasks', (req, res) => {
+// --- Task helpers ---
+
+function formatGradeLabel(grade) {
+  if (!grade) return '';
+  if (/^\d+$/.test(grade)) return `Grade ${grade}`;
+  if (grade === 'HS') return 'High School';
+  return grade;
+}
+
+function flattenMisconceptions(misconceptions) {
+  if (!misconceptions || !Array.isArray(misconceptions)) return [];
+  return misconceptions.map(m => {
+    if (typeof m === 'string') return m;
+    const parts = [m.title, m.description].filter(Boolean);
+    return parts.join(': ');
+  });
+}
+
+function formatTaskForApi(dbTask) {
+  const misconceptionsFlat = flattenMisconceptions(dbTask.misconceptions);
+  return {
+    id: dbTask.slug,
+    slug: dbTask.slug,
+    title: dbTask.title,
+    grade: formatGradeLabel(dbTask.grade),
+    domain: dbTask.domain,
+    standard: dbTask.ccssCode,
+    standardDescription: dbTask.standardStatement || '',
+    description: dbTask.standardStatement
+      ? dbTask.standardStatement.split('.')[0] + '.'
+      : '',
+    problemStatement: dbTask.studentPrompt || '',
+    teachingPrompt: dbTask.teachingPrompt || '',
+    targetConcepts: dbTask.targetConcepts || [],
+    correctSolutionPathway: '',
+    misconceptions: misconceptionsFlat,
+    aiIntro: dbTask.aiIntro || '',
+    aiIntroES: dbTask.aiIntroEs || '',
+    imageUrl: null,
+    sections: {
+      studentPrompt: dbTask.studentPrompt || '',
+      misconceptions: dbTask.misconceptions || [],
+      patternRecognition: dbTask.patternRecognition || '',
+      generalization: dbTask.generalization || '',
+      inference: dbTask.inferencePrediction || '',
+      mappingData: dbTask.mappingData || { claims: [], evidence: '', criticalThinking: '' },
+    },
+  };
+}
+
+function loadTasksFromJson() {
   try {
     const tasksPath = path.join(process.cwd(), 'src/data/tasks.json');
     const tasksData = JSON.parse(fs.readFileSync(tasksPath, 'utf-8'));
+    return Object.values(tasksData.tasks);
+  } catch { return []; }
+}
+
+function loadCollectionsFromJson() {
+  try {
+    const collectionsPath = path.join(process.cwd(), 'src/data/taskCollections.json');
+    return JSON.parse(fs.readFileSync(collectionsPath, 'utf-8'));
+  } catch { return { collections: [] }; }
+}
+
+// --- Task routes ---
+
+app.get('/api/tasks', async (req, res) => {
+  try {
     const { grade, domain } = req.query;
 
-    let tasks = Object.values(tasksData.tasks);
+    if (useDatabase) {
+      const where = { published: true };
+      if (grade) where.grade = grade.replace(/^Grade\s*/i, '');
+      if (domain) where.domain = { contains: domain, mode: 'insensitive' };
 
-    if (grade) {
-      tasks = tasks.filter(t => t.grade.toLowerCase().includes(grade.toLowerCase()));
-    }
-    if (domain) {
-      tasks = tasks.filter(t => t.domain.toLowerCase().includes(domain.toLowerCase()));
+      const dbTasks = await (await import('./db.js')).prisma.task.findMany({ where, orderBy: { ccssCode: 'asc' } });
+
+      if (dbTasks.length > 0) {
+        const tasks = dbTasks.map(formatTaskForApi);
+        return res.json({ tasks, count: tasks.length });
+      }
     }
 
-    res.json({ tasks });
+    // Fallback to JSON file
+    let tasks = loadTasksFromJson();
+    if (grade) tasks = tasks.filter(t => t.grade.toLowerCase().includes(grade.toLowerCase()));
+    if (domain) tasks = tasks.filter(t => t.domain.toLowerCase().includes(domain.toLowerCase()));
+    res.json({ tasks, count: tasks.length });
   } catch (error) {
     console.error('Tasks fetch error:', error);
     res.status(500).json({ error: error.message });
   }
 });
 
-// Get a single task by ID
-app.get('/api/tasks/:id', (req, res) => {
+app.get('/api/tasks/:id', async (req, res) => {
   try {
     const { id } = req.params;
+
+    if (useDatabase) {
+      const { prisma } = await import('./db.js');
+      const dbTask = await prisma.task.findFirst({
+        where: { OR: [{ id }, { slug: id }], published: true },
+      });
+
+      if (dbTask) return res.json(formatTaskForApi(dbTask));
+    }
+
+    // Fallback to JSON file
     const tasksPath = path.join(process.cwd(), 'src/data/tasks.json');
     const tasksData = JSON.parse(fs.readFileSync(tasksPath, 'utf-8'));
     const task = tasksData.tasks[id];
-
-    if (!task) {
-      return res.status(404).json({ error: 'Task not found' });
-    }
-
+    if (!task) return res.status(404).json({ error: 'Task not found' });
     res.json(task);
   } catch (error) {
     console.error('Task fetch error:', error);
@@ -610,16 +690,145 @@ app.get('/api/tasks/:id', (req, res) => {
   }
 });
 
-// Get task collections
-app.get('/api/collections', (req, res) => {
+app.get('/api/collections', async (req, res) => {
   try {
-    // In production: Fetch from database
-    // For now: Return from JSON file
-    const collectionsPath = path.join(process.cwd(), 'src/data/taskCollections.json');
-    const collections = JSON.parse(fs.readFileSync(collectionsPath, 'utf-8'));
-    res.json(collections);
+    if (useDatabase) {
+      const { prisma } = await import('./db.js');
+      const dbCollections = await prisma.collection.findMany({
+        where: { published: true },
+        include: {
+          tasks: {
+            orderBy: { sortOrder: 'asc' },
+            include: { task: true },
+          },
+        },
+        orderBy: [{ grade: 'asc' }, { title: 'asc' }],
+      });
+
+      if (dbCollections.length > 0) {
+        const collections = dbCollections.map(c => ({
+          id: c.slug,
+          slug: c.slug,
+          title: c.title,
+          description: c.description || '',
+          grade: c.grade ? parseInt(c.grade, 10) || c.grade : null,
+          tasks: c.tasks.map(ct => ({
+            id: ct.task.slug,
+            slug: ct.task.slug,
+            title: ct.task.title,
+            description: ct.task.standardStatement ? ct.task.standardStatement.split('.')[0] + '.' : '',
+            standard: ct.task.ccssCode,
+            grade: formatGradeLabel(ct.task.grade),
+            domain: ct.task.domain,
+            order: ct.sortOrder,
+            required: false,
+          })),
+        }));
+        return res.json({ collections });
+      }
+    }
+
+    // Fallback to JSON file
+    res.json(loadCollectionsFromJson());
   } catch (error) {
     console.error('Collections fetch error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// --- Task upload ---
+
+const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 1024 * 1024 } });
+
+function slugify(text) {
+  return text.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+}
+
+app.post('/api/tasks/upload', upload.single('file'), async (req, res) => {
+  try {
+    if (!useDatabase) {
+      return res.status(503).json({ error: 'Database not available. Task upload requires PostgreSQL.' });
+    }
+
+    let markdownContent;
+    let filename = 'upload.md';
+
+    if (req.file) {
+      markdownContent = req.file.buffer.toString('utf-8');
+      filename = req.file.originalname || filename;
+    } else if (req.is('text/markdown') || req.is('text/plain')) {
+      const chunks = [];
+      for await (const chunk of req) chunks.push(chunk);
+      markdownContent = Buffer.concat(chunks).toString('utf-8');
+    } else if (req.body?.content) {
+      markdownContent = req.body.content;
+      filename = req.body.filename || filename;
+    } else {
+      return res.status(400).json({ error: 'No markdown content provided. Send as multipart file, text/markdown body, or JSON with { content, filename }.' });
+    }
+
+    const parsed = parseMarkdown(markdownContent, filename);
+
+    if (!parsed.ccssCode || !parsed.taskTitle) {
+      return res.status(422).json({ error: 'Could not extract ccss_code or task_title from the markdown.' });
+    }
+
+    const gradeNum = parsed.gradeLevel?.match(/\d+/)?.[0];
+    const grade = gradeNum || (/high\s*school/i.test(parsed.gradeLevel) ? 'HS' : parsed.gradeLevel || 'unknown');
+    const slug = slugify(`${parsed.ccssCode}-${parsed.taskTitle}`);
+
+    const miscFlat = parsed.misconceptions.map(m => typeof m === 'string' ? m : [m.title, m.description].filter(Boolean).join(': '));
+    const promptPreview = parsed.studentPrompt?.split(/[.!?"]\s/)?.[0] || parsed.taskTitle;
+    const firstMiscDesc = parsed.misconceptions?.[0]?.description || '';
+    const aiIntro = `Hi! I'm Zippy! 🎉\n\n${promptPreview}.\n\nHmm, I think ${firstMiscDesc.charAt(0).toLowerCase() + firstMiscDesc.slice(1).slice(0, 120)}... 🤔\n\nCan you help me understand this better?`;
+
+    const { prisma } = await import('./db.js');
+    const task = await prisma.task.upsert({
+      where: { slug },
+      create: {
+        slug,
+        title: parsed.taskTitle,
+        grade,
+        domain: parsed.domain || 'General',
+        ccssCode: parsed.ccssCode,
+        cluster: parsed.cluster || null,
+        standardStatement: parsed.standardStatement || null,
+        studentPrompt: parsed.studentPrompt || null,
+        misconceptions: parsed.misconceptions,
+        patternRecognition: parsed.patternRecognition || null,
+        generalization: parsed.generalization || null,
+        inferencePrediction: parsed.inferencePrediction || null,
+        mappingData: parsed.mappingData,
+        teachingPrompt: `Help Zippy understand ${parsed.taskTitle.toLowerCase()} by guiding them through the concept step by step.`,
+        targetConcepts: parsed.standardStatement ? [parsed.standardStatement.split(',')[0].trim()] : [],
+        aiIntro,
+        sourceFile: filename,
+        published: true,
+      },
+      update: {
+        title: parsed.taskTitle,
+        grade,
+        domain: parsed.domain || 'General',
+        ccssCode: parsed.ccssCode,
+        cluster: parsed.cluster || null,
+        standardStatement: parsed.standardStatement || null,
+        studentPrompt: parsed.studentPrompt || null,
+        misconceptions: parsed.misconceptions,
+        patternRecognition: parsed.patternRecognition || null,
+        generalization: parsed.generalization || null,
+        inferencePrediction: parsed.inferencePrediction || null,
+        mappingData: parsed.mappingData,
+        teachingPrompt: `Help Zippy understand ${parsed.taskTitle.toLowerCase()} by guiding them through the concept step by step.`,
+        targetConcepts: parsed.standardStatement ? [parsed.standardStatement.split(',')[0].trim()] : [],
+        aiIntro,
+        sourceFile: filename,
+      },
+    });
+
+    console.log(`📥 Task uploaded: ${parsed.ccssCode} - ${parsed.taskTitle} (${task.id})`);
+    res.json({ success: true, task: formatTaskForApi(task) });
+  } catch (error) {
+    console.error('Task upload error:', error);
     res.status(500).json({ error: error.message });
   }
 });

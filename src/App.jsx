@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { Target, Users, Award, BarChart3, MessageSquare } from 'lucide-react';
 import { API_ENDPOINTS } from './config/api';
 import { generateZippyPrompt } from './utils/zippyPrompt';
@@ -30,31 +30,28 @@ import ParentDashboard from './views/ParentDashboard';
 
 const snakeToCamel = (s) => s.replace(/_([a-z])/g, (_, c) => c.toUpperCase());
 
-const TASKS = Object.fromEntries(
-  Object.entries(tasksData.tasks).map(([id, task]) => [snakeToCamel(id), task])
-);
-
-const EXAMPLE_TASKS = Object.values(tasksData.tasks);
+const INITIAL_TASKS = Object.values(tasksData.tasks);
 
 const getTaskField = (task, field, language = 'en') => {
   if (language === 'es' && task[`${field}ES`]) return task[`${field}ES`];
   return task[field];
 };
 
-const getTaskSystemPrompt = (taskKey, language = 'en') => {
-  const task = TASKS[taskKey];
-  if (!task) return '';
-  const gen = language === 'es' ? generateZippyPromptES : generateZippyPrompt;
-  return gen({
-    title: getTaskField(task, 'title', language),
-    problemStatement: task.problemStatement,
-    teachingPrompt: task.teachingPrompt,
-    targetConcepts: task.targetConcepts,
-    correctSolutionPathway: task.correctSolutionPathway,
-    misconceptions: task.misconceptions,
-    studentCognality: 'Decoder',
-  });
-};
+function buildTaskLookup(taskList) {
+  const map = {};
+  for (const task of taskList) {
+    const id = task.id || task.slug;
+    if (id) {
+      map[id] = task;
+      map[snakeToCamel(id)] = task;
+    }
+    if (task.slug && task.slug !== id) {
+      map[task.slug] = task;
+      map[snakeToCamel(task.slug)] = task;
+    }
+  }
+  return map;
+}
 
 const detectEvidence = (messageContent, currentEvidence) => {
   const lower = messageContent.toLowerCase();
@@ -111,6 +108,26 @@ const App = () => {
   const [showFilters, setShowFilters] = useState(false);
   const [collectionView, setCollectionView] = useState('all');
 
+  const [allTasks, setAllTasks] = useState(INITIAL_TASKS);
+
+  const TASKS = useMemo(() => buildTaskLookup(allTasks), [allTasks]);
+  const EXAMPLE_TASKS = allTasks;
+
+  const getTaskSystemPrompt = useCallback((taskKey, lang = 'en') => {
+    const task = TASKS[taskKey];
+    if (!task) return '';
+    const gen = lang === 'es' ? generateZippyPromptES : generateZippyPrompt;
+    return gen({
+      title: getTaskField(task, 'title', lang),
+      problemStatement: task.problemStatement,
+      teachingPrompt: task.teachingPrompt,
+      targetConcepts: task.targetConcepts,
+      correctSolutionPathway: task.correctSolutionPathway,
+      misconceptions: task.misconceptions,
+      studentCognality: 'Decoder',
+    });
+  }, [TASKS]);
+
   // ---------- Effects ----------
 
   useEffect(() => {
@@ -120,10 +137,20 @@ const App = () => {
   useEffect(() => {
     (async () => {
       try {
-        const r = await fetch(`${API_ENDPOINTS.chat.replace('/api/chat', '/api/standards')}`);
-        if (r.ok) console.log('✅ Backend API is reachable');
-        else console.warn('⚠️ Backend API returned error:', r.status);
-      } catch (e) { console.error('❌ Cannot reach backend API:', e.message); }
+        const r = await fetch(`${API_ENDPOINTS.chat.replace('/api/chat', '/api/tasks')}`);
+        if (!r.ok) { console.warn('⚠️ Tasks API returned error:', r.status); return; }
+        const data = await r.json();
+        const apiTasks = data.tasks || [];
+        if (apiTasks.length > 0) {
+          setAllTasks(prev => {
+            const merged = new Map();
+            for (const t of prev) merged.set(t.id || t.slug, t);
+            for (const t of apiTasks) merged.set(t.id || t.slug, t);
+            return Array.from(merged.values());
+          });
+          console.log(`✅ Loaded ${apiTasks.length} tasks from API`);
+        }
+      } catch (e) { console.warn('⚠️ Tasks API unreachable, using bundled tasks:', e.message); }
     })();
   }, []);
 
@@ -133,7 +160,7 @@ const App = () => {
       const task = TASKS[taskKey];
       if (task) setMessages([{ role: 'assistant', content: getTaskField(task, 'aiIntro', language) }]);
     }
-  }, [language]);
+  }, [language, TASKS]);
 
   useEffect(() => {
     if (userRole === 'teacher' && view === 'teacherReviewAssignments') fetchEvaluations();

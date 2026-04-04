@@ -137,10 +137,14 @@ const TaskCollectionBrowser = ({ onSelectTask }) => {
 
                     <div className="flex items-center gap-3 text-sm text-neutral-500">
                       <span>{task.grade}</span>
-                      {task.standardId && (
+                      {(task.standardId || task.standard || task.ccssCode) && (
                         <>
                           <span>•</span>
-                          <StandardBadge standardId={task.standardId} standardCode={task.standard} />
+                          {task.standardId ? (
+                            <StandardBadge standardId={task.standardId} standardCode={task.standard || task.ccssCode} />
+                          ) : (
+                            <span className="text-brand-600 font-medium">{task.standard || task.ccssCode}</span>
+                          )}
                         </>
                       )}
                     </div>
