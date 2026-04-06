@@ -207,19 +207,12 @@ const TeachingSession = ({
       setCompletionFlash(false);
       setIsCompleted(true);
       setCurrentZippyMood('excited');
-      setLocalZippyExtras(prev => [...prev, {
-        id: `done-${Date.now()}`,
-        text: tl('completedZippyMessage'),
-        content: tl('completedZippyMessage'),
-        mood: 'excited',
-        timestamp: new Date(),
-      }]);
-      setTimeout(() => setShowPostOptions(true), 600);
+      setTimeout(() => setShowPostOptions(true), 300);
     }, 700);
   };
 
   const handleContinueExplaining = () => { setIsCompleted(false); setShowPostOptions(false); };
-  const handleReviewThinking = () => { setShowHistory(true); setIsCompleted(false); setShowPostOptions(false); };
+  const handleReviewThinking = () => { onCompleteSession(); };
   const handleNewProblem = () => {
     setWhiteboardItems([]); setDrawingStrokes([]);
     setRevisionCount(0); setIsCompleted(false); setShowPostOptions(false);
@@ -369,7 +362,7 @@ const TeachingSession = ({
                     <div className="p-3 flex flex-col sm:flex-row gap-2">
                       {[
                         { label: tl('continueExplaining'), sub: 'Add more to your explanation', icon: <MessageCircle className="h-4 w-4" />, color: '#0A4D8C', handler: handleContinueExplaining, delay: 0.15 },
-                        { label: tl('reviewThinking'), sub: 'Look back at what you wrote', icon: <Eye className="h-4 w-4" />, color: '#00A896', handler: handleReviewThinking, delay: 0.22 },
+                        { label: tl('reviewThinking'), sub: 'See how you did', icon: <Eye className="h-4 w-4" />, color: '#00A896', handler: handleReviewThinking, delay: 0.22 },
                         { label: tl('newProblem'), sub: 'Try a fresh challenge', icon: <Sparkles className="h-4 w-4" />, color: '#FF6B4A', handler: handleNewProblem, delay: 0.29 },
                       ].map(opt => (
                         <motion.button

@@ -5,6 +5,7 @@ import fs from 'fs';
 import path from 'path';
 import multer from 'multer';
 import { generateEvaluatorPrompt } from './src/utils/evaluatorPrompt.js';
+import { prepareExtraction } from './src/utils/conversationEvents.js';
 import {
   connectDatabase, disconnectDatabase, useDatabase,
   upsertConversation, getAllConversations,
@@ -23,6 +24,10 @@ const allowedOrigins = [
   'http://127.0.0.1:3001',
   'http://localhost:3002',
   'http://127.0.0.1:3002',
+  'http://localhost:3003',
+  'http://127.0.0.1:3003',
+  'http://localhost:3004',
+  'http://127.0.0.1:3004',
   'http://localhost:5173',
   'http://127.0.0.1:5173',
   'https://cognality.netlify.app',
@@ -275,49 +280,43 @@ async function evaluateConversation(conversationLog, sessionId) {
       throw new Error('API key not configured');
     }
 
-    // Format conversation transcript for evaluator
-    const transcript = conversationLog.messages.map((msg, idx) => {
-      const role = msg.role === 'assistant' ? 'AI Protégé (Zippy)' : 'Student';
-      return `${role}: ${msg.content}`;
-    }).join('\n\n');
-
-    // Build the evaluation request
-    const evaluatorPrompt = generateEvaluatorPrompt();
     const taskMetadata = conversationLog.taskMetadata || {};
 
-    const evaluationRequest = `Please evaluate the following student-AI Protégé conversation.
+    // ── Step 1: Build ConversationEventLog via extraction pipeline ──────────
+    const rawTranscript = (conversationLog.messages || []).map(m => ({
+      speaker: m.role === 'assistant' ? 'zippy' : 'student',
+      text: m.content || '',
+    }));
 
-TASK METADATA:
-- Task: ${taskMetadata.title || 'Unknown'}
-- Target Concepts: ${taskMetadata.targetConcepts ? taskMetadata.targetConcepts.join(', ') : 'Not specified'}
-- Correct Solution: ${taskMetadata.correctSolutionPathway || 'Not specified'}
-- Known Misconceptions: ${taskMetadata.misconceptions ? taskMetadata.misconceptions.join('; ') : 'Not specified'}
+    const taskMeta = {
+      taskTitle: taskMetadata.title || 'Unknown Task',
+      ccssCode: taskMetadata.ccssCode || '',
+      misconceptions: Array.isArray(taskMetadata.misconceptions)
+        ? taskMetadata.misconceptions.map(m =>
+            typeof m === 'string' ? { title: m, description: m, type: 'unknown' } : m
+          )
+        : [],
+      targetConcepts: taskMetadata.targetConcepts || [],
+    };
 
-CONVERSATION TRANSCRIPT:
-${transcript}
+    const sessionMeta = { sessionId, taskId: sessionId, taskTitle: taskMeta.taskTitle };
+    // ── Step 2: Build event log using rule signals only (no extra API call) ──
+    const { resolve } = prepareExtraction(rawTranscript, taskMeta, sessionMeta);
+    const eventLog = resolve('');
 
-Please provide your evaluation in the specified JSON format.`;
-
+    // ── Step 3: Build evaluator prompt with event log & call evaluator ───────
+    const evaluatorPrompt = generateEvaluatorPrompt(eventLog);
     console.log(`🔍 Evaluating session ${sessionId}...`);
 
     const response = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': apiKey,
-        'anthropic-version': '2023-06-01'
-      },
+      headers: { 'Content-Type': 'application/json', 'x-api-key': apiKey, 'anthropic-version': '2023-06-01' },
       body: JSON.stringify({
-        model: 'claude-sonnet-4-5-20250929',
-        max_tokens: 2048,
+        model: 'claude-sonnet-4-6',
+        max_tokens: 16000,
         system: evaluatorPrompt,
-        messages: [
-          {
-            role: 'user',
-            content: evaluationRequest
-          }
-        ]
-      })
+        messages: [{ role: 'user', content: 'Produce the Cognitive Breakdown Report for the event log provided in the system prompt.' }],
+      }),
     });
 
     const data = await response.json();
@@ -327,31 +326,68 @@ Please provide your evaluation in the specified JSON format.`;
       throw new Error(`Evaluation failed: ${data.error?.message || 'Unknown error'}`);
     }
 
-    // Parse the evaluation result
+    // ── Step 4: Parse & validate new v3 format ───────────────────────────────
     const evaluationText = data.content[0].text;
-
-    // Try to extract JSON from the response
     let evaluation;
     try {
-      // Look for JSON block in the response
-      const jsonMatch = evaluationText.match(/\{[\s\S]*\}/);
-      if (jsonMatch) {
-        evaluation = JSON.parse(jsonMatch[0]);
-      } else {
-        evaluation = JSON.parse(evaluationText);
-      }
+      const stripped = evaluationText
+        .replace(/^```json\s*/i, '')
+        .replace(/^```\s*/i, '')
+        .replace(/```\s*$/i, '')
+        .trim();
+      const jsonMatch = stripped.match(/\{[\s\S]*\}/);
+      evaluation = JSON.parse(jsonMatch ? jsonMatch[0] : stripped);
     } catch (parseError) {
-      console.error('❌ Failed to parse evaluation JSON:', evaluationText);
+      console.error('❌ Failed to parse evaluation JSON:', evaluationText.slice(0, 500));
       throw new Error('Invalid evaluation format from API');
     }
 
-    // Validate evaluation structure
-    if (!evaluation.categoryScores || !evaluation.justifications || typeof evaluation.totalScore !== 'number') {
+    if (!evaluation.misconceptionAnalysis && !evaluation.causalChain) {
       console.error('❌ Invalid evaluation structure:', evaluation);
       throw new Error('Evaluation missing required fields');
     }
 
-    console.log(`✅ Evaluation complete for session ${sessionId}: ${evaluation.totalScore}/100`);
+    // ── Step 5: Derive legacy score fields for frontend compatibility ─────────
+    const sigScore = s => ({ CORRECTED: 4, IDENTIFIED: 3, SHARED: 1 }[s] || 2);
+    const miscItems = evaluation.misconceptionAnalysis?.items || [];
+    const miscScore = miscItems.length
+      ? miscItems.reduce((s, i) => s + sigScore(i.signal), 0) / miscItems.length : 2;
+
+    const patternLabel = evaluation.patternRecognitionAnalysis?.interpretation?.label;
+    const patternScore = { STRUCTURAL: 4, PROCEDURAL: 3, SURFACE_FEATURE: 2, MISSED: 1, OVER_GENERALISED: 2 }[patternLabel] ?? 2;
+
+    const genLabel = evaluation.generalizationAnalysis?.interpretation?.label;
+    const genScore = { CORRECT_WITH_BOUNDARIES: 4, CORRECT_NO_BOUNDARIES: 3, PARTIAL: 2, EXAMPLE_SPECIFIC: 2, INCORRECT_RULE: 1, OVER_GENERALISED: 2 }[genLabel] ?? 2;
+
+    const inferLabel = evaluation.inferenceTransferAnalysis?.interpretation?.label;
+    const inferScore = { FULL_TRANSFER: 4, PARTIAL_TRANSFER: 2, NO_TRANSFER: 1 }[inferLabel] ?? 2;
+
+    const totalScore = Math.round(((miscScore + patternScore + genScore + inferScore) / 16) * 100);
+
+    evaluation.categoryScores = {
+      misconceptionCorrection: Math.round(miscScore),
+      conceptArticulation: Math.round(patternScore),
+      logicCoherence: Math.round(genScore),
+      cognitiveResilience: Math.round(inferScore),
+    };
+    evaluation.justifications = {
+      misconceptionCorrection: evaluation.misconceptionAnalysis?.summary || '',
+      conceptArticulation: evaluation.patternRecognitionAnalysis?.finding || '',
+      logicCoherence: evaluation.generalizationAnalysis?.diagnosis || '',
+      cognitiveResilience: evaluation.inferenceTransferAnalysis?.diagnosis || '',
+    };
+    evaluation.totalScore = totalScore;
+    // Save full v3 JSON so it can be restored from DB cache
+    evaluation.rawResponse = JSON.stringify({
+      misconceptionAnalysis:       evaluation.misconceptionAnalysis,
+      patternRecognitionAnalysis:  evaluation.patternRecognitionAnalysis,
+      generalizationAnalysis:      evaluation.generalizationAnalysis,
+      inferenceTransferAnalysis:   evaluation.inferenceTransferAnalysis,
+      causalChain:                 evaluation.causalChain,
+      instructionalPriority:       evaluation.instructionalPriority,
+    });
+
+    console.log(`✅ Evaluation complete for session ${sessionId}: ${totalScore}/100`);
 
     // Cache the result — database + in-memory + JSON file
     if (useDatabase) {
@@ -415,40 +451,67 @@ app.get('/api/teacher/conversations', async (req, res) => {
       console.log(`📊 Teacher dashboard requested: ${logs.length} conversations from JSON`);
     }
 
-    const conversationsWithEvaluations = await Promise.all(
-      logs.map(async (log) => {
-        let evaluation;
-        if (log._dbEvaluation) {
-          const e = log._dbEvaluation;
-          evaluation = {
-            categoryScores: {
-              conceptArticulation: e.conceptArticulation,
-              logicCoherence: e.logicCoherence,
-              misconceptionCorrection: e.misconceptionCorrection,
-              cognitiveResilience: e.cognitiveResilience
-            },
-            justifications: e.justifications,
-            totalScore: e.totalScore
-          };
-        } else {
-          evaluation = await evaluateConversation(log, log.sessionId);
+    // Evaluate sequentially to avoid rate-limit bursts
+    const conversationsWithEvaluations = [];
+    for (const log of logs) {
+      let evaluation;
+      if (log._dbEvaluation) {
+        const e = log._dbEvaluation;
+        let v3 = {};
+        // 1. Try rawResponse in DB record (set by new code path)
+        if (e.rawResponse) {
+          try { v3 = JSON.parse(e.rawResponse); } catch {}
         }
-
-        return {
-          sessionId: log.sessionId,
-          timestamp: log.timestamp,
-          updatedAt: log.updatedAt,
-          turnCount: log.messages.length,
-          taskTitle: log.taskMetadata?.title || 'Unknown Task',
-          evaluation: {
-            categoryScores: evaluation.categoryScores,
-            justifications: evaluation.justifications,
-            totalScore: evaluation.totalScore,
-            error: evaluation.error || false
-          }
+        // 2. Fall back to in-memory cache (populated from evaluations.json)
+        if (!v3.misconceptionAnalysis && evaluationCache.has(log.sessionId)) {
+          const cached = evaluationCache.get(log.sessionId);
+          v3 = {
+            misconceptionAnalysis:      cached.misconceptionAnalysis,
+            patternRecognitionAnalysis: cached.patternRecognitionAnalysis,
+            generalizationAnalysis:     cached.generalizationAnalysis,
+            inferenceTransferAnalysis:  cached.inferenceTransferAnalysis,
+            causalChain:                cached.causalChain,
+            instructionalPriority:      cached.instructionalPriority,
+          };
+        }
+        evaluation = {
+          ...v3,
+          categoryScores: {
+            conceptArticulation: e.conceptArticulation,
+            logicCoherence: e.logicCoherence,
+            misconceptionCorrection: e.misconceptionCorrection,
+            cognitiveResilience: e.cognitiveResilience
+          },
+          justifications: e.justifications,
+          totalScore: e.totalScore,
+          instructionalPriority: v3.instructionalPriority || e.instructionalPriority,
         };
-      })
-    );
+      } else {
+        evaluation = await evaluateConversation(log, log.sessionId);
+        // Small pause between evaluations to stay within rate limits
+        await new Promise(r => setTimeout(r, 500));
+      }
+
+      conversationsWithEvaluations.push({
+        sessionId: log.sessionId,
+        timestamp: log.timestamp,
+        updatedAt: log.updatedAt,
+        turnCount: log.messages.length,
+        taskTitle: log.taskMetadata?.title || 'Unknown Task',
+        evaluation: {
+          misconceptionAnalysis:      evaluation.misconceptionAnalysis,
+          patternRecognitionAnalysis: evaluation.patternRecognitionAnalysis,
+          generalizationAnalysis:     evaluation.generalizationAnalysis,
+          inferenceTransferAnalysis:  evaluation.inferenceTransferAnalysis,
+          causalChain:                evaluation.causalChain,
+          categoryScores:             evaluation.categoryScores,
+          justifications:             evaluation.justifications,
+          totalScore:                 evaluation.totalScore,
+          instructionalPriority:      evaluation.instructionalPriority,
+          error:                      evaluation.error || false
+        }
+      });
+    }
 
     res.json({
       count: logs.length,
@@ -486,16 +549,24 @@ app.get('/api/teacher/conversations/:sessionId', async (req, res) => {
           createdAt: m.createdAt,
           sequenceNumber: m.sequenceNumber
         })),
-        evaluation: conv.evaluation ? {
-          totalScore: conv.evaluation.totalScore,
-          categoryScores: {
-            conceptArticulation: conv.evaluation.conceptArticulation,
-            logicCoherence: conv.evaluation.logicCoherence,
-            misconceptionCorrection: conv.evaluation.misconceptionCorrection,
-            cognitiveResilience: conv.evaluation.cognitiveResilience
-          },
-          justifications: conv.evaluation.justifications
-        } : null
+        evaluation: conv.evaluation ? (() => {
+          let v3 = {};
+          if (conv.evaluation.rawResponse) {
+            try { v3 = JSON.parse(conv.evaluation.rawResponse); } catch {}
+          }
+          return {
+            ...v3,
+            totalScore: conv.evaluation.totalScore,
+            categoryScores: {
+              conceptArticulation: conv.evaluation.conceptArticulation,
+              logicCoherence: conv.evaluation.logicCoherence,
+              misconceptionCorrection: conv.evaluation.misconceptionCorrection,
+              cognitiveResilience: conv.evaluation.cognitiveResilience
+            },
+            justifications: conv.evaluation.justifications,
+            instructionalPriority: v3.instructionalPriority || null,
+          };
+        })() : null
       });
     }
 

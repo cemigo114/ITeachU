@@ -1,5 +1,143 @@
 # ITeachU Prompt Update Summary
 
+---
+
+## Date: April 6, 2026
+
+## Overview
+Major refactor of the assessment pipeline and UI reporting layer. This update introduces a fully structured evidence-extraction pipeline between the Zippy conversation and the evaluator LLM, replaces the legacy 4-category competency rubric with a phase-aligned Cognitive Breakdown Report, and ships two new role-specific report components (TeacherReport, StudentReport) that consume the new evaluation schema.
+
+---
+
+## System Descriptions (Current State)
+
+### `src/utils/zippyPrompt.js` — Zippy System Prompt Generator v5.0
+
+Generates Zippy's full system prompt from a parsed task object (`parseMarkdown` output).
+
+**Character:** Zippy is a curious, humble middle-school AI learner. The student is the teacher. Zippy never evaluates, corrects, or instructs — it only asks questions, makes honest mistakes, and reflects on what it is taught.
+
+**5-Phase Conversation Protocol:**
+1. **Phase 1 — Opening:** Zippy introduces itself, frames its confusion using the task's `studentPrompt`, and invites the student to explain.
+2. **Phase 2 — Misconception Probing:** Zippy voices each misconception (M1, M2…) as its own confused reasoning, one at a time. A 2-turn micro-loop handles correction (ACKNOWLEDGE_CORRECTION), vague pushback (PROBE_REASONING), or acceptance (FOLLOW_WRONG_PATH).
+3. **Phase 3 — Pattern Recognition:** Zippy surfaces the task's pattern prompt as a puzzle it just noticed.
+4. **Phase 4 — Generalization:** Zippy poses the generalization question as genuine curiosity.
+5. **Phase 5 — Inference & Transfer:** Zippy presents a new-context challenge, then closes with a warm summary of only what the student explicitly taught it.
+
+**Silent Signalling Protocol:** Every Zippy message ends with exactly one HTML comment:
+```
+<!-- ZIPPY_MOVE:<MOVE_ID> PHASE:<N> [MISCONCEPTION:<Mi>] [SIGNAL:<VALUE>] -->
+```
+These comments are invisible to the student and consumed by `conversationEvents.js`.
+
+**"I Don't Know" Escalation:** Three-strike protocol — phase-specific low-pressure probe → anchor to what they know → graceful close. Never reveals the answer at any strike level.
+
+---
+
+### `src/utils/conversationEvents.js` — Evidence Extraction Pipeline
+
+Sits between the raw Zippy conversation transcript and the evaluator LLM. Transforms a raw message array into a structured `ConversationEventLog`.
+
+**Pipeline stages:**
+1. `parseTranscript()` — strips HTML comments, tracks current phase, produces `TurnRecord[]`.
+2. `extractZippyMoves()` — parses Zippy's silent HTML comments into `ZippyMoveEvent[]` with `moveId`, `phase`, `misconceptionId`, and `signalValue`.
+3. `ruleBasedScreening()` — deterministic regex rules fire on student turns (e.g. `RULE_DIRECT_CORRECTION`, `RULE_DISENGAGE`, `RULE_BECAUSE_JUSTIFICATION`) and produce `RuleSignal[]` with `confidence: 1.0`.
+4. `buildLLMExtractionPrompt()` — assembles a prompt for a second Claude call that maps every student turn to one or more `CognitiveEvent` records using the canonical `COGNITIVE_MOVES` taxonomy. The LLM can confirm, upgrade, or override rule signals.
+5. `assembleEventLog()` — merges LLM output with rule signals, aggregates Zippy's phase signals into `misconceptionLog`, `patternSignal`, `generalizationSignal`, `inferenceSignal`, computes `sessionQuality` (`thin` / `adequate` / `rich`), and builds a `studentTurns` array of verbatim student text for evidence verification.
+
+**Output — `ConversationEventLog`:** `{ sessionId, taskId, taskTitle, turns, zippyMoves, cognitiveEvents, phaseSummary, misconceptionLog, patternSignal, generalizationSignal, inferenceSignal, studentTurns, sessionQuality }`. This is the sole input to `generateEvaluatorPrompt()`.
+
+---
+
+### `src/utils/evaluatorPrompt.js` — Evaluator System Prompt Generator v3.0
+
+Generates the system prompt for a dedicated evaluator LLM call. Input is a `ConversationEventLog`; output is a **Cognitive Breakdown Report** JSON.
+
+**Replaces:** the legacy 4-category competency rubric (conceptArticulation, logicCoherence, misconceptionCorrection, cognitiveResilience) and numeric totalScore.
+
+**Framework:** Every section follows Evidence → Interpretation → Diagnosis → Action (E→I→D→A).
+
+**Four diagnostic sections:**
+1. **Misconception Analysis** — one entry per Mᵢ with `signal` (CORRECTED/IDENTIFIED/SHARED), verbatim `evidence`, `interpretation.classification` (FULL_CORRECTION / SURFACE_CORRECTION / PASSIVE_NON_CORRECTION), `diagnosis.rootCause`, and `action`.
+2. **Pattern Recognition Analysis** — `interpretation.label` (STRUCTURAL / PROCEDURAL / SURFACE_FEATURE / MISSED / OVER_GENERALISED), `interpretation.justification`, and a required `finding` sentence ("Student [label] → indicates [interpretation].").
+3. **Generalization Analysis** — `interpretation.label` (CORRECT_WITH_BOUNDARIES / CORRECT_NO_BOUNDARIES / PARTIAL / EXAMPLE_SPECIFIC / INCORRECT_RULE / OVER_GENERALISED), `interpretation.justification`, `reasoningMode`.
+4. **Inference & Transfer Analysis** — `interpretation.label` (FULL_TRANSFER / PARTIAL_TRANSFER / NO_TRANSFER), `interpretation.justification`, `transferQuality`.
+
+**Causal chain:** Required paragraph connecting all four sections with explicit causal language.
+
+**Instructional Priority:** Single highest-priority target — `priorityTarget`, `whyRoot`, `recommendedNextExperience`, `teacherPrompt` (ready-to-use question), `transferRiskTopics[]`.
+
+**`studentEvidence[]`:** Verbatim student turns forwarded into the output JSON for the UI to display as raw quotes, with `highlight` and `highlightReason` fields.
+
+**Conflict resolution:** If a Zippy signal contradicts a `cognitiveEvent` with confidence ≥ 0.8, the cognitive event wins.
+
+---
+
+### `src/components/teacherReport.jsx` — TeacherReport Component
+
+Teacher-facing report consuming the Cognitive Breakdown Report JSON.
+
+**Sections:**
+- **Misconception Check:** One row per misconception. If `signal === CORRECTED` or `IDENTIFIED`: compact layout (title + chip + raw student quote). If `signal === SHARED`: two-column layout with the student's raw quote (found via `highlightReason` ID match or word-overlap search against `studentEvidence` phase-2 turns), root cause in amber callout, and instructional action. Root cause is hidden when the student corrected the misconception.
+- **Where Thinking Breaks:** Four breakpoint nodes (Misconception / Pattern / Generalisation / Transfer) with pass/partial/fail/unreached icons. Below the nodes: one-sentence summary per phase using `pa.finding` (Pattern), `ga.interpretation.justification` (Generalisation), `ia.interpretation.justification` (Transfer).
+- **Proof from the Interaction:** Up to 3 highlighted student turns from `studentEvidence`, sorted by `highlight` flag then chronological order.
+- **What to Do Next:** `priorityTarget` headline, `recommendedNextExperience`, `teacherPrompt` in a sky callout, `transferRiskTopics` as pills.
+
+**Removed:** Priority Action sidebar (moved to What to Do Next inside the report), ActionPanel with buttons (Assign follow-up task, Ask Zippy to probe deeper, Add teacher note).
+
+---
+
+### `src/components/StudentReport.jsx` — StudentReport Component
+
+Student-facing session recap. No diagnostic language ("misconception", "breakpoint", "signal").
+
+**Sections:**
+- **Header:** Emoji + personalised headline ("Great job!", "Nice work!", "Keep it up!") derived from how many misconceptions were corrected.
+- **What You Did Well:** Animated strength items derived from phase signals. If `thinSession: true`, shows a single honest fallback line.
+- **Your Skills This Session:** Four skill bars (Spotting errors / Seeing patterns / Making rules / Applying ideas) with scores from phase signals. MISSED → 0, NO_TRANSFER → 0, INCORRECT_RULE → 0. Bars are hidden entirely when `thinSession: true`.
+- **Something to Look At Again (FocusCard):** Derived from actual phase outcomes, not the teacher-addressed `recommendedNextExperience`. Priority order: `thinSession` → SHARED misconception (using `item.evidence` for specificity) → MISSED pattern → INCORRECT/OVER_GENERALISED rule → NO_TRANSFER → PARTIAL_TRANSFER.
+- **Can You Answer This? (ChallengeCard):** Tap-to-reveal self-challenge from `teacherPrompt` (stripped of "Try asking:" prefix). Hidden when `thinSession: true`.
+- **Ready for Your Next Challenge?:** Dark CTA card with `onStartNextSession` callback and first `transferRiskTopics` entry as preview.
+
+---
+
+## UI Routing Changes
+
+### `src/views/FeedbackView.jsx`
+- Added `StudentReport` import; accepts `currentUser` prop from App.jsx.
+- When `userRole === 'student'` and evaluation exists: renders `StudentReport` (student's first name, task title, `onBackToDashboard` as next-session callback).
+- Other roles fall back to `TeacherReport`.
+
+### `src/views/TeacherFeedbackView.jsx`
+- Replaced `EvaluationBreakdown` with `TeacherReport`.
+
+### `src/views/StudentDetailView.jsx`
+- Replaced `EvaluationBreakdown` with `TeacherReport`.
+- Removed "Priority Action" sidebar card (now inside TeacherReport as "What to Do Next").
+
+### `src/App.jsx`
+- Passes `currentUser` to `FeedbackView` so `StudentReport` can personalise the headline.
+
+---
+
+## Files Modified
+
+| File | Change |
+|---|---|
+| `src/utils/zippyPrompt.js` | v5.0 — event-tagged phases, silent HTML comment signalling protocol |
+| `src/utils/zippyPromptES.js` | Spanish equivalent updated to match v5.0 structure |
+| `src/utils/conversationEvents.js` | New — full evidence extraction pipeline |
+| `src/utils/evaluatorPrompt.js` | v3.0 — replaced 4-category rubric with E→I→D→A Cognitive Breakdown Report |
+| `src/components/teacherReport.jsx` | New — TeacherReport component (was EvaluationBreakdown) |
+| `src/components/StudentReport.jsx` | New — StudentReport component |
+| `src/views/FeedbackView.jsx` | Routes to StudentReport for student role |
+| `src/views/TeacherFeedbackView.jsx` | Uses TeacherReport |
+| `src/views/StudentDetailView.jsx` | Uses TeacherReport; removed Priority Action sidebar |
+| `src/App.jsx` | Passes currentUser to FeedbackView |
+| `.env` | PORT changed to 3010, VITE_API_URL updated to localhost:3010 |
+
+---
+
 ## Date: December 23, 2025
 
 ## Overview

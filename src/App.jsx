@@ -304,11 +304,9 @@ const App = () => {
 
   const completeSession = () => {
     if (!sessionId) { alert('Error: Session tracking failed. Please try your last message again.'); return; }
-    setAssignments(assignments.map(a =>
-      a.id === activeAssignment.id
-        ? { ...a, status: 'completed', completedDate: new Date().toISOString().split('T')[0], messages, sessionId }
-        : a
-    ));
+    const completedAssignment = { ...activeAssignment, status: 'completed', completedDate: new Date().toISOString().split('T')[0], messages, sessionId };
+    setAssignments(assignments.map(a => a.id === activeAssignment.id ? completedAssignment : a));
+    setActiveAssignment(completedAssignment);
     setView('feedback');
     fetchEvaluations();
   };
@@ -382,7 +380,7 @@ const App = () => {
 
   if (view === 'feedback') {
     const assignment = selectedAssignmentForReview || activeAssignment;
-    return <FeedbackView assignment={assignment} evaluationData={evaluationData} userRole={userRole} getBadge={getBadge} onFetchEvaluations={fetchEvaluations} onBackToDashboard={() => {
+    return <FeedbackView assignment={assignment} evaluationData={evaluationData} userRole={userRole} currentUser={currentUser} getBadge={getBadge} onFetchEvaluations={fetchEvaluations} onBackToDashboard={() => {
       if (userRole === 'student') setView('studentDashboard');
       else if (userRole === 'teacher') setView('teacherDashboard');
       else if (userRole === 'parent') setView('parentDashboard');
