@@ -168,15 +168,7 @@ export async function getEvaluation(sessionId) {
   if (!conversation?.evaluation) return null;
 
   const eval_ = conversation.evaluation;
-
-  // Restore full v3 JSON from rawResponse if available
-  let v3 = {};
-  if (eval_.rawResponse) {
-    try { v3 = JSON.parse(eval_.rawResponse); } catch {}
-  }
-
   return {
-    ...v3,
     categoryScores: {
       conceptArticulation: eval_.conceptArticulation,
       logicCoherence: eval_.logicCoherence,
@@ -184,7 +176,6 @@ export async function getEvaluation(sessionId) {
       cognitiveResilience: eval_.cognitiveResilience
     },
     justifications: eval_.justifications,
-    totalScore: eval_.totalScore,
-    instructionalPriority: v3.instructionalPriority || null,
+    totalScore: eval_.totalScore
   };
 }

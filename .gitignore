@@ -35,6 +35,3 @@ data/*.db-wal
 
 # Git worktrees for design variants
 .worktrees
-
-# Local Netlify folder
-.netlify

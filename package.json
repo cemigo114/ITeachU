@@ -13,9 +13,7 @@
     "db:migrate": "prisma migrate dev",
     "db:push": "prisma db push",
     "db:studio": "prisma studio",
-    "postinstall": "prisma generate",
-    "ingest": "node scripts/ingest-tasks.js",
-    "export-tasks": "node scripts/export-tasks-to-json.js"
+    "postinstall": "prisma generate"
   },
   "dependencies": {
     "@prisma/client": "^6.5.0",
@@ -24,12 +22,9 @@
     "cors": "^2.8.5",
     "dotenv": "^16.3.1",
     "express": "^4.18.2",
-    "gray-matter": "^4.0.3",
     "handlebars": "^4.7.8",
-    "katex": "^0.16.44",
     "lucide-react": "^0.294.0",
     "motion": "^12.38.0",
-    "multer": "^2.1.1",
     "postcss": "^8.4.32",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
