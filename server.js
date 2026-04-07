@@ -3,15 +3,8 @@ import cors from 'cors';
 import 'dotenv/config';
 import fs from 'fs';
 import path from 'path';
-import multer from 'multer';
 import { generateEvaluatorPrompt } from './src/utils/evaluatorPrompt.js';
-import { prepareExtraction } from './src/utils/conversationEvents.js';
-import {
-  connectDatabase, disconnectDatabase, useDatabase,
-  upsertConversation, getAllConversations,
-  upsertEvaluation, getEvaluation
-} from './db.js';
-import { parseMarkdown } from './scripts/parse-markdown.js';
+import { getDb } from './db/index.js';
 
 const app = express();
 const PORT = process.env.PORT || 3002;
@@ -24,10 +17,6 @@ const allowedOrigins = [
   'http://127.0.0.1:3001',
   'http://localhost:3002',
   'http://127.0.0.1:3002',
-  'http://localhost:3003',
-  'http://127.0.0.1:3003',
-  'http://localhost:3004',
-  'http://127.0.0.1:3004',
   'http://localhost:5173',
   'http://127.0.0.1:5173',
   'https://cognality.netlify.app',
@@ -60,30 +49,6 @@ app.use((req, res, next) => {
     'content-type': req.headers['content-type']
   });
   next();
-});
-
-// Health/diagnostic endpoint
-app.get('/api/health', async (req, res) => {
-  const { prisma } = await import('./db.js');
-  let dbStatus = 'no prisma client';
-  let dbConvCount = null;
-  if (prisma) {
-    try {
-      const count = await prisma.conversation.count();
-      dbStatus = 'connected';
-      dbConvCount = count;
-    } catch (e) {
-      dbStatus = `error: ${e.message}`;
-    }
-  }
-  res.json({
-    storage: useDatabase ? 'postgresql' : 'json',
-    hasDatabaseUrl: !!process.env.DATABASE_URL,
-    databaseUrlPrefix: process.env.DATABASE_URL ? process.env.DATABASE_URL.substring(0, 30) + '...' : null,
-    dbStatus,
-    dbConversationCount: dbConvCount,
-    jsonConversationCount: conversationLogs.length
-  });
 });
 
 // File-based persistence paths
@@ -132,30 +97,6 @@ const sessionsData = loadFromFile(SESSIONS_FILE, []);
 const sessions = new Map(sessionsData); // sessionId -> session data
 
 console.log(`📊 Loaded ${conversationLogs.length} conversations, ${sessions.size} sessions, ${evaluationCache.size} evaluations`);
-
-function saveConversationToJson(sessionId, anthropicRequest, apiResponse, taskMetadata) {
-  let conversationLog = conversationLogs.find(log => log.sessionId === sessionId);
-  if (conversationLog) {
-    conversationLog.messages = anthropicRequest.messages;
-    conversationLog.lastResponse = apiResponse.content[0].text;
-    conversationLog.updatedAt = new Date().toISOString();
-    console.log(`📝 Updated existing conversation (JSON) for session ${sessionId}`);
-  } else {
-    conversationLog = {
-      sessionId,
-      timestamp: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-      messages: anthropicRequest.messages,
-      lastResponse: apiResponse.content[0].text,
-      model: anthropicRequest.model,
-      system: anthropicRequest.system,
-      taskMetadata: taskMetadata || {}
-    };
-    conversationLogs.push(conversationLog);
-    console.log(`📊 New conversation (JSON) for session ${sessionId} (${conversationLogs.length} total)`);
-  }
-  saveToFile(CONVERSATIONS_FILE, conversationLogs);
-}
 
 app.post('/api/chat', async (req, res) => {
   try {
@@ -215,25 +156,33 @@ app.post('/api/chat', async (req, res) => {
       stopReason: data.stop_reason
     });
 
-    // Persist conversation — database if available, JSON fallback otherwise
-    if (useDatabase) {
-      try {
-        await upsertConversation({
-          sessionId: currentSessionId,
-          model: anthropicRequest.model,
-          systemPrompt: anthropicRequest.system,
-          taskMetadata: taskMetadata || {},
-          messages: anthropicRequest.messages,
-          lastResponse: data.content[0].text
-        });
-        console.log(`🗄️  Conversation saved to database for session ${currentSessionId}`);
-      } catch (dbError) {
-        console.error('⚠️  Database save failed, falling back to JSON:', dbError.message);
-        saveConversationToJson(currentSessionId, anthropicRequest, data, taskMetadata);
-      }
+    // Find or create conversation log for this session
+    let conversationLog = conversationLogs.find(log => log.sessionId === currentSessionId);
+
+    if (conversationLog) {
+      // Update existing conversation
+      conversationLog.messages = anthropicRequest.messages;
+      conversationLog.lastResponse = data.content[0].text;
+      conversationLog.updatedAt = new Date().toISOString();
+      console.log(`📝 Updated existing conversation for session ${currentSessionId}`);
     } else {
-      saveConversationToJson(currentSessionId, anthropicRequest, data, taskMetadata);
+      // Create new conversation log
+      conversationLog = {
+        sessionId: currentSessionId,
+        timestamp: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        messages: anthropicRequest.messages,
+        lastResponse: data.content[0].text,
+        model: anthropicRequest.model,
+        system: anthropicRequest.system, // Store system prompt for context
+        taskMetadata: taskMetadata || {} // Store task metadata if provided (extracted earlier)
+      };
+      conversationLogs.push(conversationLog);
+      console.log(`📊 New conversation created for session ${currentSessionId} (${conversationLogs.length} total)`);
     }
+
+    // Save conversations to file after update
+    saveToFile(CONVERSATIONS_FILE, conversationLogs);
 
     // Return sessionId with response so frontend can track it
     res.json({
@@ -262,16 +211,9 @@ app.post('/api/chat', async (req, res) => {
  */
 async function evaluateConversation(conversationLog, sessionId) {
   try {
-    // Check database cache first, then in-memory cache
-    if (useDatabase) {
-      const dbEval = await getEvaluation(sessionId);
-      if (dbEval) {
-        console.log(`📋 Using database-cached evaluation for session ${sessionId}`);
-        return dbEval;
-      }
-    }
+    // Check cache first
     if (evaluationCache.has(sessionId)) {
-      console.log(`📋 Using memory-cached evaluation for session ${sessionId}`);
+      console.log(`📋 Using cached evaluation for session ${sessionId}`);
       return evaluationCache.get(sessionId);
     }
 
@@ -280,43 +222,49 @@ async function evaluateConversation(conversationLog, sessionId) {
       throw new Error('API key not configured');
     }
 
+    // Format conversation transcript for evaluator
+    const transcript = conversationLog.messages.map((msg, idx) => {
+      const role = msg.role === 'assistant' ? 'AI Protégé (Zippy)' : 'Student';
+      return `${role}: ${msg.content}`;
+    }).join('\n\n');
+
+    // Build the evaluation request
+    const evaluatorPrompt = generateEvaluatorPrompt();
     const taskMetadata = conversationLog.taskMetadata || {};
 
-    // ── Step 1: Build ConversationEventLog via extraction pipeline ──────────
-    const rawTranscript = (conversationLog.messages || []).map(m => ({
-      speaker: m.role === 'assistant' ? 'zippy' : 'student',
-      text: m.content || '',
-    }));
+    const evaluationRequest = `Please evaluate the following student-AI Protégé conversation.
 
-    const taskMeta = {
-      taskTitle: taskMetadata.title || 'Unknown Task',
-      ccssCode: taskMetadata.ccssCode || '',
-      misconceptions: Array.isArray(taskMetadata.misconceptions)
-        ? taskMetadata.misconceptions.map(m =>
-            typeof m === 'string' ? { title: m, description: m, type: 'unknown' } : m
-          )
-        : [],
-      targetConcepts: taskMetadata.targetConcepts || [],
-    };
+TASK METADATA:
+- Task: ${taskMetadata.title || 'Unknown'}
+- Target Concepts: ${taskMetadata.targetConcepts ? taskMetadata.targetConcepts.join(', ') : 'Not specified'}
+- Correct Solution: ${taskMetadata.correctSolutionPathway || 'Not specified'}
+- Known Misconceptions: ${taskMetadata.misconceptions ? taskMetadata.misconceptions.join('; ') : 'Not specified'}
 
-    const sessionMeta = { sessionId, taskId: sessionId, taskTitle: taskMeta.taskTitle };
-    // ── Step 2: Build event log using rule signals only (no extra API call) ──
-    const { resolve } = prepareExtraction(rawTranscript, taskMeta, sessionMeta);
-    const eventLog = resolve('');
+CONVERSATION TRANSCRIPT:
+${transcript}
 
-    // ── Step 3: Build evaluator prompt with event log & call evaluator ───────
-    const evaluatorPrompt = generateEvaluatorPrompt(eventLog);
+Please provide your evaluation in the specified JSON format.`;
+
     console.log(`🔍 Evaluating session ${sessionId}...`);
 
     const response = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'x-api-key': apiKey, 'anthropic-version': '2023-06-01' },
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': apiKey,
+        'anthropic-version': '2023-06-01'
+      },
       body: JSON.stringify({
-        model: 'claude-sonnet-4-6',
-        max_tokens: 16000,
+        model: 'claude-sonnet-4-5-20250929',
+        max_tokens: 2048,
         system: evaluatorPrompt,
-        messages: [{ role: 'user', content: 'Produce the Cognitive Breakdown Report for the event log provided in the system prompt.' }],
-      }),
+        messages: [
+          {
+            role: 'user',
+            content: evaluationRequest
+          }
+        ]
+      })
     });
 
     const data = await response.json();
@@ -326,79 +274,36 @@ async function evaluateConversation(conversationLog, sessionId) {
       throw new Error(`Evaluation failed: ${data.error?.message || 'Unknown error'}`);
     }
 
-    // ── Step 4: Parse & validate new v3 format ───────────────────────────────
+    // Parse the evaluation result
     const evaluationText = data.content[0].text;
+
+    // Try to extract JSON from the response
     let evaluation;
     try {
-      const stripped = evaluationText
-        .replace(/^```json\s*/i, '')
-        .replace(/^```\s*/i, '')
-        .replace(/```\s*$/i, '')
-        .trim();
-      const jsonMatch = stripped.match(/\{[\s\S]*\}/);
-      evaluation = JSON.parse(jsonMatch ? jsonMatch[0] : stripped);
+      // Look for JSON block in the response
+      const jsonMatch = evaluationText.match(/\{[\s\S]*\}/);
+      if (jsonMatch) {
+        evaluation = JSON.parse(jsonMatch[0]);
+      } else {
+        evaluation = JSON.parse(evaluationText);
+      }
     } catch (parseError) {
-      console.error('❌ Failed to parse evaluation JSON:', evaluationText.slice(0, 500));
+      console.error('❌ Failed to parse evaluation JSON:', evaluationText);
       throw new Error('Invalid evaluation format from API');
     }
 
-    if (!evaluation.misconceptionAnalysis && !evaluation.causalChain) {
+    // Validate evaluation structure
+    if (!evaluation.categoryScores || !evaluation.justifications || typeof evaluation.totalScore !== 'number') {
       console.error('❌ Invalid evaluation structure:', evaluation);
       throw new Error('Evaluation missing required fields');
     }
 
-    // ── Step 5: Derive legacy score fields for frontend compatibility ─────────
-    const sigScore = s => ({ CORRECTED: 4, IDENTIFIED: 3, SHARED: 1 }[s] || 2);
-    const miscItems = evaluation.misconceptionAnalysis?.items || [];
-    const miscScore = miscItems.length
-      ? miscItems.reduce((s, i) => s + sigScore(i.signal), 0) / miscItems.length : 2;
+    console.log(`✅ Evaluation complete for session ${sessionId}: ${evaluation.totalScore}/100`);
 
-    const patternLabel = evaluation.patternRecognitionAnalysis?.interpretation?.label;
-    const patternScore = { STRUCTURAL: 4, PROCEDURAL: 3, SURFACE_FEATURE: 2, MISSED: 1, OVER_GENERALISED: 2 }[patternLabel] ?? 2;
-
-    const genLabel = evaluation.generalizationAnalysis?.interpretation?.label;
-    const genScore = { CORRECT_WITH_BOUNDARIES: 4, CORRECT_NO_BOUNDARIES: 3, PARTIAL: 2, EXAMPLE_SPECIFIC: 2, INCORRECT_RULE: 1, OVER_GENERALISED: 2 }[genLabel] ?? 2;
-
-    const inferLabel = evaluation.inferenceTransferAnalysis?.interpretation?.label;
-    const inferScore = { FULL_TRANSFER: 4, PARTIAL_TRANSFER: 2, NO_TRANSFER: 1 }[inferLabel] ?? 2;
-
-    const totalScore = Math.round(((miscScore + patternScore + genScore + inferScore) / 16) * 100);
-
-    evaluation.categoryScores = {
-      misconceptionCorrection: Math.round(miscScore),
-      conceptArticulation: Math.round(patternScore),
-      logicCoherence: Math.round(genScore),
-      cognitiveResilience: Math.round(inferScore),
-    };
-    evaluation.justifications = {
-      misconceptionCorrection: evaluation.misconceptionAnalysis?.summary || '',
-      conceptArticulation: evaluation.patternRecognitionAnalysis?.finding || '',
-      logicCoherence: evaluation.generalizationAnalysis?.diagnosis || '',
-      cognitiveResilience: evaluation.inferenceTransferAnalysis?.diagnosis || '',
-    };
-    evaluation.totalScore = totalScore;
-    // Save full v3 JSON so it can be restored from DB cache
-    evaluation.rawResponse = JSON.stringify({
-      misconceptionAnalysis:       evaluation.misconceptionAnalysis,
-      patternRecognitionAnalysis:  evaluation.patternRecognitionAnalysis,
-      generalizationAnalysis:      evaluation.generalizationAnalysis,
-      inferenceTransferAnalysis:   evaluation.inferenceTransferAnalysis,
-      causalChain:                 evaluation.causalChain,
-      instructionalPriority:       evaluation.instructionalPriority,
-    });
-
-    console.log(`✅ Evaluation complete for session ${sessionId}: ${totalScore}/100`);
-
-    // Cache the result — database + in-memory + JSON file
-    if (useDatabase) {
-      try {
-        await upsertEvaluation(sessionId, evaluation);
-        console.log(`🗄️  Evaluation saved to database for session ${sessionId}`);
-      } catch (dbError) {
-        console.error('⚠️  Database evaluation save failed:', dbError.message);
-      }
-    }
+    // Cache the result
     evaluationCache.set(sessionId, evaluation);
+
+    // Save evaluations cache to file
     saveToFile(EVALUATIONS_FILE, Array.from(evaluationCache.entries()));
 
     return evaluation;
@@ -428,153 +333,36 @@ async function evaluateConversation(conversationLog, sessionId) {
 // Teacher-only endpoint to get conversation logs and assessments
 app.get('/api/teacher/conversations', async (req, res) => {
   try {
-    let logs;
+    // In production: Add authentication middleware
+    console.log(`📊 Teacher dashboard requested: ${conversationLogs.length} conversations to evaluate`);
 
-    if (useDatabase) {
-      try {
-        const dbConversations = await getAllConversations();
-        logs = dbConversations.map(conv => ({
-          sessionId: conv.sessionId,
-          timestamp: conv.createdAt.toISOString(),
-          updatedAt: conv.updatedAt.toISOString(),
-          messages: conv.messages.map(m => ({ role: m.role, content: m.content })),
-          taskMetadata: conv.taskMetadata || {},
-          _dbEvaluation: conv.evaluation
-        }));
-        console.log(`📊 Teacher dashboard requested: ${logs.length} conversations from database`);
-      } catch (dbError) {
-        console.error('⚠️  Database read failed, falling back to JSON:', dbError.message);
-        logs = conversationLogs.map(log => ({ ...log, _dbEvaluation: null }));
-      }
-    } else {
-      logs = conversationLogs.map(log => ({ ...log, _dbEvaluation: null }));
-      console.log(`📊 Teacher dashboard requested: ${logs.length} conversations from JSON`);
-    }
+    // Evaluate all conversations (in parallel for performance)
+    const conversationsWithEvaluations = await Promise.all(
+      conversationLogs.map(async (log) => {
+        const evaluation = await evaluateConversation(log, log.sessionId);
 
-    // Evaluate sequentially to avoid rate-limit bursts
-    const conversationsWithEvaluations = [];
-    for (const log of logs) {
-      let evaluation;
-      if (log._dbEvaluation) {
-        const e = log._dbEvaluation;
-        let v3 = {};
-        // 1. Try rawResponse in DB record (set by new code path)
-        if (e.rawResponse) {
-          try { v3 = JSON.parse(e.rawResponse); } catch {}
-        }
-        // 2. Fall back to in-memory cache (populated from evaluations.json)
-        if (!v3.misconceptionAnalysis && evaluationCache.has(log.sessionId)) {
-          const cached = evaluationCache.get(log.sessionId);
-          v3 = {
-            misconceptionAnalysis:      cached.misconceptionAnalysis,
-            patternRecognitionAnalysis: cached.patternRecognitionAnalysis,
-            generalizationAnalysis:     cached.generalizationAnalysis,
-            inferenceTransferAnalysis:  cached.inferenceTransferAnalysis,
-            causalChain:                cached.causalChain,
-            instructionalPriority:      cached.instructionalPriority,
-          };
-        }
-        evaluation = {
-          ...v3,
-          categoryScores: {
-            conceptArticulation: e.conceptArticulation,
-            logicCoherence: e.logicCoherence,
-            misconceptionCorrection: e.misconceptionCorrection,
-            cognitiveResilience: e.cognitiveResilience
-          },
-          justifications: e.justifications,
-          totalScore: e.totalScore,
-          instructionalPriority: v3.instructionalPriority || e.instructionalPriority,
+        return {
+          sessionId: log.sessionId,
+          timestamp: log.timestamp,
+          updatedAt: log.updatedAt,
+          turnCount: log.messages.length,
+          taskTitle: log.taskMetadata?.title || 'Unknown Task',
+          evaluation: {
+            categoryScores: evaluation.categoryScores,
+            justifications: evaluation.justifications,
+            totalScore: evaluation.totalScore,
+            error: evaluation.error || false
+          }
         };
-      } else {
-        evaluation = await evaluateConversation(log, log.sessionId);
-        // Small pause between evaluations to stay within rate limits
-        await new Promise(r => setTimeout(r, 500));
-      }
-
-      conversationsWithEvaluations.push({
-        sessionId: log.sessionId,
-        timestamp: log.timestamp,
-        updatedAt: log.updatedAt,
-        turnCount: log.messages.length,
-        taskTitle: log.taskMetadata?.title || 'Unknown Task',
-        evaluation: {
-          misconceptionAnalysis:      evaluation.misconceptionAnalysis,
-          patternRecognitionAnalysis: evaluation.patternRecognitionAnalysis,
-          generalizationAnalysis:     evaluation.generalizationAnalysis,
-          inferenceTransferAnalysis:  evaluation.inferenceTransferAnalysis,
-          causalChain:                evaluation.causalChain,
-          categoryScores:             evaluation.categoryScores,
-          justifications:             evaluation.justifications,
-          totalScore:                 evaluation.totalScore,
-          instructionalPriority:      evaluation.instructionalPriority,
-          error:                      evaluation.error || false
-        }
-      });
-    }
+      })
+    );
 
     res.json({
-      count: logs.length,
+      count: conversationLogs.length,
       conversations: conversationsWithEvaluations
     });
   } catch (error) {
     console.error('❌ Teacher dashboard error:', error);
-    res.status(500).json({ error: error.message });
-  }
-});
-
-// Get full conversation with messages by sessionId
-app.get('/api/teacher/conversations/:sessionId', async (req, res) => {
-  try {
-    const { sessionId } = req.params;
-
-    if (useDatabase) {
-      const { prisma } = await import('./db.js');
-      const conv = await prisma.conversation.findUnique({
-        where: { sessionId },
-        include: { messages: { orderBy: { sequenceNumber: 'asc' } }, evaluation: true }
-      });
-      if (!conv) return res.status(404).json({ error: 'Conversation not found' });
-
-      return res.json({
-        sessionId: conv.sessionId,
-        taskTitle: conv.taskTitle,
-        model: conv.model,
-        status: conv.status,
-        createdAt: conv.createdAt,
-        updatedAt: conv.updatedAt,
-        messages: conv.messages.map(m => ({
-          role: m.role,
-          content: m.content,
-          createdAt: m.createdAt,
-          sequenceNumber: m.sequenceNumber
-        })),
-        evaluation: conv.evaluation ? (() => {
-          let v3 = {};
-          if (conv.evaluation.rawResponse) {
-            try { v3 = JSON.parse(conv.evaluation.rawResponse); } catch {}
-          }
-          return {
-            ...v3,
-            totalScore: conv.evaluation.totalScore,
-            categoryScores: {
-              conceptArticulation: conv.evaluation.conceptArticulation,
-              logicCoherence: conv.evaluation.logicCoherence,
-              misconceptionCorrection: conv.evaluation.misconceptionCorrection,
-              cognitiveResilience: conv.evaluation.cognitiveResilience
-            },
-            justifications: conv.evaluation.justifications,
-            instructionalPriority: v3.instructionalPriority || null,
-          };
-        })() : null
-      });
-    }
-
-    const log = conversationLogs.find(l => l.sessionId === sessionId);
-    if (!log) return res.status(404).json({ error: 'Conversation not found' });
-    res.json(log);
-  } catch (error) {
-    console.error('Conversation detail error:', error);
     res.status(500).json({ error: error.message });
   }
 });
@@ -641,94 +429,32 @@ app.delete('/api/sessions/:sessionId', (req, res) => {
   }
 });
 
-// --- Task helpers ---
+// ---------- Task Bank API (reads from SQLite) ----------
 
-function formatGradeLabel(grade) {
-  if (!grade) return '';
-  if (/^\d+$/.test(grade)) return `Grade ${grade}`;
-  if (grade === 'HS') return 'High School';
-  return grade;
-}
-
-function flattenMisconceptions(misconceptions) {
-  if (!misconceptions || !Array.isArray(misconceptions)) return [];
-  return misconceptions.map(m => {
-    if (typeof m === 'string') return m;
-    const parts = [m.title, m.description].filter(Boolean);
-    return parts.join(': ');
-  });
-}
-
-function formatTaskForApi(dbTask) {
-  const misconceptionsFlat = flattenMisconceptions(dbTask.misconceptions);
-  return {
-    id: dbTask.slug,
-    slug: dbTask.slug,
-    title: dbTask.title,
-    grade: formatGradeLabel(dbTask.grade),
-    domain: dbTask.domain,
-    standard: dbTask.ccssCode,
-    standardDescription: dbTask.standardStatement || '',
-    description: dbTask.standardStatement
-      ? dbTask.standardStatement.split('.')[0] + '.'
-      : '',
-    problemStatement: dbTask.studentPrompt || '',
-    teachingPrompt: dbTask.teachingPrompt || '',
-    targetConcepts: dbTask.targetConcepts || [],
-    correctSolutionPathway: '',
-    misconceptions: misconceptionsFlat,
-    aiIntro: dbTask.aiIntro || '',
-    aiIntroES: dbTask.aiIntroEs || '',
-    imageUrl: null,
-    sections: {
-      studentPrompt: dbTask.studentPrompt || '',
-      misconceptions: dbTask.misconceptions || [],
-      patternRecognition: dbTask.patternRecognition || '',
-      generalization: dbTask.generalization || '',
-      inference: dbTask.inferencePrediction || '',
-      mappingData: dbTask.mappingData || { claims: [], evidence: '', criticalThinking: '' },
-    },
-  };
-}
-
-function loadTasksFromJson() {
+// GET /api/tasks  — list all tasks (optional ?grade= filter)
+app.get('/api/tasks', (req, res) => {
   try {
-    const tasksPath = path.join(process.cwd(), 'src/data/tasks.json');
-    const tasksData = JSON.parse(fs.readFileSync(tasksPath, 'utf-8'));
-    return Object.values(tasksData.tasks);
-  } catch { return []; }
-}
-
-function loadCollectionsFromJson() {
-  try {
-    const collectionsPath = path.join(process.cwd(), 'src/data/taskCollections.json');
-    return JSON.parse(fs.readFileSync(collectionsPath, 'utf-8'));
-  } catch { return { collections: [] }; }
-}
-
-// --- Task routes ---
-
-app.get('/api/tasks', async (req, res) => {
-  try {
+    const db = getDb();
     const { grade, domain } = req.query;
+    let sql = `SELECT id, slug, title, description, standard_statement_code, grade, domain, image_url,
+                      problem_statement, misconceptions, pattern_recognition, generalization,
+                      inference_prediction, mapping_data, teaching_prompt, target_concepts,
+                      correct_solution_pathway, ai_intro, ai_intro_es
+               FROM task`;
+    const conditions = [];
+    const params = [];
+    if (grade) { conditions.push('grade = ?'); params.push(grade); }
+    if (domain) { conditions.push('domain = ?'); params.push(domain); }
+    if (conditions.length) sql += ' WHERE ' + conditions.join(' AND ');
+    sql += ' ORDER BY standard_statement_code';
 
-    if (useDatabase) {
-      const where = { published: true };
-      if (grade) where.grade = grade.replace(/^Grade\s*/i, '');
-      if (domain) where.domain = { contains: domain, mode: 'insensitive' };
-
-      const dbTasks = await (await import('./db.js')).prisma.task.findMany({ where, orderBy: { ccssCode: 'asc' } });
-
-      if (dbTasks.length > 0) {
-        const tasks = dbTasks.map(formatTaskForApi);
-        return res.json({ tasks, count: tasks.length });
-      }
-    }
-
-    // Fallback to JSON file
-    let tasks = loadTasksFromJson();
-    if (grade) tasks = tasks.filter(t => t.grade.toLowerCase().includes(grade.toLowerCase()));
-    if (domain) tasks = tasks.filter(t => t.domain.toLowerCase().includes(domain.toLowerCase()));
+    const rows = db.prepare(sql).all(...params);
+    const tasks = rows.map(r => ({
+      ...r,
+      misconceptions: safeJsonParse(r.misconceptions, []),
+      mapping_data: safeJsonParse(r.mapping_data, {}),
+      target_concepts: safeJsonParse(r.target_concepts, []),
+    }));
     res.json({ tasks, count: tasks.length });
   } catch (error) {
     console.error('Tasks fetch error:', error);
@@ -736,24 +462,19 @@ app.get('/api/tasks', async (req, res) => {
   }
 });
 
-app.get('/api/tasks/:id', async (req, res) => {
+// GET /api/tasks/:id  — full task detail for teaching sessions
+app.get('/api/tasks/:id', (req, res) => {
   try {
-    const { id } = req.params;
+    const db = getDb();
+    const row = db.prepare('SELECT * FROM task WHERE id = ? OR slug = ?').get(req.params.id, req.params.id);
+    if (!row) return res.status(404).json({ error: 'Task not found' });
 
-    if (useDatabase) {
-      const { prisma } = await import('./db.js');
-      const dbTask = await prisma.task.findFirst({
-        where: { OR: [{ id }, { slug: id }], published: true },
-      });
-
-      if (dbTask) return res.json(formatTaskForApi(dbTask));
-    }
-
-    // Fallback to JSON file
-    const tasksPath = path.join(process.cwd(), 'src/data/tasks.json');
-    const tasksData = JSON.parse(fs.readFileSync(tasksPath, 'utf-8'));
-    const task = tasksData.tasks[id];
-    if (!task) return res.status(404).json({ error: 'Task not found' });
+    const task = {
+      ...row,
+      misconceptions: safeJsonParse(row.misconceptions, []),
+      mapping_data: safeJsonParse(row.mapping_data, {}),
+      target_concepts: safeJsonParse(row.target_concepts, []),
+    };
     res.json(task);
   } catch (error) {
     console.error('Task fetch error:', error);
@@ -761,148 +482,49 @@ app.get('/api/tasks/:id', async (req, res) => {
   }
 });
 
-app.get('/api/collections', async (req, res) => {
+// GET /api/collections  — list collections with their tasks
+app.get('/api/collections', (req, res) => {
   try {
-    if (useDatabase) {
-      const { prisma } = await import('./db.js');
-      const dbCollections = await prisma.collection.findMany({
-        where: { published: true },
-        include: {
-          tasks: {
-            orderBy: { sortOrder: 'asc' },
-            include: { task: true },
-          },
-        },
-        orderBy: [{ grade: 'asc' }, { title: 'asc' }],
-      });
+    const db = getDb();
+    const collections = db.prepare(
+      `SELECT id, slug, title, description, type, grade, published FROM collection WHERE published = 1 ORDER BY grade, title`
+    ).all();
 
-      if (dbCollections.length > 0) {
-        const collections = dbCollections.map(c => ({
-          id: c.slug,
-          slug: c.slug,
-          title: c.title,
-          description: c.description || '',
-          grade: c.grade ? parseInt(c.grade, 10) || c.grade : null,
-          tasks: c.tasks.map(ct => ({
-            id: ct.task.slug,
-            slug: ct.task.slug,
-            title: ct.task.title,
-            description: ct.task.standardStatement ? ct.task.standardStatement.split('.')[0] + '.' : '',
-            standard: ct.task.ccssCode,
-            grade: formatGradeLabel(ct.task.grade),
-            domain: ct.task.domain,
-            order: ct.sortOrder,
-            required: false,
-          })),
-        }));
-        return res.json({ collections });
-      }
-    }
+    const getTasksForCollection = db.prepare(
+      `SELECT t.id, t.slug, t.title, t.description, t.standard_statement_code, t.grade, t.domain, t.image_url,
+              ct.sort_order, ct.required
+       FROM collection_tasks ct
+       JOIN task t ON t.id = ct.task_id
+       WHERE ct.collection_id = ?
+       ORDER BY ct.sort_order`
+    );
 
-    // Fallback to JSON file
-    res.json(loadCollectionsFromJson());
+    const result = collections.map(c => ({
+      ...c,
+      tasks: getTasksForCollection.all(c.id).map(t => ({
+        id: t.id,
+        slug: t.slug,
+        title: t.title,
+        description: t.description,
+        standard: t.standard_statement_code,
+        grade: t.grade,
+        domain: t.domain,
+        order: t.sort_order,
+        required: !!t.required,
+      }))
+    }));
+
+    res.json({ collections: result });
   } catch (error) {
     console.error('Collections fetch error:', error);
     res.status(500).json({ error: error.message });
   }
 });
 
-// --- Task upload ---
-
-const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 1024 * 1024 } });
-
-function slugify(text) {
-  return text.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+function safeJsonParse(str, fallback) {
+  if (!str) return fallback;
+  try { return JSON.parse(str); } catch { return fallback; }
 }
-
-app.post('/api/tasks/upload', upload.single('file'), async (req, res) => {
-  try {
-    if (!useDatabase) {
-      return res.status(503).json({ error: 'Database not available. Task upload requires PostgreSQL.' });
-    }
-
-    let markdownContent;
-    let filename = 'upload.md';
-
-    if (req.file) {
-      markdownContent = req.file.buffer.toString('utf-8');
-      filename = req.file.originalname || filename;
-    } else if (req.is('text/markdown') || req.is('text/plain')) {
-      const chunks = [];
-      for await (const chunk of req) chunks.push(chunk);
-      markdownContent = Buffer.concat(chunks).toString('utf-8');
-    } else if (req.body?.content) {
-      markdownContent = req.body.content;
-      filename = req.body.filename || filename;
-    } else {
-      return res.status(400).json({ error: 'No markdown content provided. Send as multipart file, text/markdown body, or JSON with { content, filename }.' });
-    }
-
-    const parsed = parseMarkdown(markdownContent, filename);
-
-    if (!parsed.ccssCode || !parsed.taskTitle) {
-      return res.status(422).json({ error: 'Could not extract ccss_code or task_title from the markdown.' });
-    }
-
-    const gradeNum = parsed.gradeLevel?.match(/\d+/)?.[0];
-    const grade = gradeNum || (/high\s*school/i.test(parsed.gradeLevel) ? 'HS' : parsed.gradeLevel || 'unknown');
-    const slug = slugify(`${parsed.ccssCode}-${parsed.taskTitle}`);
-
-    const miscFlat = parsed.misconceptions.map(m => typeof m === 'string' ? m : [m.title, m.description].filter(Boolean).join(': '));
-    const promptPreview = parsed.studentPrompt?.split(/[.!?"]\s/)?.[0] || parsed.taskTitle;
-    const firstMiscDesc = parsed.misconceptions?.[0]?.description || '';
-    const aiIntro = `Hi! I'm Zippy! 🎉\n\n${promptPreview}.\n\nHmm, I think ${firstMiscDesc.charAt(0).toLowerCase() + firstMiscDesc.slice(1).slice(0, 120)}... 🤔\n\nCan you help me understand this better?`;
-
-    const { prisma } = await import('./db.js');
-    const task = await prisma.task.upsert({
-      where: { slug },
-      create: {
-        slug,
-        title: parsed.taskTitle,
-        grade,
-        domain: parsed.domain || 'General',
-        ccssCode: parsed.ccssCode,
-        cluster: parsed.cluster || null,
-        standardStatement: parsed.standardStatement || null,
-        studentPrompt: parsed.studentPrompt || null,
-        misconceptions: parsed.misconceptions,
-        patternRecognition: parsed.patternRecognition || null,
-        generalization: parsed.generalization || null,
-        inferencePrediction: parsed.inferencePrediction || null,
-        mappingData: parsed.mappingData,
-        teachingPrompt: `Help Zippy understand ${parsed.taskTitle.toLowerCase()} by guiding them through the concept step by step.`,
-        targetConcepts: parsed.standardStatement ? [parsed.standardStatement.split(',')[0].trim()] : [],
-        aiIntro,
-        sourceFile: filename,
-        published: true,
-      },
-      update: {
-        title: parsed.taskTitle,
-        grade,
-        domain: parsed.domain || 'General',
-        ccssCode: parsed.ccssCode,
-        cluster: parsed.cluster || null,
-        standardStatement: parsed.standardStatement || null,
-        studentPrompt: parsed.studentPrompt || null,
-        misconceptions: parsed.misconceptions,
-        patternRecognition: parsed.patternRecognition || null,
-        generalization: parsed.generalization || null,
-        inferencePrediction: parsed.inferencePrediction || null,
-        mappingData: parsed.mappingData,
-        teachingPrompt: `Help Zippy understand ${parsed.taskTitle.toLowerCase()} by guiding them through the concept step by step.`,
-        targetConcepts: parsed.standardStatement ? [parsed.standardStatement.split(',')[0].trim()] : [],
-        aiIntro,
-        sourceFile: filename,
-      },
-    });
-
-    console.log(`📥 Task uploaded: ${parsed.ccssCode} - ${parsed.taskTitle} (${task.id})`);
-    res.json({ success: true, task: formatTaskForApi(task) });
-  } catch (error) {
-    console.error('Task upload error:', error);
-    res.status(500).json({ error: error.message });
-  }
-});
 
 // Get educational standards (Connecticut Mathematics - 746 standards from Knowledge Graph)
 app.get('/api/standards', (req, res) => {
@@ -951,34 +573,10 @@ app.get('/api/standards/:id/prerequisites', (req, res) => {
   }
 });
 
-async function startServer() {
-  if (useDatabase) {
-    try {
-      const { execSync } = await import('child_process');
-      console.log('🔄 Running database migrations...');
-      execSync('npx prisma migrate deploy', { stdio: 'inherit' });
-      console.log('✅ Migrations complete');
-    } catch (e) {
-      console.error('⚠️  Migration failed:', e.message);
-    }
-    await connectDatabase();
-  }
-
-  app.listen(PORT, () => {
-    console.log(`🚀 Proxy server running on http://localhost:${PORT}`);
-    console.log(`🗄️  Storage: ${useDatabase ? 'PostgreSQL' : 'JSON files'}`);
-    console.log(`📊 Backend assessment enabled - logs hidden from frontend`);
-    console.log(`💾 Session persistence enabled`);
-    console.log(`📚 Task collections API ready`);
-    console.log(`📝 Tasks API ready`);
-    console.log(`🎯 Standards alignment API ready`);
-  });
-
-  process.on('SIGTERM', async () => {
-    console.log('🛑 SIGTERM received, shutting down...');
-    await disconnectDatabase();
-    process.exit(0);
-  });
-}
-
-startServer();
+app.listen(PORT, () => {
+  console.log(`🚀 Proxy server running on http://localhost:${PORT}`);
+  console.log(`📊 Backend assessment enabled - logs hidden from frontend`);
+  console.log(`💾 Session persistence enabled`);
+  console.log(`📚 Task collections API ready`);
+  console.log(`🎯 Standards alignment API ready`);
+});

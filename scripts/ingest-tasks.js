@@ -1,211 +1,216 @@
-#!/usr/bin/env node
 /**
- * CLI script for bulk-ingesting markdown task files into PostgreSQL.
+ * Ingest task .docx files into the SQLite database.
  *
  * Usage:
- *   npm run ingest -- --dir "/path/to/New Item Bank"
- *   TASK_DIR="/path/to/New Item Bank" npm run ingest
+ *   node scripts/ingest-tasks.js                          # defaults to ../Grade 6
+ *   TASK_DOCX_ROOT="/path/to/Grade 7" node scripts/ingest-tasks.js
+ *
+ * Idempotent: uses INSERT OR REPLACE so re-running is safe.
  */
-import { readdir, readFile } from 'fs/promises';
+import 'dotenv/config';
+import fs from 'fs';
 import path from 'path';
-import { PrismaClient } from '@prisma/client';
-import { parseMarkdown } from './parse-markdown.js';
+import { fileURLToPath } from 'url';
+import { getDb } from '../db/index.js';
+import { parseDocx } from './parse-docx.js';
 
-const prisma = new PrismaClient();
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const ROOT = path.join(__dirname, '..');
+
+const TASK_DOCX_ROOT = process.env.TASK_DOCX_ROOT || path.join(ROOT, '..', 'Grade 6');
+
+const DOMAIN_MAP = {
+  'RP': 'Ratios & Proportions',
+  'NS': 'The Number System',
+  'EE': 'Expressions & Equations',
+  'SP': 'Statistics & Probability',
+  'G':  'Geometry',
+  'NF': 'Number & Operations - Fractions',
+  'OA': 'Operations & Algebraic Thinking',
+  'NBT': 'Number & Operations in Base Ten',
+  'MD': 'Measurement & Data',
+  'F':  'Functions',
+};
+
+function normalizeStatementCode(filename) {
+  const base = path.basename(filename, '.docx');
+  // Handles both "6.SP.A.2_Title" and "6_EE_A_1_Title" formats
+  const dotMatch = base.match(/^(\d+\.[A-Z]+\.[A-Z]\.\d+)/);
+  if (dotMatch) return dotMatch[1];
+  const underscoreMatch = base.match(/^(\d+)[._]([A-Z]+)[._]([A-Z])[._](\d+)/i);
+  if (underscoreMatch) return `${underscoreMatch[1]}.${underscoreMatch[2]}.${underscoreMatch[3]}.${underscoreMatch[4]}`;
+  return base.split('_')[0];
+}
+
+function getDomain(statementCode) {
+  const m = statementCode.match(/^\d+\.([A-Z]+)\./);
+  return m ? (DOMAIN_MAP[m[1]] || m[1]) : 'General';
+}
 
 function slugify(text) {
-  return text
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-|-$/g, '');
+  return text.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
 }
 
-function deriveGrade(gradeLevel) {
-  if (!gradeLevel) return '';
-  const num = gradeLevel.match(/\d+/);
-  if (num) return num[0];
-  if (/high\s*school|hs/i.test(gradeLevel)) return 'HS';
-  return gradeLevel;
-}
-
-function generateAiIntro(parsed) {
-  const title = parsed.taskTitle || 'this task';
-  const prompt = parsed.studentPrompt || '';
-  const firstMisconception = parsed.misconceptions?.[0];
+function generateAiIntro(title, studentPrompt, misconceptions) {
+  const firstMisconception = misconceptions?.[0] || '';
   const misconceptionText = firstMisconception
-    ? typeof firstMisconception === 'string'
-      ? firstMisconception
-      : firstMisconception.title || firstMisconception.description || ''
-    : '';
+    .replace(/^[^:]+:\s*/, '')  // strip label like "Additive Reasoning:"
+    .replace(/\.$/, '');
 
-  const intro = `Hi! I'm Zippy! I need help with "${title}". ${prompt ? prompt.split('.').slice(0, 2).join('.') + '.' : ''} ${misconceptionText ? `I was thinking about it and got confused because ${misconceptionText.toLowerCase().replace(/^\*\*/, '').split('.')[0]}.` : ''} Can you help me understand?`;
-  return intro.replace(/\s+/g, ' ').trim();
+  const promptPreview = studentPrompt?.split(/[.!?]/)[0] || title;
+
+  return `Hi! I'm Zippy! 🎉\n\n${promptPreview}.\n\nHmm, I think ${misconceptionText.charAt(0).toLowerCase() + misconceptionText.slice(1)}... 🤔\n\nCan you help me understand this better?`;
 }
 
-function generateTeachingPrompt(parsed) {
-  return `Help Zippy understand ${parsed.taskTitle || 'the concept'} by teaching the key mathematical ideas step by step.`;
+function deriveGrade(statementCode) {
+  const m = statementCode.match(/^(\d+)\./);
+  return m ? m[1] : '6';
 }
 
 async function main() {
-  const args = process.argv.slice(2);
-  const dirFlagIdx = args.indexOf('--dir');
-  const taskDir = dirFlagIdx !== -1 ? args[dirFlagIdx + 1] : process.env.TASK_DIR;
-  const dryRun = args.includes('--dry-run');
+  const db = getDb();
 
-  if (!taskDir) {
-    console.error('Usage: npm run ingest -- --dir "/path/to/markdown/files"');
+  let docxDir = TASK_DOCX_ROOT;
+  if (!fs.existsSync(docxDir)) {
+    console.error('Task docx directory not found:', docxDir);
+    console.error('Set TASK_DOCX_ROOT environment variable to the folder containing .docx files.');
     process.exit(1);
   }
 
-  console.log(`📂 Reading markdown files from: ${taskDir}`);
-  if (dryRun) console.log('🔍 DRY RUN — no database writes');
+  const files = fs.readdirSync(docxDir).filter(f => f.endsWith('.docx'));
+  console.log(`Found ${files.length} .docx files in ${docxDir}`);
 
-  const files = (await readdir(taskDir)).filter(f => f.endsWith('.md'));
-  console.log(`📄 Found ${files.length} .md files\n`);
+  const insTask = db.prepare(`
+    INSERT OR REPLACE INTO task (
+      id, slug, title, description,
+      problem_statement, misconceptions, pattern_recognition,
+      generalization, inference_prediction, mapping_data,
+      teaching_prompt, target_concepts, correct_solution_pathway,
+      ai_intro, ai_intro_es,
+      standard_statement_code, standard_case_uuid, grade,
+      domain, docx_path, image_url
+    ) VALUES (
+      ?, ?, ?, ?,
+      ?, ?, ?,
+      ?, ?, ?,
+      ?, ?, ?,
+      ?, ?,
+      ?, ?, ?,
+      ?, ?, ?
+    )
+  `);
 
-  let inserted = 0, updated = 0, failed = 0;
-  const collectionMap = new Map();
-  const warnings = [];
+  const insCollection = db.prepare(`
+    INSERT OR IGNORE INTO collection (id, slug, title, description, type, grade, published, source)
+    VALUES (?, ?, ?, ?, ?, ?, 1, 'derived')
+  `);
 
-  for (const file of files) {
+  const insCollectionTask = db.prepare(`
+    INSERT OR REPLACE INTO collection_tasks (collection_id, task_id, sort_order, required)
+    VALUES (?, ?, ?, ?)
+  `);
+
+  // Try to look up standard UUIDs from the standards table if it exists
+  let getStandardByCode = null;
+  try {
+    const tableCheck = db.prepare(
+      "SELECT name FROM sqlite_master WHERE type='table' AND name='standards_framework_item'"
+    ).get();
+    if (tableCheck) {
+      getStandardByCode = db.prepare(
+        "SELECT case_identifier_uuid FROM standards_framework_item WHERE statement_code = ? LIMIT 1"
+      );
+    }
+  } catch { /* standards table may not exist yet */ }
+
+  const collectionTracker = {};
+  let inserted = 0;
+  let failed = 0;
+
+  for (let i = 0; i < files.length; i++) {
+    const file = files[i];
+    const filePath = path.join(docxDir, file);
+    const statementCode = normalizeStatementCode(file);
+    const grade = deriveGrade(statementCode);
+    const domain = getDomain(statementCode);
+
+    let parsed;
     try {
-      const content = await readFile(path.join(taskDir, file), 'utf-8');
-      const parsed = parseMarkdown(content, file);
-
-      if (!parsed.ccssCode || !parsed.taskTitle) {
-        warnings.push(`⚠️  ${file}: missing ccssCode or taskTitle, skipping`);
-        failed++;
-        continue;
-      }
-
-      const grade = deriveGrade(parsed.gradeLevel);
-      const slug = slugify(`${parsed.ccssCode}-${parsed.taskTitle}`);
-      const aiIntro = generateAiIntro(parsed);
-      const teachingPrompt = generateTeachingPrompt(parsed);
-
-      const targetConcepts = [];
-      if (parsed.studentPrompt) targetConcepts.push(parsed.taskTitle);
-      if (parsed.patternRecognition) targetConcepts.push('Pattern Recognition');
-      if (parsed.generalization) targetConcepts.push('Generalization');
-
-      if (dryRun) {
-        console.log(`  ✓ ${slug} (${grade} / ${parsed.domain})`);
-      } else {
-        const existing = await prisma.task.findUnique({ where: { slug } });
-        await prisma.task.upsert({
-          where: { slug },
-          create: {
-            slug,
-            title: parsed.taskTitle,
-            grade,
-            domain: parsed.domain || '',
-            ccssCode: parsed.ccssCode,
-            cluster: parsed.cluster || null,
-            standardStatement: parsed.standardStatement || null,
-            studentPrompt: parsed.studentPrompt || null,
-            misconceptions: parsed.misconceptions,
-            patternRecognition: parsed.patternRecognition || null,
-            generalization: parsed.generalization || null,
-            inferencePrediction: parsed.inferencePrediction || null,
-            mappingData: parsed.mappingData,
-            teachingPrompt,
-            targetConcepts,
-            aiIntro,
-            aiIntroEs: null,
-            sourceFile: file,
-          },
-          update: {
-            title: parsed.taskTitle,
-            grade,
-            domain: parsed.domain || '',
-            ccssCode: parsed.ccssCode,
-            cluster: parsed.cluster || null,
-            standardStatement: parsed.standardStatement || null,
-            studentPrompt: parsed.studentPrompt || null,
-            misconceptions: parsed.misconceptions,
-            patternRecognition: parsed.patternRecognition || null,
-            generalization: parsed.generalization || null,
-            inferencePrediction: parsed.inferencePrediction || null,
-            mappingData: parsed.mappingData,
-            teachingPrompt,
-            targetConcepts,
-            aiIntro,
-            sourceFile: file,
-          },
-        });
-
-        if (existing) {
-          updated++;
-          console.log(`  ↻ ${slug}`);
-        } else {
-          inserted++;
-          console.log(`  + ${slug}`);
-        }
-      }
-
-      const collKey = `${grade}-${slugify(parsed.domain || 'general')}`;
-      if (!collectionMap.has(collKey)) {
-        collectionMap.set(collKey, {
-          grade,
-          domain: parsed.domain || 'General',
-          slugs: [],
-        });
-      }
-      collectionMap.get(collKey).slugs.push(slug);
+      parsed = await parseDocx(filePath);
     } catch (err) {
-      warnings.push(`❌ ${file}: ${err.message}`);
+      console.warn(`  SKIP ${file}: parse error - ${err.message}`);
       failed++;
+      continue;
     }
-  }
 
-  if (!dryRun) {
-    console.log('\n📦 Creating collections...');
-    for (const [collKey, { grade, domain, slugs }] of collectionMap) {
-      const collSlug = collKey;
-      const collTitle = `${grade === 'HS' ? 'High School' : `Grade ${grade}`} — ${domain}`;
+    let title = parsed.title || path.basename(file, '.docx').replace(/[_-]/g, ' ');
+    // Strip leading standard-code prefix from title (e.g. "6.EE.A.4 Equivalent..." → "Equivalent...")
+    title = title.replace(/^\d+[\s._]+[A-Z]+[\s._]+[A-Z][\s._]+\d+[\s._]*/i, '').trim() || title;
+    const slug = slugify(`${statementCode}-${title}`);
+    const id = slug;
 
-      const collection = await prisma.collection.upsert({
-        where: { slug: collSlug },
-        create: {
-          slug: collSlug,
-          title: collTitle,
-          description: `${domain} tasks for ${grade === 'HS' ? 'High School' : `Grade ${grade}`}`,
-          grade,
-        },
-        update: {
-          title: collTitle,
-          description: `${domain} tasks for ${grade === 'HS' ? 'High School' : `Grade ${grade}`}`,
-          grade,
-        },
-      });
+    const standardUuid = getStandardByCode
+      ? (getStandardByCode.get(statementCode)?.case_identifier_uuid || null)
+      : null;
 
-      for (let i = 0; i < slugs.length; i++) {
-        const task = await prisma.task.findUnique({ where: { slug: slugs[i] } });
-        if (!task) continue;
-        await prisma.collectionTask.upsert({
-          where: {
-            collectionId_taskId: { collectionId: collection.id, taskId: task.id },
-          },
-          create: { collectionId: collection.id, taskId: task.id, sortOrder: i },
-          update: { sortOrder: i },
-        });
-      }
+    const aiIntro = generateAiIntro(title, parsed.studentPrompt, parsed.misconceptions);
+    const teachingPrompt = `Help Zippy understand ${title.toLowerCase()} by guiding them through the concept step by step.`;
+    const targetConcepts = parsed.standardDescription
+      ? [parsed.standardDescription.split(',')[0].trim()]
+      : [];
 
-      console.log(`  📁 ${collTitle} (${slugs.length} tasks)`);
+    insTask.run(
+      id,
+      slug,
+      title,
+      parsed.standardDescription || '',
+      parsed.studentPrompt || '',
+      JSON.stringify(parsed.misconceptions || []),
+      parsed.patternRecognition || '',
+      parsed.generalization || '',
+      parsed.inferencePrediction || '',
+      JSON.stringify(parsed.mappingData || {}),
+      teachingPrompt,
+      JSON.stringify(targetConcepts),
+      '',
+      aiIntro,
+      null,
+      statementCode,
+      standardUuid,
+      grade,
+      domain,
+      file,
+      null
+    );
+
+    // Track domain collections
+    const collId = `grade-${grade}-${slugify(domain)}`;
+    if (!collectionTracker[collId]) {
+      collectionTracker[collId] = { grade, domain, tasks: [] };
+      insCollection.run(
+        collId,
+        slugify(`grade-${grade}-${domain}`),
+        `Grade ${grade} - ${domain}`,
+        `Grade ${grade} ${domain} tasks`,
+        'unit',
+        parseInt(grade, 10)
+      );
     }
+    collectionTracker[collId].tasks.push(id);
+    insCollectionTask.run(collId, id, collectionTracker[collId].tasks.length, collectionTracker[collId].tasks.length === 1 ? 1 : 0);
+
+    inserted++;
+    console.log(`  ✓ ${statementCode} - ${title}`);
   }
 
-  console.log(`\n✅ Done! ${inserted} inserted, ${updated} updated, ${failed} failed`);
-  if (warnings.length) {
-    console.log('\n⚠️  Warnings:');
-    warnings.forEach(w => console.log(`  ${w}`));
+  console.log(`\nDone: ${inserted} tasks inserted, ${failed} failed`);
+  console.log(`Collections created: ${Object.keys(collectionTracker).length}`);
+  for (const [collId, info] of Object.entries(collectionTracker)) {
+    console.log(`  ${collId}: ${info.tasks.length} tasks`);
   }
-
-  await prisma.$disconnect();
 }
 
-main().catch(async (err) => {
-  console.error('Fatal error:', err);
-  await prisma.$disconnect();
+main().catch(err => {
+  console.error(err);
   process.exit(1);
 });
