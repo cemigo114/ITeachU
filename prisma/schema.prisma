@@ -53,3 +53,63 @@ model Evaluation {
 
   conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
 }
+
+model Task {
+  id                  String   @id @default(cuid())
+  slug                String   @unique
+  title               String
+  grade               String
+  domain              String
+  ccssCode            String
+  cluster             String?
+  standardStatement   String?  @db.Text
+
+  studentPrompt       String?  @db.Text
+  misconceptions      Json?
+  patternRecognition  String?  @db.Text
+  generalization      String?  @db.Text
+  inferencePrediction String?  @db.Text
+  mappingData         Json?
+
+  teachingPrompt      String?  @db.Text
+  targetConcepts      Json?
+  aiIntro             String?  @db.Text
+  aiIntroEs           String?  @db.Text
+
+  sourceFile          String?
+  published           Boolean  @default(true)
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  collections         CollectionTask[]
+
+  @@index([grade])
+  @@index([domain])
+  @@index([ccssCode])
+}
+
+model Collection {
+  id          String   @id @default(cuid())
+  slug        String   @unique
+  title       String
+  description String?
+  grade       String?
+  published   Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  tasks       CollectionTask[]
+
+  @@index([grade])
+}
+
+model CollectionTask {
+  collectionId String
+  taskId       String
+  sortOrder    Int      @default(0)
+
+  collection   Collection @relation(fields: [collectionId], references: [id], onDelete: Cascade)
+  task         Task       @relation(fields: [taskId], references: [id], onDelete: Cascade)
+
+  @@id([collectionId, taskId])
+}

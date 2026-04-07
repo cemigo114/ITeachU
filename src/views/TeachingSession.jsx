@@ -207,19 +207,12 @@ const TeachingSession = ({
       setCompletionFlash(false);
       setIsCompleted(true);
       setCurrentZippyMood('excited');
-      setLocalZippyExtras(prev => [...prev, {
-        id: `done-${Date.now()}`,
-        text: tl('completedZippyMessage'),
-        content: tl('completedZippyMessage'),
-        mood: 'excited',
-        timestamp: new Date(),
-      }]);
-      setTimeout(() => setShowPostOptions(true), 600);
+      setTimeout(() => setShowPostOptions(true), 300);
     }, 700);
   };
 
   const handleContinueExplaining = () => { setIsCompleted(false); setShowPostOptions(false); };
-  const handleReviewThinking = () => { setShowHistory(true); setIsCompleted(false); setShowPostOptions(false); };
+  const handleReviewThinking = () => { onCompleteSession(); };
   const handleNewProblem = () => {
     setWhiteboardItems([]); setDrawingStrokes([]);
     setRevisionCount(0); setIsCompleted(false); setShowPostOptions(false);
@@ -255,7 +248,7 @@ const TeachingSession = ({
           </button>
           <div>
             <h1 className="text-lg md:text-2xl font-bold text-white">{getTaskField(task, 'title', language)}</h1>
-            <p className="text-xs md:text-sm text-white/90">{`${task.grade} • ${task.standard}`}</p>
+            <p className="text-xs md:text-sm text-white/90">{`${task.grade || ''} • ${task.standard || task.ccssCode || ''}`}</p>
           </div>
         </div>
         <div className="absolute top-4 right-4 md:top-5 md:right-8">
@@ -270,7 +263,7 @@ const TeachingSession = ({
         <div className="bg-white border-b md:border-b-0 md:border-r border-gray-200 shadow-md flex-shrink-0 md:w-80 lg:w-96 flex flex-col">
           <TaskCard
             title={getTaskField(task, 'title', language)}
-            subtitle={`Help Zippy understand ${task.standard}`}
+            subtitle={`Help Zippy understand ${task.standard || task.ccssCode || 'this topic'}`}
           />
 
           <div className="overflow-y-auto p-4 space-y-3 h-40 md:h-auto md:flex-1" style={{ minHeight: 0 }}>
@@ -369,7 +362,7 @@ const TeachingSession = ({
                     <div className="p-3 flex flex-col sm:flex-row gap-2">
                       {[
                         { label: tl('continueExplaining'), sub: 'Add more to your explanation', icon: <MessageCircle className="h-4 w-4" />, color: '#0A4D8C', handler: handleContinueExplaining, delay: 0.15 },
-                        { label: tl('reviewThinking'), sub: 'Look back at what you wrote', icon: <Eye className="h-4 w-4" />, color: '#00A896', handler: handleReviewThinking, delay: 0.22 },
+                        { label: tl('reviewThinking'), sub: 'See how you did', icon: <Eye className="h-4 w-4" />, color: '#00A896', handler: handleReviewThinking, delay: 0.22 },
                         { label: tl('newProblem'), sub: 'Try a fresh challenge', icon: <Sparkles className="h-4 w-4" />, color: '#FF6B4A', handler: handleNewProblem, delay: 0.29 },
                       ].map(opt => (
                         <motion.button

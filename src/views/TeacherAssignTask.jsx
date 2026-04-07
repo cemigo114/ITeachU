@@ -95,7 +95,7 @@ const TeacherAssignTask = ({
                     <Badge variant="default" size="sm">
                       {task.grade}
                     </Badge>
-                    <StandardBadge standardId={task.standardId} standardCode={task.standard} />
+                    <StandardBadge standardId={task.standardId} standardCode={task.standard || task.ccssCode} />
                   </div>
                 </Card>
               ))}

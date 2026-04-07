@@ -4,11 +4,7 @@ import 'dotenv/config';
 import fs from 'fs';
 import path from 'path';
 import { generateEvaluatorPrompt } from './src/utils/evaluatorPrompt.js';
-import {
-  connectDatabase, disconnectDatabase, useDatabase,
-  upsertConversation, getAllConversations,
-  upsertEvaluation, getEvaluation
-} from './db.js';
+import { getDb } from './db/index.js';
 
 const app = express();
 const PORT = process.env.PORT || 3002;
@@ -53,30 +49,6 @@ app.use((req, res, next) => {
     'content-type': req.headers['content-type']
   });
   next();
-});
-
-// Health/diagnostic endpoint
-app.get('/api/health', async (req, res) => {
-  const { prisma } = await import('./db.js');
-  let dbStatus = 'no prisma client';
-  let dbConvCount = null;
-  if (prisma) {
-    try {
-      const count = await prisma.conversation.count();
-      dbStatus = 'connected';
-      dbConvCount = count;
-    } catch (e) {
-      dbStatus = `error: ${e.message}`;
-    }
-  }
-  res.json({
-    storage: useDatabase ? 'postgresql' : 'json',
-    hasDatabaseUrl: !!process.env.DATABASE_URL,
-    databaseUrlPrefix: process.env.DATABASE_URL ? process.env.DATABASE_URL.substring(0, 30) + '...' : null,
-    dbStatus,
-    dbConversationCount: dbConvCount,
-    jsonConversationCount: conversationLogs.length
-  });
 });
 
 // File-based persistence paths
@@ -125,30 +97,6 @@ const sessionsData = loadFromFile(SESSIONS_FILE, []);
 const sessions = new Map(sessionsData); // sessionId -> session data
 
 console.log(`📊 Loaded ${conversationLogs.length} conversations, ${sessions.size} sessions, ${evaluationCache.size} evaluations`);
-
-function saveConversationToJson(sessionId, anthropicRequest, apiResponse, taskMetadata) {
-  let conversationLog = conversationLogs.find(log => log.sessionId === sessionId);
-  if (conversationLog) {
-    conversationLog.messages = anthropicRequest.messages;
-    conversationLog.lastResponse = apiResponse.content[0].text;
-    conversationLog.updatedAt = new Date().toISOString();
-    console.log(`📝 Updated existing conversation (JSON) for session ${sessionId}`);
-  } else {
-    conversationLog = {
-      sessionId,
-      timestamp: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-      messages: anthropicRequest.messages,
-      lastResponse: apiResponse.content[0].text,
-      model: anthropicRequest.model,
-      system: anthropicRequest.system,
-      taskMetadata: taskMetadata || {}
-    };
-    conversationLogs.push(conversationLog);
-    console.log(`📊 New conversation (JSON) for session ${sessionId} (${conversationLogs.length} total)`);
-  }
-  saveToFile(CONVERSATIONS_FILE, conversationLogs);
-}
 
 app.post('/api/chat', async (req, res) => {
   try {
@@ -208,25 +156,33 @@ app.post('/api/chat', async (req, res) => {
       stopReason: data.stop_reason
     });
 
-    // Persist conversation — database if available, JSON fallback otherwise
-    if (useDatabase) {
-      try {
-        await upsertConversation({
-          sessionId: currentSessionId,
-          model: anthropicRequest.model,
-          systemPrompt: anthropicRequest.system,
-          taskMetadata: taskMetadata || {},
-          messages: anthropicRequest.messages,
-          lastResponse: data.content[0].text
-        });
-        console.log(`🗄️  Conversation saved to database for session ${currentSessionId}`);
-      } catch (dbError) {
-        console.error('⚠️  Database save failed, falling back to JSON:', dbError.message);
-        saveConversationToJson(currentSessionId, anthropicRequest, data, taskMetadata);
-      }
+    // Find or create conversation log for this session
+    let conversationLog = conversationLogs.find(log => log.sessionId === currentSessionId);
+
+    if (conversationLog) {
+      // Update existing conversation
+      conversationLog.messages = anthropicRequest.messages;
+      conversationLog.lastResponse = data.content[0].text;
+      conversationLog.updatedAt = new Date().toISOString();
+      console.log(`📝 Updated existing conversation for session ${currentSessionId}`);
     } else {
-      saveConversationToJson(currentSessionId, anthropicRequest, data, taskMetadata);
+      // Create new conversation log
+      conversationLog = {
+        sessionId: currentSessionId,
+        timestamp: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        messages: anthropicRequest.messages,
+        lastResponse: data.content[0].text,
+        model: anthropicRequest.model,
+        system: anthropicRequest.system, // Store system prompt for context
+        taskMetadata: taskMetadata || {} // Store task metadata if provided (extracted earlier)
+      };
+      conversationLogs.push(conversationLog);
+      console.log(`📊 New conversation created for session ${currentSessionId} (${conversationLogs.length} total)`);
     }
+
+    // Save conversations to file after update
+    saveToFile(CONVERSATIONS_FILE, conversationLogs);
 
     // Return sessionId with response so frontend can track it
     res.json({
@@ -255,16 +211,9 @@ app.post('/api/chat', async (req, res) => {
  */
 async function evaluateConversation(conversationLog, sessionId) {
   try {
-    // Check database cache first, then in-memory cache
-    if (useDatabase) {
-      const dbEval = await getEvaluation(sessionId);
-      if (dbEval) {
-        console.log(`📋 Using database-cached evaluation for session ${sessionId}`);
-        return dbEval;
-      }
-    }
+    // Check cache first
     if (evaluationCache.has(sessionId)) {
-      console.log(`📋 Using memory-cached evaluation for session ${sessionId}`);
+      console.log(`📋 Using cached evaluation for session ${sessionId}`);
       return evaluationCache.get(sessionId);
     }
 
@@ -351,16 +300,10 @@ Please provide your evaluation in the specified JSON format.`;
 
     console.log(`✅ Evaluation complete for session ${sessionId}: ${evaluation.totalScore}/100`);
 
-    // Cache the result — database + in-memory + JSON file
-    if (useDatabase) {
-      try {
-        await upsertEvaluation(sessionId, evaluation);
-        console.log(`🗄️  Evaluation saved to database for session ${sessionId}`);
-      } catch (dbError) {
-        console.error('⚠️  Database evaluation save failed:', dbError.message);
-      }
-    }
+    // Cache the result
     evaluationCache.set(sessionId, evaluation);
+
+    // Save evaluations cache to file
     saveToFile(EVALUATIONS_FILE, Array.from(evaluationCache.entries()));
 
     return evaluation;
@@ -390,47 +333,13 @@ Please provide your evaluation in the specified JSON format.`;
 // Teacher-only endpoint to get conversation logs and assessments
 app.get('/api/teacher/conversations', async (req, res) => {
   try {
-    let logs;
+    // In production: Add authentication middleware
+    console.log(`📊 Teacher dashboard requested: ${conversationLogs.length} conversations to evaluate`);
 
-    if (useDatabase) {
-      try {
-        const dbConversations = await getAllConversations();
-        logs = dbConversations.map(conv => ({
-          sessionId: conv.sessionId,
-          timestamp: conv.createdAt.toISOString(),
-          updatedAt: conv.updatedAt.toISOString(),
-          messages: conv.messages.map(m => ({ role: m.role, content: m.content })),
-          taskMetadata: conv.taskMetadata || {},
-          _dbEvaluation: conv.evaluation
-        }));
-        console.log(`📊 Teacher dashboard requested: ${logs.length} conversations from database`);
-      } catch (dbError) {
-        console.error('⚠️  Database read failed, falling back to JSON:', dbError.message);
-        logs = conversationLogs.map(log => ({ ...log, _dbEvaluation: null }));
-      }
-    } else {
-      logs = conversationLogs.map(log => ({ ...log, _dbEvaluation: null }));
-      console.log(`📊 Teacher dashboard requested: ${logs.length} conversations from JSON`);
-    }
-
+    // Evaluate all conversations (in parallel for performance)
     const conversationsWithEvaluations = await Promise.all(
-      logs.map(async (log) => {
-        let evaluation;
-        if (log._dbEvaluation) {
-          const e = log._dbEvaluation;
-          evaluation = {
-            categoryScores: {
-              conceptArticulation: e.conceptArticulation,
-              logicCoherence: e.logicCoherence,
-              misconceptionCorrection: e.misconceptionCorrection,
-              cognitiveResilience: e.cognitiveResilience
-            },
-            justifications: e.justifications,
-            totalScore: e.totalScore
-          };
-        } else {
-          evaluation = await evaluateConversation(log, log.sessionId);
-        }
+      conversationLogs.map(async (log) => {
+        const evaluation = await evaluateConversation(log, log.sessionId);
 
         return {
           sessionId: log.sessionId,
@@ -449,59 +358,11 @@ app.get('/api/teacher/conversations', async (req, res) => {
     );
 
     res.json({
-      count: logs.length,
+      count: conversationLogs.length,
       conversations: conversationsWithEvaluations
     });
   } catch (error) {
     console.error('❌ Teacher dashboard error:', error);
-    res.status(500).json({ error: error.message });
-  }
-});
-
-// Get full conversation with messages by sessionId
-app.get('/api/teacher/conversations/:sessionId', async (req, res) => {
-  try {
-    const { sessionId } = req.params;
-
-    if (useDatabase) {
-      const { prisma } = await import('./db.js');
-      const conv = await prisma.conversation.findUnique({
-        where: { sessionId },
-        include: { messages: { orderBy: { sequenceNumber: 'asc' } }, evaluation: true }
-      });
-      if (!conv) return res.status(404).json({ error: 'Conversation not found' });
-
-      return res.json({
-        sessionId: conv.sessionId,
-        taskTitle: conv.taskTitle,
-        model: conv.model,
-        status: conv.status,
-        createdAt: conv.createdAt,
-        updatedAt: conv.updatedAt,
-        messages: conv.messages.map(m => ({
-          role: m.role,
-          content: m.content,
-          createdAt: m.createdAt,
-          sequenceNumber: m.sequenceNumber
-        })),
-        evaluation: conv.evaluation ? {
-          totalScore: conv.evaluation.totalScore,
-          categoryScores: {
-            conceptArticulation: conv.evaluation.conceptArticulation,
-            logicCoherence: conv.evaluation.logicCoherence,
-            misconceptionCorrection: conv.evaluation.misconceptionCorrection,
-            cognitiveResilience: conv.evaluation.cognitiveResilience
-          },
-          justifications: conv.evaluation.justifications
-        } : null
-      });
-    }
-
-    const log = conversationLogs.find(l => l.sessionId === sessionId);
-    if (!log) return res.status(404).json({ error: 'Conversation not found' });
-    res.json(log);
-  } catch (error) {
-    console.error('Conversation detail error:', error);
     res.status(500).json({ error: error.message });
   }
 });
@@ -568,41 +429,52 @@ app.delete('/api/sessions/:sessionId', (req, res) => {
   }
 });
 
-// Get all tasks
+// ---------- Task Bank API (reads from SQLite) ----------
+
+// GET /api/tasks  — list all tasks (optional ?grade= filter)
 app.get('/api/tasks', (req, res) => {
   try {
-    const tasksPath = path.join(process.cwd(), 'src/data/tasks.json');
-    const tasksData = JSON.parse(fs.readFileSync(tasksPath, 'utf-8'));
+    const db = getDb();
     const { grade, domain } = req.query;
+    let sql = `SELECT id, slug, title, description, standard_statement_code, grade, domain, image_url,
+                      problem_statement, misconceptions, pattern_recognition, generalization,
+                      inference_prediction, mapping_data, teaching_prompt, target_concepts,
+                      correct_solution_pathway, ai_intro, ai_intro_es
+               FROM task`;
+    const conditions = [];
+    const params = [];
+    if (grade) { conditions.push('grade = ?'); params.push(grade); }
+    if (domain) { conditions.push('domain = ?'); params.push(domain); }
+    if (conditions.length) sql += ' WHERE ' + conditions.join(' AND ');
+    sql += ' ORDER BY standard_statement_code';
 
-    let tasks = Object.values(tasksData.tasks);
-
-    if (grade) {
-      tasks = tasks.filter(t => t.grade.toLowerCase().includes(grade.toLowerCase()));
-    }
-    if (domain) {
-      tasks = tasks.filter(t => t.domain.toLowerCase().includes(domain.toLowerCase()));
-    }
-
-    res.json({ tasks });
+    const rows = db.prepare(sql).all(...params);
+    const tasks = rows.map(r => ({
+      ...r,
+      misconceptions: safeJsonParse(r.misconceptions, []),
+      mapping_data: safeJsonParse(r.mapping_data, {}),
+      target_concepts: safeJsonParse(r.target_concepts, []),
+    }));
+    res.json({ tasks, count: tasks.length });
   } catch (error) {
     console.error('Tasks fetch error:', error);
     res.status(500).json({ error: error.message });
   }
 });
 
-// Get a single task by ID
+// GET /api/tasks/:id  — full task detail for teaching sessions
 app.get('/api/tasks/:id', (req, res) => {
   try {
-    const { id } = req.params;
-    const tasksPath = path.join(process.cwd(), 'src/data/tasks.json');
-    const tasksData = JSON.parse(fs.readFileSync(tasksPath, 'utf-8'));
-    const task = tasksData.tasks[id];
+    const db = getDb();
+    const row = db.prepare('SELECT * FROM task WHERE id = ? OR slug = ?').get(req.params.id, req.params.id);
+    if (!row) return res.status(404).json({ error: 'Task not found' });
 
-    if (!task) {
-      return res.status(404).json({ error: 'Task not found' });
-    }
-
+    const task = {
+      ...row,
+      misconceptions: safeJsonParse(row.misconceptions, []),
+      mapping_data: safeJsonParse(row.mapping_data, {}),
+      target_concepts: safeJsonParse(row.target_concepts, []),
+    };
     res.json(task);
   } catch (error) {
     console.error('Task fetch error:', error);
@@ -610,19 +482,49 @@ app.get('/api/tasks/:id', (req, res) => {
   }
 });
 
-// Get task collections
+// GET /api/collections  — list collections with their tasks
 app.get('/api/collections', (req, res) => {
   try {
-    // In production: Fetch from database
-    // For now: Return from JSON file
-    const collectionsPath = path.join(process.cwd(), 'src/data/taskCollections.json');
-    const collections = JSON.parse(fs.readFileSync(collectionsPath, 'utf-8'));
-    res.json(collections);
+    const db = getDb();
+    const collections = db.prepare(
+      `SELECT id, slug, title, description, type, grade, published FROM collection WHERE published = 1 ORDER BY grade, title`
+    ).all();
+
+    const getTasksForCollection = db.prepare(
+      `SELECT t.id, t.slug, t.title, t.description, t.standard_statement_code, t.grade, t.domain, t.image_url,
+              ct.sort_order, ct.required
+       FROM collection_tasks ct
+       JOIN task t ON t.id = ct.task_id
+       WHERE ct.collection_id = ?
+       ORDER BY ct.sort_order`
+    );
+
+    const result = collections.map(c => ({
+      ...c,
+      tasks: getTasksForCollection.all(c.id).map(t => ({
+        id: t.id,
+        slug: t.slug,
+        title: t.title,
+        description: t.description,
+        standard: t.standard_statement_code,
+        grade: t.grade,
+        domain: t.domain,
+        order: t.sort_order,
+        required: !!t.required,
+      }))
+    }));
+
+    res.json({ collections: result });
   } catch (error) {
     console.error('Collections fetch error:', error);
     res.status(500).json({ error: error.message });
   }
 });
+
+function safeJsonParse(str, fallback) {
+  if (!str) return fallback;
+  try { return JSON.parse(str); } catch { return fallback; }
+}
 
 // Get educational standards (Connecticut Mathematics - 746 standards from Knowledge Graph)
 app.get('/api/standards', (req, res) => {
@@ -671,34 +573,10 @@ app.get('/api/standards/:id/prerequisites', (req, res) => {
   }
 });
 
-async function startServer() {
-  if (useDatabase) {
-    try {
-      const { execSync } = await import('child_process');
-      console.log('🔄 Running database migrations...');
-      execSync('npx prisma migrate deploy', { stdio: 'inherit' });
-      console.log('✅ Migrations complete');
-    } catch (e) {
-      console.error('⚠️  Migration failed:', e.message);
-    }
-    await connectDatabase();
-  }
-
-  app.listen(PORT, () => {
-    console.log(`🚀 Proxy server running on http://localhost:${PORT}`);
-    console.log(`🗄️  Storage: ${useDatabase ? 'PostgreSQL' : 'JSON files'}`);
-    console.log(`📊 Backend assessment enabled - logs hidden from frontend`);
-    console.log(`💾 Session persistence enabled`);
-    console.log(`📚 Task collections API ready`);
-    console.log(`📝 Tasks API ready`);
-    console.log(`🎯 Standards alignment API ready`);
-  });
-
-  process.on('SIGTERM', async () => {
-    console.log('🛑 SIGTERM received, shutting down...');
-    await disconnectDatabase();
-    process.exit(0);
-  });
-}
-
-startServer();
+app.listen(PORT, () => {
+  console.log(`🚀 Proxy server running on http://localhost:${PORT}`);
+  console.log(`📊 Backend assessment enabled - logs hidden from frontend`);
+  console.log(`💾 Session persistence enabled`);
+  console.log(`📚 Task collections API ready`);
+  console.log(`🎯 Standards alignment API ready`);
+});

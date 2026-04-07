@@ -39,7 +39,7 @@ export const translations = {
     completed2: "Completed",
     completedSubtitle: "Mark this moment of progress",
     continueExplaining: "Continue explaining",
-    reviewThinking: "Review your thinking",
+    reviewThinking: "Review your feedback",
     newProblem: "Start a new problem",
     completedZippyMessage: "Ohhh, I get it now! You multiply EACH ingredient by 2 — so 4 cups of strawberries and 6 cups of yogurt. Thank you so much for helping me! 🌟",
     zippyMessage: "Hi! I'm trying to double this smoothie recipe. It has 2 cups of strawberries and 3 cups of yogurt. I added them together (2+3=5), then doubled that to get 10. Should I use 5 cups of each? 🤔",
@@ -48,6 +48,11 @@ export const translations = {
     myAssignments: "My Assignments",
     startTeaching: "Start Teaching",
     viewFeedback: "View Feedback",
+
+    // Drawing
+    draw: "Draw",
+    insertDrawing: "Insert into message",
+    drawingAttached: "Drawing attached",
 
     // Status
     assigned: "Assigned",
@@ -91,7 +96,7 @@ export const translations = {
     completed2: "Completado",
     completedSubtitle: "Marca este momento de progreso",
     continueExplaining: "Continuar explicando",
-    reviewThinking: "Revisar tu pensamiento",
+    reviewThinking: "Revisar tu retroalimentación",
     newProblem: "Comenzar un nuevo problema",
     completedZippyMessage: "¡Ahora lo entiendo! Multiplicas CADA ingrediente por 2 — así que 4 tazas de fresas y 6 tazas de yogur. ¡Muchas gracias por ayudarme! 🌟",
     zippyMessage: "¡Hola! Estoy tratando de duplicar esta receta de batido. Tiene 2 tazas de fresas y 3 tazas de yogur. Las sumé (2+3=5), luego dupliqué eso para obtener 10. ¿Debería usar 5 tazas de cada una? 🤔",
@@ -100,6 +105,11 @@ export const translations = {
     myAssignments: "Mis Asignaciones",
     startTeaching: "Comenzar a Enseñar",
     viewFeedback: "Ver Retroalimentación",
+
+    // Drawing
+    draw: "Dibujar",
+    insertDrawing: "Insertar en mensaje",
+    drawingAttached: "Dibujo adjunto",
 
     // Status
     assigned: "Asignado",

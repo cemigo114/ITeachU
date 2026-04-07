@@ -3,16 +3,31 @@ import PageHeader from '../components/ui/PageHeader';
 import Card from '../components/ui/Card';
 import Badge from '../components/ui/Badge';
 import Button from '../components/ui/Button';
+import MathText from '../components/MathText';
+
+function formatMisconception(m) {
+  if (m == null) return { text: '' };
+  if (typeof m === 'string') return m;
+  if (typeof m !== 'object') return String(m);
+  const parts = [m.title, m.description].filter(Boolean);
+  const text = parts.join(': ');
+  if (m.type) return { text, type: m.type };
+  return { text };
+}
 
 const TeacherTaskDetail = ({ task, onBack, onAssign }) => {
   if (!task) return null;
+
+  const sections = task.sections || {};
+  const misconceptions = sections.misconceptions || task.misconceptions || [];
+  const mappingData = sections.mappingData || {};
 
   return (
     <div className="min-h-screen bg-neutral-50 font-body view-enter">
       <PageHeader
         role="teacher"
         title={task.title}
-        subtitle={`${task.standard} • ${task.grade}`}
+        subtitle={`${task.standard || task.ccssCode || ''} • ${task.grade}`}
         onBack={onBack}
       />
 
@@ -20,7 +35,7 @@ const TeacherTaskDetail = ({ task, onBack, onAssign }) => {
         <Card variant="elevated" padding="lg" className="animate-fade-in">
           <div className="flex flex-wrap items-center gap-2 mb-4">
             <Badge variant="brand" size="md">
-              {task.standard}
+              {task.standard || task.ccssCode}
             </Badge>
             <Badge variant="default" size="md">
               {task.grade}
@@ -31,78 +46,108 @@ const TeacherTaskDetail = ({ task, onBack, onAssign }) => {
           </div>
 
           <p className="text-neutral-700 mb-4">{task.description}</p>
-          <p className="text-sm text-neutral-600 italic">{task.standardDescription}</p>
+          {task.standardDescription && (
+            <p className="text-sm text-neutral-600 italic">{task.standardDescription}</p>
+          )}
         </Card>
 
-        <Card variant="elevated" padding="lg">
-          <h2 className="text-lg font-display font-bold text-brand-900 mb-3">
-            1. Student Prompt (Low Entry Point)
-          </h2>
-          <p className="text-neutral-700">{task.sections.studentPrompt}</p>
-        </Card>
+        {(sections.studentPrompt || task.problemStatement) && (
+          <Card variant="elevated" padding="lg">
+            <h2 className="text-lg font-display font-bold text-brand-900 mb-3">
+              1. Student Prompt (Low Entry Point)
+            </h2>
+            <MathText className="text-neutral-700 whitespace-pre-line block">
+              {sections.studentPrompt || task.problemStatement}
+            </MathText>
+          </Card>
+        )}
 
-        <Card variant="elevated" padding="lg">
-          <h2 className="text-lg font-display font-bold text-brand-900 mb-3">
-            2. Possible Misconceptions
-          </h2>
-          <ul className="space-y-2">
-            {task.sections.misconceptions.map((misconception, idx) => (
-              <li key={idx} className="flex gap-3">
-                <span className="text-brand-600 font-semibold shrink-0">{idx + 1}.</span>
-                <span className="text-neutral-700">{misconception}</span>
-              </li>
-            ))}
-          </ul>
-        </Card>
-
-        <Card variant="elevated" padding="lg">
-          <h2 className="text-lg font-display font-bold text-brand-900 mb-3">
-            3. Pattern Recognition Prompt
-          </h2>
-          <p className="text-neutral-700">{task.sections.patternRecognition}</p>
-        </Card>
-
-        <Card variant="elevated" padding="lg">
-          <h2 className="text-lg font-display font-bold text-brand-900 mb-3">
-            4. Generalization Question (Always/Sometimes/Never)
-          </h2>
-          <p className="text-neutral-700">{task.sections.generalization}</p>
-        </Card>
-
-        <Card variant="elevated" padding="lg">
-          <h2 className="text-lg font-display font-bold text-brand-900 mb-3">
-            5. Inference and Prediction
-          </h2>
-          <p className="text-neutral-700">{task.sections.inference}</p>
-        </Card>
-
-        <Card variant="elevated" padding="lg">
-          <h2 className="text-lg font-display font-bold text-brand-900 mb-3">
-            6. Mapping and Process Data
-          </h2>
-          <div className="space-y-3">
-            <div>
-              <h3 className="font-display font-semibold text-neutral-900 mb-1">Claims:</h3>
-              <ul className="list-disc list-inside space-y-1">
-                {task.sections.mappingData.claims.map((claim, idx) => (
-                  <li key={idx} className="text-neutral-700">
-                    {claim}
+        {misconceptions.length > 0 && (
+          <Card variant="elevated" padding="lg">
+            <h2 className="text-lg font-display font-bold text-brand-900 mb-3">
+              2. Possible Misconceptions
+            </h2>
+            <ul className="space-y-3">
+              {misconceptions.map((raw, idx) => {
+                const m = formatMisconception(raw);
+                const text = typeof m === 'string' ? m : m.text;
+                const type = typeof m === 'object' ? m.type : null;
+                return (
+                  <li key={idx} className="flex gap-3">
+                    <span className="text-brand-600 font-semibold shrink-0">{idx + 1}.</span>
+                    <div>
+                      <MathText className="text-neutral-700">{text}</MathText>
+                      {type && (
+                        <span className="ml-2 text-xs text-neutral-400 italic">({type})</span>
+                      )}
+                    </div>
                   </li>
-                ))}
-              </ul>
+                );
+              })}
+            </ul>
+          </Card>
+        )}
+
+        {sections.patternRecognition && (
+          <Card variant="elevated" padding="lg">
+            <h2 className="text-lg font-display font-bold text-brand-900 mb-3">
+              3. Pattern Recognition Prompt
+            </h2>
+            <MathText className="text-neutral-700 whitespace-pre-line block">{sections.patternRecognition}</MathText>
+          </Card>
+        )}
+
+        {sections.generalization && (
+          <Card variant="elevated" padding="lg">
+            <h2 className="text-lg font-display font-bold text-brand-900 mb-3">
+              4. Generalization Question (Always/Sometimes/Never)
+            </h2>
+            <MathText className="text-neutral-700 whitespace-pre-line block">{sections.generalization}</MathText>
+          </Card>
+        )}
+
+        {sections.inference && (
+          <Card variant="elevated" padding="lg">
+            <h2 className="text-lg font-display font-bold text-brand-900 mb-3">
+              5. Inference and Prediction
+            </h2>
+            <MathText className="text-neutral-700 whitespace-pre-line block">{sections.inference}</MathText>
+          </Card>
+        )}
+
+        {(mappingData.claims?.length > 0 || mappingData.evidence || mappingData.criticalThinking) && (
+          <Card variant="elevated" padding="lg">
+            <h2 className="text-lg font-display font-bold text-brand-900 mb-3">
+              6. Mapping and Process Data
+            </h2>
+            <div className="space-y-3">
+              {mappingData.claims?.length > 0 && (
+                <div>
+                  <h3 className="font-display font-semibold text-neutral-900 mb-1">Claims:</h3>
+                  <ul className="list-disc list-inside space-y-1">
+                    {mappingData.claims.map((claim, idx) => (
+                      <li key={idx} className="text-neutral-700"><MathText>{claim}</MathText></li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+              {mappingData.evidence && (
+                <div>
+                  <h3 className="font-display font-semibold text-neutral-900 mb-1">Evidence:</h3>
+                  <MathText className="text-neutral-700 block">{mappingData.evidence}</MathText>
+                </div>
+              )}
+              {mappingData.criticalThinking && (
+                <div>
+                  <h3 className="font-display font-semibold text-neutral-900 mb-1">
+                    Process Data Revealing Critical Thinking:
+                  </h3>
+                  <MathText className="text-neutral-700 block">{mappingData.criticalThinking}</MathText>
+                </div>
+              )}
             </div>
-            <div>
-              <h3 className="font-display font-semibold text-neutral-900 mb-1">Evidence:</h3>
-              <p className="text-neutral-700">{task.sections.mappingData.evidence}</p>
-            </div>
-            <div>
-              <h3 className="font-display font-semibold text-neutral-900 mb-1">
-                Process Data Revealing Critical Thinking:
-              </h3>
-              <p className="text-neutral-700">{task.sections.mappingData.criticalThinking}</p>
-            </div>
-          </div>
-        </Card>
+          </Card>
+        )}
 
         <div className="flex flex-col sm:flex-row gap-4 pt-2">
           <Button type="button" variant="secondary" className="flex-1" onClick={onBack}>

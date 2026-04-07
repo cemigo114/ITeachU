@@ -125,6 +125,9 @@ const ChatBubble = ({
 
   const isExcited = mood === 'excited';
 
+  const stripZippyMeta = (text) =>
+    (text || '').replace(/<!--[\s\S]*?-->/g, '').trim();
+
   const handleSpeak = (text) => {
     if ('speechSynthesis' in window) {
       window.speechSynthesis.cancel();
@@ -165,7 +168,7 @@ const ChatBubble = ({
           transition={{ type: 'spring', stiffness: 250, damping: 20, delay: 0.1 }}
           className={`flex-1 rounded-2xl rounded-tl-sm p-3 shadow-lg border ${isExcited ? 'bg-gradient-to-br from-amber-50 to-orange-50 border-orange-100' : 'bg-white border-gray-200'}`}
         >
-          <p className="text-sm md:text-base text-gray-800 leading-relaxed whitespace-pre-wrap">{message.content || message.text}</p>
+          <p className="text-sm md:text-base text-gray-800 leading-relaxed whitespace-pre-wrap">{stripZippyMeta(message.content || message.text)}</p>
         </motion.div>
         <motion.div
           initial={{ opacity: 0, scale: 0.8 }}
@@ -175,7 +178,7 @@ const ChatBubble = ({
         >
           <button
             type="button"
-            onClick={() => handleSpeak(message.content || message.text)}
+            onClick={() => handleSpeak(stripZippyMeta(message.content || message.text))}
             className="bg-[#0A4D8C] hover:bg-[#0A4D8C]/90 text-white shadow-md h-8 w-8 rounded-full flex items-center justify-center transition-colors"
           >
             <Volume2 className="h-3.5 w-3.5" />
