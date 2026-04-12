@@ -41,7 +41,7 @@ export const translations = {
     continueExplaining: "Continue explaining",
     reviewThinking: "Review your thinking",
     newProblem: "Start a new problem",
-    completedZippyMessage: "Ohhh, I get it now! You multiply EACH ingredient by 2 — so 4 cups of strawberries and 6 cups of yogurt. Thank you so much for helping me! 🌟",
+    completedZippyMessage: "Ohhh, I think I really understand now! Thank you so much for explaining that to me — you're an amazing teacher! 🌟",
     zippyMessage: "Hi! I'm trying to double this smoothie recipe. It has 2 cups of strawberries and 3 cups of yogurt. I added them together (2+3=5), then doubled that to get 10. Should I use 5 cups of each? 🤔",
 
     // Dashboard
@@ -93,7 +93,7 @@ export const translations = {
     continueExplaining: "Continuar explicando",
     reviewThinking: "Revisar tu pensamiento",
     newProblem: "Comenzar un nuevo problema",
-    completedZippyMessage: "¡Ahora lo entiendo! Multiplicas CADA ingrediente por 2 — así que 4 tazas de fresas y 6 tazas de yogur. ¡Muchas gracias por ayudarme! 🌟",
+    completedZippyMessage: "¡Ohhh, creo que ahora lo entiendo de verdad! ¡Muchas gracias por explicármelo — eres un maestro increíble! 🌟",
     zippyMessage: "¡Hola! Estoy tratando de duplicar esta receta de batido. Tiene 2 tazas de fresas y 3 tazas de yogur. Las sumé (2+3=5), luego dupliqué eso para obtener 10. ¿Debería usar 5 tazas de cada una? 🤔",
 
     // Dashboard
