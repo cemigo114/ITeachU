@@ -25,6 +25,17 @@ const TeacherBrowseTasks = ({
   const grades = [...new Set(EXAMPLE_TASKS.map((t) => t.grade))];
   const domains = [...new Set(EXAMPLE_TASKS.map((t) => t.domain))];
 
+  const [expandedDescriptions, setExpandedDescriptions] = React.useState(new Set());
+
+  const toggleDescription = (taskId) => {
+    setExpandedDescriptions(prev => {
+      const next = new Set(prev);
+      if (next.has(taskId)) next.delete(taskId);
+      else next.add(taskId);
+      return next;
+    });
+  };
+
   const filteredTasks = EXAMPLE_TASKS.filter((task) => {
     const matchesSearch =
       task.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -190,7 +201,18 @@ const TeacherBrowseTasks = ({
                     </h3>
                   </div>
 
-                  <p className="text-sm text-neutral-600 mb-3 line-clamp-2">{task.description}</p>
+                  <div className="mb-3">
+                    <p className={`text-sm text-neutral-600 ${expandedDescriptions.has(task.id) ? '' : 'line-clamp-2'}`}>
+                      {task.description}
+                    </p>
+                    <button
+                      type="button"
+                      onClick={(e) => { e.stopPropagation(); toggleDescription(task.id); }}
+                      className="mt-1 text-xs font-medium text-brand-600 hover:text-brand-700 focus-ring rounded px-0.5 transition-colors"
+                    >
+                      {expandedDescriptions.has(task.id) ? 'Show less' : 'Show more'}
+                    </button>
+                  </div>
 
                   <div className="flex flex-wrap gap-2 mb-3 items-center">
                     <Badge variant="default" size="sm">
