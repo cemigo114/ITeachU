@@ -4,6 +4,9 @@ import 'dotenv/config';
 import fs from 'fs';
 import path from 'path';
 import { generateEvaluatorPrompt } from './src/utils/evaluatorPrompt.js';
+import { generateZippyPrompt } from './src/utils/zippyPrompt.js';
+import { parseSignal } from './src/utils/parseSignal.js';
+import { parseTaskMarkdown } from './src/utils/parseMarkdown.js';
 import {
   connectDatabase, disconnectDatabase, useDatabase,
   upsertConversation, getAllConversations,
@@ -124,6 +127,12 @@ const evaluationCache = new Map(evaluationCacheData); // conversationId -> evalu
 const sessionsData = loadFromFile(SESSIONS_FILE, []);
 const sessions = new Map(sessionsData); // sessionId -> session data
 
+// Cache for generated system prompts per session
+const systemPromptCache = new Map(); // sessionId -> system prompt string
+
+// Path to the New Item Bank task markdown files
+const ITEM_BANK_DIR = path.resolve(process.cwd(), '..', 'New Item Bank');
+
 console.log(`📊 Loaded ${conversationLogs.length} conversations, ${sessions.size} sessions, ${evaluationCache.size} evaluations`);
 
 function saveConversationToJson(sessionId, anthropicRequest, apiResponse, taskMetadata) {
@@ -172,11 +181,19 @@ app.post('/api/chat', async (req, res) => {
     // Generate or use existing sessionId
     const currentSessionId = sessionId || `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 
+    // Cache the system prompt per session — reuse if already generated
+    let systemPrompt = anthropicRequestBody.system;
+    if (systemPromptCache.has(currentSessionId)) {
+      systemPrompt = systemPromptCache.get(currentSessionId);
+    } else if (systemPrompt) {
+      systemPromptCache.set(currentSessionId, systemPrompt);
+    }
+
     // Prepare request body for Anthropic (only standard fields)
     const anthropicRequest = {
       model: anthropicRequestBody.model,
       max_tokens: anthropicRequestBody.max_tokens,
-      system: anthropicRequestBody.system,
+      system: systemPrompt,
       messages: anthropicRequestBody.messages
     };
 
@@ -208,6 +225,10 @@ app.post('/api/chat', async (req, res) => {
       stopReason: data.stop_reason
     });
 
+    // Parse signal tags from the LLM response
+    const rawResponseText = data.content?.[0]?.text || '';
+    const { visibleText, signal } = parseSignal(rawResponseText);
+
     // Persist conversation — database if available, JSON fallback otherwise
     if (useDatabase) {
       try {
@@ -217,7 +238,7 @@ app.post('/api/chat', async (req, res) => {
           systemPrompt: anthropicRequest.system,
           taskMetadata: taskMetadata || {},
           messages: anthropicRequest.messages,
-          lastResponse: data.content[0].text
+          lastResponse: rawResponseText
         });
         console.log(`🗄️  Conversation saved to database for session ${currentSessionId}`);
       } catch (dbError) {
@@ -228,9 +249,11 @@ app.post('/api/chat', async (req, res) => {
       saveConversationToJson(currentSessionId, anthropicRequest, data, taskMetadata);
     }
 
-    // Return sessionId with response so frontend can track it
+    // Return parsed response with visible text and signal separated
     res.json({
       ...data,
+      content: [{ ...data.content[0], text: visibleText }],
+      signal,
       sessionId: currentSessionId
     });
   } catch (error) {
@@ -279,22 +302,22 @@ async function evaluateConversation(conversationLog, sessionId) {
       return `${role}: ${msg.content}`;
     }).join('\n\n');
 
-    // Build the evaluation request
-    const evaluatorPrompt = generateEvaluatorPrompt();
+    // Build the evaluation request using v5.0 evaluator
     const taskMetadata = conversationLog.taskMetadata || {};
+    const evaluatorPrompt = generateEvaluatorPrompt(taskMetadata);
 
-    const evaluationRequest = `Please evaluate the following student-AI Protégé conversation.
+    const evaluationRequest = `Evaluate the following ConversationEventLog and produce a Cognitive Breakdown Report.
 
 TASK METADATA:
-- Task: ${taskMetadata.title || 'Unknown'}
-- Target Concepts: ${taskMetadata.targetConcepts ? taskMetadata.targetConcepts.join(', ') : 'Not specified'}
-- Correct Solution: ${taskMetadata.correctSolutionPathway || 'Not specified'}
-- Known Misconceptions: ${taskMetadata.misconceptions ? taskMetadata.misconceptions.join('; ') : 'Not specified'}
+- Task: ${taskMetadata.taskTitle || taskMetadata.title || 'Unknown'}
+- CCSS Code: ${taskMetadata.ccssCode || 'Not specified'}
+- Target Concepts: ${Array.isArray(taskMetadata.targetConcepts) ? taskMetadata.targetConcepts.join('; ') : 'Not specified'}
+- Misconceptions: ${Array.isArray(taskMetadata.misconceptions) ? taskMetadata.misconceptions.map(m => typeof m === 'string' ? m : `${m.id}: ${m.title} (${m.type})`).join('; ') : 'Not specified'}
 
 CONVERSATION TRANSCRIPT:
 ${transcript}
 
-Please provide your evaluation in the specified JSON format.`;
+Produce the Cognitive Breakdown Report as the specified JSON object.`;
 
     console.log(`🔍 Evaluating session ${sessionId}...`);
 
@@ -343,13 +366,16 @@ Please provide your evaluation in the specified JSON format.`;
       throw new Error('Invalid evaluation format from API');
     }
 
-    // Validate evaluation structure
-    if (!evaluation.categoryScores || !evaluation.justifications || typeof evaluation.totalScore !== 'number') {
+    // Validate evaluation structure — accept both v3 (categoryScores) and v5 (misconceptionAnalysis) formats
+    const isV5 = !!evaluation.misconceptionAnalysis;
+    const isV3 = !!evaluation.categoryScores;
+
+    if (!isV5 && !isV3) {
       console.error('❌ Invalid evaluation structure:', evaluation);
       throw new Error('Evaluation missing required fields');
     }
 
-    console.log(`✅ Evaluation complete for session ${sessionId}: ${evaluation.totalScore}/100`);
+    console.log(`✅ Evaluation complete for session ${sessionId} (${isV5 ? 'v5.0' : 'v3.0'} format)`);
 
     // Cache the result — database + in-memory + JSON file
     if (useDatabase) {
@@ -568,42 +594,72 @@ app.delete('/api/sessions/:sessionId', (req, res) => {
   }
 });
 
-// Get all tasks
+// Get all tasks — list available task markdown files from New Item Bank
 app.get('/api/tasks', (req, res) => {
   try {
-    const tasksPath = path.join(process.cwd(), 'src/data/tasks.json');
-    const tasksData = JSON.parse(fs.readFileSync(tasksPath, 'utf-8'));
     const { grade, domain } = req.query;
 
-    let tasks = Object.values(tasksData.tasks);
+    if (!fs.existsSync(ITEM_BANK_DIR)) {
+      return res.json({ tasks: [], source: 'item-bank', error: 'Item bank directory not found' });
+    }
+
+    const files = fs.readdirSync(ITEM_BANK_DIR).filter(f => f.endsWith('.md'));
+    let tasks = files.map(filename => {
+      try {
+        const content = fs.readFileSync(path.join(ITEM_BANK_DIR, filename), 'utf-8');
+        const parsed = parseTaskMarkdown(content);
+        return { ...parsed, filename };
+      } catch (parseErr) {
+        console.error(`Failed to parse ${filename}:`, parseErr.message);
+        return null;
+      }
+    }).filter(Boolean);
 
     if (grade) {
-      tasks = tasks.filter(t => t.grade.toLowerCase().includes(grade.toLowerCase()));
+      tasks = tasks.filter(t => (t.gradeLevel || '').toLowerCase().includes(grade.toLowerCase()));
     }
     if (domain) {
-      tasks = tasks.filter(t => t.domain.toLowerCase().includes(domain.toLowerCase()));
+      tasks = tasks.filter(t => (t.domain || '').toLowerCase().includes(domain.toLowerCase()));
     }
 
-    res.json({ tasks });
+    // Return lightweight listing (exclude full prompt content for listing)
+    const listing = tasks.map(t => ({
+      filename: t.filename,
+      taskTitle: t.taskTitle,
+      ccssCode: t.ccssCode,
+      gradeLevel: t.gradeLevel,
+      domain: t.domain,
+      standardStatement: t.standardStatement,
+      misconceptionCount: t.misconceptions.length,
+    }));
+
+    res.json({ tasks: listing, source: 'item-bank', count: listing.length });
   } catch (error) {
     console.error('Tasks fetch error:', error);
     res.status(500).json({ error: error.message });
   }
 });
 
-// Get a single task by ID
-app.get('/api/tasks/:id', (req, res) => {
+// Get a single task by filename — parse and return full task data
+app.get('/api/tasks/:filename', (req, res) => {
   try {
-    const { id } = req.params;
-    const tasksPath = path.join(process.cwd(), 'src/data/tasks.json');
-    const tasksData = JSON.parse(fs.readFileSync(tasksPath, 'utf-8'));
-    const task = tasksData.tasks[id];
+    const { filename } = req.params;
 
-    if (!task) {
+    // Sanitise: only allow .md files, no directory traversal
+    if (!filename.endsWith('.md') || filename.includes('..') || filename.includes('/')) {
+      return res.status(400).json({ error: 'Invalid filename' });
+    }
+
+    const filePath = path.join(ITEM_BANK_DIR, filename);
+
+    if (!fs.existsSync(filePath)) {
       return res.status(404).json({ error: 'Task not found' });
     }
 
-    res.json(task);
+    const content = fs.readFileSync(filePath, 'utf-8');
+    const taskData = parseTaskMarkdown(content);
+
+    res.json(taskData);
   } catch (error) {
     console.error('Task fetch error:', error);
     res.status(500).json({ error: error.message });
