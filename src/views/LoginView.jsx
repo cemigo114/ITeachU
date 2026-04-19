@@ -41,7 +41,7 @@ const LoginView = ({ mascotEmotion, onLogin }) => {
       <Card variant="elevated" padding="lg" className="relative max-w-md w-full">
         <div className="flex flex-col items-center mb-8">
           <div className="w-[70px] h-[70px] mb-4 animate-float">
-            <LumoMascot emotion={mascotEmotion} size="small" />
+            <LumoMascot emotion={mascotEmotion} size="medium" />
           </div>
           <h1 className="text-3xl font-display font-bold text-neutral-900">
             Cognality Learning
