@@ -4,7 +4,7 @@ import { CheckCircle, X } from 'lucide-react';
 const Toast = ({ message, visible, onDismiss }) => {
   useEffect(() => {
     if (!visible) return;
-    const timer = setTimeout(onDismiss, 3000);
+    const timer = setTimeout(onDismiss, 10000);
     return () => clearTimeout(timer);
   }, [visible, onDismiss]);
 
