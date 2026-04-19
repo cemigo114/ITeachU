@@ -28,9 +28,9 @@ const ChatBubble = ({
         transition={{ type: 'spring', stiffness: 300, damping: 25 }}
         className="flex gap-3 items-start"
       >
-        <div className="flex-shrink-0">
-          <div className="w-10 h-10 md:w-11 md:h-11 rounded-full overflow-hidden shadow-lg border-2 border-[#00A896]">
-            <LumoMascot emotion="thinking" size="small" />
+        <div className="flex-shrink-0 -ml-2">
+          <div className="flex items-center justify-center">
+            <LumoMascot emotion="thinking" size="xsmall" />
           </div>
         </div>
         <div className="flex-1">
@@ -140,30 +140,30 @@ const ChatBubble = ({
       initial={{ opacity: 0, y: 20, scale: 0.9 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
       transition={{ type: 'spring', stiffness: 300, damping: 25 }}
-      className="flex gap-3 items-start"
+      className="flex gap-1 items-start"
     >
       <motion.div
         initial={{ scale: 0 }}
         animate={{ scale: 1 }}
         transition={{ type: 'spring', stiffness: 400, damping: 20 }}
-        className="flex-shrink-0"
+        className="flex-shrink-0 -ml-2"
       >
         <motion.div
           animate={isExcited ? { rotate: [0, -8, 8, -4, 4, 0] } : { rotate: 0 }}
           transition={{ type: 'tween', ease: 'easeInOut', duration: 0.5 }}
         >
-          <div className={`w-10 h-10 md:w-11 md:h-11 rounded-full overflow-hidden shadow-lg border-2 transition-colors ${isExcited ? 'border-[#FF6B4A]' : 'border-[#00A896]'}`}>
-            <LumoMascot emotion={mood || 'curious'} size="small" />
+          <div className={`flex items-center justify-center rounded-full overflow-hidden border-2 transition-colors ${isExcited ? 'border-[#FF6B4A]' : 'border-[#00A896]'}`}>
+            <LumoMascot emotion={mood || 'curious'} size="xsmall" />
           </div>
         </motion.div>
       </motion.div>
 
-      <div className="flex-1 flex items-start gap-2">
+      <div className="flex-1 flex flex-col gap-1">
         <motion.div
           initial={{ opacity: 0, x: -10 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ type: 'spring', stiffness: 250, damping: 20, delay: 0.1 }}
-          className={`flex-1 rounded-2xl rounded-tl-sm p-3 shadow-lg border ${isExcited ? 'bg-gradient-to-br from-amber-50 to-orange-50 border-orange-100' : 'bg-white border-gray-200'}`}
+          className={`rounded-2xl rounded-tl-sm p-3 shadow-lg border ${isExcited ? 'bg-gradient-to-br from-amber-50 to-orange-50 border-orange-100' : 'bg-white border-gray-200'}`}
         >
           <p className="text-sm md:text-base text-gray-800 leading-relaxed whitespace-pre-wrap">{message.content || message.text}</p>
         </motion.div>
@@ -171,7 +171,7 @@ const ChatBubble = ({
           initial={{ opacity: 0, scale: 0.8 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ type: 'spring', stiffness: 400, damping: 20, delay: 0.2 }}
-          className="flex-shrink-0 self-center"
+          className="flex justify-end"
         >
           <button
             type="button"

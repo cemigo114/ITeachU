@@ -21,6 +21,7 @@ const LumoMascot = ({ emotion = 'happy', size = 'medium', showControls = false }
 
   // Size configurations
   const sizes = {
+    xsmall: { width: 100, height: 112, scale: 0.31 },
     small: { width: 160, height: 180, scale: 0.5 },
     medium: { width: 240, height: 270, scale: 0.75 },
     large: { width: 320, height: 360, scale: 1 }
