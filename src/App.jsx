@@ -226,14 +226,14 @@ const App = () => {
       const allAreDuplicates = nonDuplicateStudentIds.length === 0;
 
       const message = allAreDuplicates
-        ? `${duplicateNames} ${duplicateStudentIds.length === 1 ? 'has' : 'have'} already been assigned "${selectedTaskForAssignment.title}". No new students will be added. Do you want to proceed?`
-        : `${duplicateNames} ${duplicateStudentIds.length === 1 ? 'has' : 'have'} already been assigned "${selectedTaskForAssignment.title}" and will be skipped. The remaining ${nonDuplicateStudentIds.length} student(s) will be assigned.`;
+        ? `${duplicateNames} ${duplicateStudentIds.length === 1 ? 'has' : 'have'} already been assigned "${selectedTaskForAssignment.title}". Do you want to assign it again?`
+        : `${duplicateNames} ${duplicateStudentIds.length === 1 ? 'has' : 'have'} already been assigned "${selectedTaskForAssignment.title}". Do you want to assign it to all ${selectedStudentsForAssignment.length} student(s) anyway?`;
 
       setConfirmModal({
         show: true,
         title: 'Duplicate Assignment',
         message,
-        onConfirm: () => doAssign(nonDuplicateStudentIds),
+        onConfirm: () => doAssign(selectedStudentsForAssignment),
       });
       return;
     }
