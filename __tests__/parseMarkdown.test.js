@@ -207,7 +207,7 @@ ccss_code: "8.EE.A.1"
   });
 
   describe('real file parsing', () => {
-    const itemBankDir = path.resolve(process.cwd(), '..', 'New Item Bank');
+    const itemBankDir = path.resolve(process.cwd(), 'item-bank');
 
     it('should parse the blue slushie mystery file', () => {
       const filePath = path.join(itemBankDir, '6.RP.A.3_blue-slushie-mystery.md');

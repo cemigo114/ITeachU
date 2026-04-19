@@ -130,8 +130,8 @@ const sessions = new Map(sessionsData); // sessionId -> session data
 // Cache for generated system prompts per session
 const systemPromptCache = new Map(); // sessionId -> system prompt string
 
-// Path to the New Item Bank task markdown files
-const ITEM_BANK_DIR = path.resolve(process.cwd(), '..', 'New Item Bank');
+// Path to the task markdown files (bundled in repo)
+const ITEM_BANK_DIR = path.resolve(process.cwd(), 'item-bank');
 
 console.log(`📊 Loaded ${conversationLogs.length} conversations, ${sessions.size} sessions, ${evaluationCache.size} evaluations`);
 
