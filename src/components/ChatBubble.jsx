@@ -163,6 +163,11 @@ const ChatBubble = ({
           transition={{ type: 'spring', stiffness: 250, damping: 20, delay: 0.1 }}
           className={`rounded-2xl rounded-tl-sm p-3 shadow-lg border ${isExcited ? 'bg-gradient-to-br from-amber-50 to-orange-50 border-orange-100' : 'bg-white border-gray-200'}`}
         >
+          {isExcited && labels.learningMoment && (
+            <span className="inline-block text-xs font-semibold text-amber-700 bg-amber-100 rounded-full px-2 py-0.5 mb-2">
+              {labels.learningMoment}
+            </span>
+          )}
           <p className="text-sm md:text-base text-gray-800 leading-relaxed whitespace-pre-wrap">{message.content || message.text}</p>
         </motion.div>
         <motion.div

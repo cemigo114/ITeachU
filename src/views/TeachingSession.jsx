@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
+import confetti from 'canvas-confetti';
 import { Check, Globe, ChevronDown, MessageCircle, Eye, Sparkles, ArrowRight } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { t } from '../utils/translations';
@@ -207,6 +208,12 @@ const TeachingSession = ({
       setCompletionFlash(false);
       setIsCompleted(true);
       setCurrentZippyMood('excited');
+      confetti({
+        particleCount: 120,
+        spread: 80,
+        origin: { y: 0.6 },
+        colors: ['#FFE16B', '#00A896', '#0A4D8C', '#FF6B4A'],
+      });
       setLocalZippyExtras(prev => [...prev, {
         id: `done-${Date.now()}`,
         text: tl('completedZippyMessage'),
@@ -297,6 +304,7 @@ const TeachingSession = ({
                     role="assistant"
                     message={{ content: m.content }}
                     mood={detectMood(m.content)}
+                    labels={{ learningMoment: tl('learningMomentLabel') }}
                   />
                 )
               ))}
@@ -306,6 +314,7 @@ const TeachingSession = ({
                   role="assistant"
                   message={message}
                   mood={message.mood || currentZippyMood}
+                  labels={{ learningMoment: tl('learningMomentLabel') }}
                 />
               ))}
             </AnimatePresence>
