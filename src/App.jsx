@@ -26,6 +26,7 @@ import TeachingSession from './views/TeachingSession';
 import FeedbackView from './views/FeedbackView';
 import ParentDashboard from './views/ParentDashboard';
 import Toast from './components/ui/Toast';
+import ConfirmModal from './components/ui/ConfirmModal';
 
 // ---------- Data & Helpers ----------
 
@@ -101,6 +102,7 @@ const App = () => {
   const [showResumePrompt, setShowResumePrompt] = useState(false);
   const [assignments, setAssignments] = useState(MOCK_ASSIGNMENTS);
   const [toast, setToast] = useState({ message: '', visible: false });
+  const [confirmModal, setConfirmModal] = useState({ show: false, title: '', message: '', onConfirm: null });
   const [selectedAssignmentForReview, setSelectedAssignmentForReview] = useState(null);
   const [selectedStudentForDetail, setSelectedStudentForDetail] = useState(null);
   const [evaluationData, setEvaluationData] = useState(null);
@@ -178,21 +180,65 @@ const App = () => {
       alert('Please select a task and at least one student');
       return;
     }
-    const newAssignments = selectedStudentsForAssignment.map((studentId) => {
-      const student = MOCK_STUDENTS.find(s => s.id === studentId);
-      return {
-        id: assignments.length + studentId,
-        studentId: student.id, studentName: student.name,
-        taskId: selectedTaskForAssignment.id || selectedTaskForAssignment.slug,
-        taskTitle: selectedTaskForAssignment.title,
-        status: 'assigned', completedDate: null, messages: [],
-      };
-    });
-    setAssignments([...assignments, ...newAssignments]);
-    setSelectedTaskForAssignment(null);
-    setSelectedStudentsForAssignment([]);
-    setView('teacherDashboard');
-    showToast(`Task "${selectedTaskForAssignment.title}" assigned to ${selectedStudentsForAssignment.length} student(s)!`);
+
+    const taskId = selectedTaskForAssignment.id || selectedTaskForAssignment.slug;
+
+    const duplicateStudentIds = selectedStudentsForAssignment.filter((studentId) =>
+      assignments.some((a) => a.studentId === studentId && a.taskId === taskId)
+    );
+
+    const nonDuplicateStudentIds = selectedStudentsForAssignment.filter(
+      (id) => !duplicateStudentIds.includes(id)
+    );
+
+    const doAssign = (studentIds) => {
+      if (studentIds.length === 0) {
+        dismissConfirmModal();
+        return;
+      }
+      const newAssignments = studentIds.map((studentId) => {
+        const student = MOCK_STUDENTS.find((s) => s.id === studentId);
+        return {
+          id: assignments.length + studentId,
+          studentId: student.id,
+          studentName: student.name,
+          taskId,
+          taskTitle: selectedTaskForAssignment.title,
+          status: 'assigned',
+          completedDate: null,
+          messages: [],
+        };
+      });
+      setAssignments((prev) => [...prev, ...newAssignments]);
+      setSelectedTaskForAssignment(null);
+      setSelectedStudentsForAssignment([]);
+      dismissConfirmModal();
+      setView('teacherDashboard');
+      showToast(`Task "${selectedTaskForAssignment.title}" assigned to ${studentIds.length} student(s)!`);
+    };
+
+    if (duplicateStudentIds.length > 0) {
+      const duplicateNames = duplicateStudentIds
+        .map((id) => MOCK_STUDENTS.find((s) => s.id === id)?.name)
+        .filter(Boolean)
+        .join(', ');
+
+      const allAreDuplicates = nonDuplicateStudentIds.length === 0;
+
+      const message = allAreDuplicates
+        ? `${duplicateNames} ${duplicateStudentIds.length === 1 ? 'has' : 'have'} already been assigned "${selectedTaskForAssignment.title}". No new students will be added. Do you want to proceed?`
+        : `${duplicateNames} ${duplicateStudentIds.length === 1 ? 'has' : 'have'} already been assigned "${selectedTaskForAssignment.title}" and will be skipped. The remaining ${nonDuplicateStudentIds.length} student(s) will be assigned.`;
+
+      setConfirmModal({
+        show: true,
+        title: 'Duplicate Assignment',
+        message,
+        onConfirm: () => doAssign(nonDuplicateStudentIds),
+      });
+      return;
+    }
+
+    doAssign(selectedStudentsForAssignment);
   };
 
   const startTeachingSession = (assignment) => {
@@ -296,6 +342,10 @@ const App = () => {
     setToast(prev => ({ ...prev, visible: false }));
   };
 
+  const dismissConfirmModal = () => {
+    setConfirmModal({ show: false, title: '', message: '', onConfirm: null });
+  };
+
   const getBadge = (totalScore) => {
     if (totalScore >= 85) return { name: 'Master Teacher', icon: '🏆', color: 'bg-yellow-500' };
     if (totalScore >= 70) return { name: 'Great Explainer', icon: '⭐', color: 'bg-brand-500' };
@@ -373,6 +423,13 @@ const App = () => {
         message={toast.message}
         visible={toast.visible}
         onDismiss={dismissToast}
+      />
+      <ConfirmModal
+        show={confirmModal.show}
+        title={confirmModal.title}
+        message={confirmModal.message}
+        onConfirm={confirmModal.onConfirm}
+        onCancel={dismissConfirmModal}
       />
     </>
   );
