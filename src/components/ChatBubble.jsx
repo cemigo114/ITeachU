@@ -152,9 +152,7 @@ const ChatBubble = ({
           animate={isExcited ? { rotate: [0, -8, 8, -4, 4, 0] } : { rotate: 0 }}
           transition={{ type: 'tween', ease: 'easeInOut', duration: 0.5 }}
         >
-          <div className={`flex items-center justify-center rounded-full overflow-hidden border-2 transition-colors ${isExcited ? 'border-[#FF6B4A]' : 'border-[#00A896]'}`}>
-            <LumoMascot emotion={mood || 'curious'} size="xsmall" />
-          </div>
+          <LumoMascot emotion={mood || 'curious'} size="xsmall" />
         </motion.div>
       </motion.div>
 
