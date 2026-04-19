@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Target, Users, Award, BarChart3, MessageSquare } from 'lucide-react';
 import { API_ENDPOINTS } from './config/api';
 import { generateZippyPrompt } from './utils/zippyPrompt';
@@ -25,6 +25,8 @@ import BrowseTasksStudent from './views/BrowseTasksStudent';
 import TeachingSession from './views/TeachingSession';
 import FeedbackView from './views/FeedbackView';
 import ParentDashboard from './views/ParentDashboard';
+import Toast from './components/ui/Toast';
+import ConfirmModal from './components/ui/ConfirmModal';
 
 // ---------- Data & Helpers ----------
 
@@ -99,6 +101,8 @@ const App = () => {
   const [currentSession, setCurrentSession] = useState(null);
   const [showResumePrompt, setShowResumePrompt] = useState(false);
   const [assignments, setAssignments] = useState(MOCK_ASSIGNMENTS);
+  const [toast, setToast] = useState({ message: '', visible: false });
+  const [confirmModal, setConfirmModal] = useState({ show: false, title: '', message: '', onConfirm: null });
   const [selectedAssignmentForReview, setSelectedAssignmentForReview] = useState(null);
   const [selectedStudentForDetail, setSelectedStudentForDetail] = useState(null);
   const [evaluationData, setEvaluationData] = useState(null);
@@ -176,21 +180,65 @@ const App = () => {
       alert('Please select a task and at least one student');
       return;
     }
-    const newAssignments = selectedStudentsForAssignment.map((studentId) => {
-      const student = MOCK_STUDENTS.find(s => s.id === studentId);
-      return {
-        id: assignments.length + studentId,
-        studentId: student.id, studentName: student.name,
-        taskId: selectedTaskForAssignment.id || selectedTaskForAssignment.slug,
-        taskTitle: selectedTaskForAssignment.title,
-        status: 'assigned', completedDate: null, messages: [],
-      };
-    });
-    setAssignments([...assignments, ...newAssignments]);
-    setSelectedTaskForAssignment(null);
-    setSelectedStudentsForAssignment([]);
-    setView('teacherDashboard');
-    alert(`Task "${selectedTaskForAssignment.title}" assigned to ${selectedStudentsForAssignment.length} student(s)!`);
+
+    const taskId = selectedTaskForAssignment.id || selectedTaskForAssignment.slug;
+
+    const duplicateStudentIds = selectedStudentsForAssignment.filter((studentId) =>
+      assignments.some((a) => a.studentId === studentId && a.taskId === taskId)
+    );
+
+    const nonDuplicateStudentIds = selectedStudentsForAssignment.filter(
+      (id) => !duplicateStudentIds.includes(id)
+    );
+
+    const doAssign = (studentIds) => {
+      if (studentIds.length === 0) {
+        dismissConfirmModal();
+        return;
+      }
+      const newAssignments = studentIds.map((studentId) => {
+        const student = MOCK_STUDENTS.find((s) => s.id === studentId);
+        return {
+          id: assignments.length + studentId,
+          studentId: student.id,
+          studentName: student.name,
+          taskId,
+          taskTitle: selectedTaskForAssignment.title,
+          status: 'assigned',
+          completedDate: null,
+          messages: [],
+        };
+      });
+      setAssignments((prev) => [...prev, ...newAssignments]);
+      setSelectedTaskForAssignment(null);
+      setSelectedStudentsForAssignment([]);
+      dismissConfirmModal();
+      setView('teacherDashboard');
+      showToast(`Task "${selectedTaskForAssignment.title}" assigned to ${studentIds.length} student(s)!`);
+    };
+
+    if (duplicateStudentIds.length > 0) {
+      const duplicateNames = duplicateStudentIds
+        .map((id) => MOCK_STUDENTS.find((s) => s.id === id)?.name)
+        .filter(Boolean)
+        .join(', ');
+
+      const allAreDuplicates = nonDuplicateStudentIds.length === 0;
+
+      const message = allAreDuplicates
+        ? `${duplicateNames} ${duplicateStudentIds.length === 1 ? 'has' : 'have'} already been assigned "${selectedTaskForAssignment.title}". Do you want to assign it again?`
+        : `${duplicateNames} ${duplicateStudentIds.length === 1 ? 'has' : 'have'} already been assigned "${selectedTaskForAssignment.title}". Do you want to assign it to all ${selectedStudentsForAssignment.length} student(s) anyway?`;
+
+      setConfirmModal({
+        show: true,
+        title: 'Duplicate Assignment',
+        message,
+        onConfirm: () => doAssign(selectedStudentsForAssignment),
+      });
+      return;
+    }
+
+    doAssign(selectedStudentsForAssignment);
   };
 
   const startTeachingSession = (assignment) => {
@@ -286,6 +334,18 @@ const App = () => {
     fetchEvaluations();
   };
 
+  const showToast = (message) => {
+    setToast({ message, visible: true });
+  };
+
+  const dismissToast = useCallback(() => {
+    setToast(prev => ({ ...prev, visible: false }));
+  }, []);
+
+  const dismissConfirmModal = () => {
+    setConfirmModal({ show: false, title: '', message: '', onConfirm: null });
+  };
+
   const getBadge = (totalScore) => {
     if (totalScore >= 85) return { name: 'Master Teacher', icon: '🏆', color: 'bg-yellow-500' };
     if (totalScore >= 70) return { name: 'Great Explainer', icon: '⭐', color: 'bg-brand-500' };
@@ -303,70 +363,76 @@ const App = () => {
 
   // ---------- View Router ----------
 
-  if (view === 'landing') {
-    return <LandingPage mascotEmotion={mascotEmotion} activeStep={activeStep} setActiveStep={setActiveStep} showStepDetail={showStepDetail} setShowStepDetail={setShowStepDetail} howItWorksSteps={howItWorksSteps} onNavigateLogin={() => setView('login')} onLogin={(role, user) => { setView('login'); setTimeout(() => handleLogin(role, user), 100); }} />;
-  }
+  const renderView = () => {
+    if (view === 'landing') {
+      return <LandingPage mascotEmotion={mascotEmotion} activeStep={activeStep} setActiveStep={setActiveStep} showStepDetail={showStepDetail} setShowStepDetail={setShowStepDetail} howItWorksSteps={howItWorksSteps} onNavigateLogin={() => setView('login')} onLogin={(role, user) => { setView('login'); setTimeout(() => handleLogin(role, user), 100); }} />;
+    }
+    if (view === 'login') {
+      return <LoginView mascotEmotion={mascotEmotion} onLogin={handleLogin} />;
+    }
+    if (view === 'teacherDashboard') {
+      return <TeacherDashboard currentUser={currentUser} assignments={assignments} onLogout={() => { setUserRole(null); setView('login'); }} onNavigate={setView} getBadge={getBadge} EXAMPLE_TASKS={EXAMPLE_TASKS} />;
+    }
+    if (view === 'teacherBrowseTasks') {
+      return <TeacherBrowseTasks EXAMPLE_TASKS={EXAMPLE_TASKS} onBack={() => setView('teacherDashboard')} onViewDetail={(task) => { setSelectedTaskForDetail(task); setView('teacherTaskDetail'); }} onAssignTask={(task) => { setSelectedTaskForAssignment(task); setView('teacherAssignTask'); }} searchQuery={searchQuery} setSearchQuery={setSearchQuery} selectedGrade={selectedGrade} setSelectedGrade={setSelectedGrade} selectedDomain={selectedDomain} setSelectedDomain={setSelectedDomain} showFilters={showFilters} setShowFilters={setShowFilters} collectionView={collectionView} setCollectionView={setCollectionView} />;
+    }
+    if (view === 'teacherTaskDetail' && selectedTaskForDetail) {
+      return <TeacherTaskDetail task={selectedTaskForDetail} onBack={() => setView('teacherBrowseTasks')} onAssign={() => { setSelectedTaskForAssignment(selectedTaskForDetail); setView('teacherAssignTask'); }} />;
+    }
+    if (view === 'teacherAssignTask') {
+      return <TeacherAssignTask selectedTask={selectedTaskForAssignment} setSelectedTask={setSelectedTaskForAssignment} TASKS={TASKS} MOCK_STUDENTS={MOCK_STUDENTS} selectedStudents={selectedStudentsForAssignment} setSelectedStudents={setSelectedStudentsForAssignment} onCreateAssignment={handleCreateAssignment} onBack={() => setView('teacherDashboard')} />;
+    }
+    if (view === 'teacherReviewAssignments') {
+      return <TeacherReviewAssignments assignments={assignments} evaluationData={evaluationData} loadingEvaluations={loadingEvaluations} onRefreshEvaluations={fetchEvaluations} getBadge={getBadge} onSelectStudent={(a) => { setSelectedStudentForDetail(a); setView('studentDetail'); }} onBack={() => setView('teacherDashboard')} EVALUATION_CATEGORIES={EVALUATION_CATEGORIES} />;
+    }
+    if (view === 'teacherFeedback' && selectedAssignmentForReview) {
+      return <TeacherFeedbackView assignment={selectedAssignmentForReview} evaluationData={evaluationData} loadingEvaluations={loadingEvaluations} getBadge={getBadge} onBack={() => setView('teacherReviewAssignments')} EVALUATION_CATEGORIES={EVALUATION_CATEGORIES} />;
+    }
+    if (view === 'studentDetail' && selectedStudentForDetail) {
+      return <StudentDetailView student={selectedStudentForDetail} evaluationData={evaluationData} loadingEvaluations={loadingEvaluations} getBadge={getBadge} onBack={() => setView('teacherReviewAssignments')} onViewFeedback={(s) => { setSelectedAssignmentForReview(s); setView('teacherFeedback'); }} EVALUATION_CATEGORIES={EVALUATION_CATEGORIES} />;
+    }
+    if (view === 'studentDashboard') {
+      return <StudentDashboard currentUser={currentUser} assignments={assignments} getBadge={getBadge} onStartTeaching={startTeachingSession} onViewFeedback={(a) => { setSelectedAssignmentForReview(a); setView('feedback'); }} onBrowseTasks={() => setView('browseTasks')} onLogout={() => { setUserRole(null); setView('login'); }} />;
+    }
+    if (view === 'browseTasks') {
+      return <BrowseTasksStudent currentUser={currentUser} onBack={() => setView('studentDashboard')} onStartTeaching={startTeachingSession} />;
+    }
+    if (view === 'teaching' && activeAssignment) {
+      const taskKey = activeAssignment.taskId.replace(/_([a-z])/g, (g) => g[1].toUpperCase());
+      const task = TASKS[taskKey];
+      return <TeachingSession task={task} messages={messages} input={input} setInput={setInput} loading={loading} onSendMessage={sendMessage} onEditUserMessage={editUserMessage} onCompleteSession={completeSession} onBack={() => setView('studentDashboard')} progress={progress} language={language} setLanguage={setLanguage} getTaskField={getTaskField} />;
+    }
+    if (view === 'feedback') {
+      const assignment = selectedAssignmentForReview || activeAssignment;
+      return <FeedbackView assignment={assignment} evaluationData={evaluationData} userRole={userRole} getBadge={getBadge} onFetchEvaluations={fetchEvaluations} onBackToDashboard={() => {
+        if (userRole === 'student') setView('studentDashboard');
+        else if (userRole === 'teacher') setView('teacherDashboard');
+        else if (userRole === 'parent') setView('parentDashboard');
+      }} EVALUATION_CATEGORIES={EVALUATION_CATEGORIES} />;
+    }
+    if (view === 'parentDashboard') {
+      return <ParentDashboard currentUser={currentUser} assignments={assignments} getBadge={getBadge} onViewFeedback={(a) => { setSelectedAssignmentForReview(a); setView('feedback'); }} onLogout={() => { setUserRole(null); setView('login'); }} />;
+    }
+    return null;
+  };
 
-  if (view === 'login') {
-    return <LoginView mascotEmotion={mascotEmotion} onLogin={handleLogin} />;
-  }
-
-  if (view === 'teacherDashboard') {
-    return <TeacherDashboard currentUser={currentUser} assignments={assignments} onLogout={() => { setUserRole(null); setView('login'); }} onNavigate={setView} getBadge={getBadge} EXAMPLE_TASKS={EXAMPLE_TASKS} />;
-  }
-
-  if (view === 'teacherBrowseTasks') {
-    return <TeacherBrowseTasks EXAMPLE_TASKS={EXAMPLE_TASKS} onBack={() => setView('teacherDashboard')} onViewDetail={(task) => { setSelectedTaskForDetail(task); setView('teacherTaskDetail'); }} onAssignTask={(task) => { setSelectedTaskForAssignment(task); setView('teacherAssignTask'); }} searchQuery={searchQuery} setSearchQuery={setSearchQuery} selectedGrade={selectedGrade} setSelectedGrade={setSelectedGrade} selectedDomain={selectedDomain} setSelectedDomain={setSelectedDomain} showFilters={showFilters} setShowFilters={setShowFilters} collectionView={collectionView} setCollectionView={setCollectionView} />;
-  }
-
-  if (view === 'teacherTaskDetail' && selectedTaskForDetail) {
-    return <TeacherTaskDetail task={selectedTaskForDetail} onBack={() => setView('teacherBrowseTasks')} onAssign={() => { setSelectedTaskForAssignment(selectedTaskForDetail); setView('teacherAssignTask'); }} />;
-  }
-
-  if (view === 'teacherAssignTask') {
-    return <TeacherAssignTask selectedTask={selectedTaskForAssignment} setSelectedTask={setSelectedTaskForAssignment} TASKS={TASKS} MOCK_STUDENTS={MOCK_STUDENTS} selectedStudents={selectedStudentsForAssignment} setSelectedStudents={setSelectedStudentsForAssignment} onCreateAssignment={handleCreateAssignment} onBack={() => setView('teacherDashboard')} />;
-  }
-
-  if (view === 'teacherReviewAssignments') {
-    return <TeacherReviewAssignments assignments={assignments} evaluationData={evaluationData} loadingEvaluations={loadingEvaluations} onRefreshEvaluations={fetchEvaluations} getBadge={getBadge} onSelectStudent={(a) => { setSelectedStudentForDetail(a); setView('studentDetail'); }} onBack={() => setView('teacherDashboard')} EVALUATION_CATEGORIES={EVALUATION_CATEGORIES} />;
-  }
-
-  if (view === 'teacherFeedback' && selectedAssignmentForReview) {
-    return <TeacherFeedbackView assignment={selectedAssignmentForReview} evaluationData={evaluationData} loadingEvaluations={loadingEvaluations} getBadge={getBadge} onBack={() => setView('teacherReviewAssignments')} EVALUATION_CATEGORIES={EVALUATION_CATEGORIES} />;
-  }
-
-  if (view === 'studentDetail' && selectedStudentForDetail) {
-    return <StudentDetailView student={selectedStudentForDetail} evaluationData={evaluationData} loadingEvaluations={loadingEvaluations} getBadge={getBadge} onBack={() => setView('teacherReviewAssignments')} onViewFeedback={(s) => { setSelectedAssignmentForReview(s); setView('teacherFeedback'); }} EVALUATION_CATEGORIES={EVALUATION_CATEGORIES} />;
-  }
-
-  if (view === 'studentDashboard') {
-    return <StudentDashboard currentUser={currentUser} assignments={assignments} getBadge={getBadge} onStartTeaching={startTeachingSession} onViewFeedback={(a) => { setSelectedAssignmentForReview(a); setView('feedback'); }} onBrowseTasks={() => setView('browseTasks')} onLogout={() => { setUserRole(null); setView('login'); }} />;
-  }
-
-  if (view === 'browseTasks') {
-    return <BrowseTasksStudent currentUser={currentUser} onBack={() => setView('studentDashboard')} onStartTeaching={startTeachingSession} />;
-  }
-
-  if (view === 'teaching' && activeAssignment) {
-    const taskKey = activeAssignment.taskId.replace(/_([a-z])/g, (g) => g[1].toUpperCase());
-    const task = TASKS[taskKey];
-    return <TeachingSession task={task} messages={messages} input={input} setInput={setInput} loading={loading} onSendMessage={sendMessage} onEditUserMessage={editUserMessage} onCompleteSession={completeSession} onBack={() => setView('studentDashboard')} progress={progress} language={language} setLanguage={setLanguage} getTaskField={getTaskField} />;
-  }
-
-  if (view === 'feedback') {
-    const assignment = selectedAssignmentForReview || activeAssignment;
-    return <FeedbackView assignment={assignment} evaluationData={evaluationData} userRole={userRole} getBadge={getBadge} onFetchEvaluations={fetchEvaluations} onBackToDashboard={() => {
-      if (userRole === 'student') setView('studentDashboard');
-      else if (userRole === 'teacher') setView('teacherDashboard');
-      else if (userRole === 'parent') setView('parentDashboard');
-    }} EVALUATION_CATEGORIES={EVALUATION_CATEGORIES} />;
-  }
-
-  if (view === 'parentDashboard') {
-    return <ParentDashboard currentUser={currentUser} assignments={assignments} getBadge={getBadge} onViewFeedback={(a) => { setSelectedAssignmentForReview(a); setView('feedback'); }} onLogout={() => { setUserRole(null); setView('login'); }} />;
-  }
-
-  return null;
+  return (
+    <>
+      {renderView()}
+      <Toast
+        message={toast.message}
+        visible={toast.visible}
+        onDismiss={dismissToast}
+      />
+      <ConfirmModal
+        show={confirmModal.show}
+        title={confirmModal.title}
+        message={confirmModal.message}
+        onConfirm={confirmModal.onConfirm}
+        onCancel={dismissConfirmModal}
+      />
+    </>
+  );
 };
 
 export default App;
