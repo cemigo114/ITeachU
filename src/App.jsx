@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Target, Users, Award, BarChart3, MessageSquare } from 'lucide-react';
 import { API_ENDPOINTS } from './config/api';
 import { generateZippyPrompt } from './utils/zippyPrompt';
@@ -338,9 +338,9 @@ const App = () => {
     setToast({ message, visible: true });
   };
 
-  const dismissToast = () => {
+  const dismissToast = useCallback(() => {
     setToast(prev => ({ ...prev, visible: false }));
-  };
+  }, []);
 
   const dismissConfirmModal = () => {
     setConfirmModal({ show: false, title: '', message: '', onConfirm: null });
