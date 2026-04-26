@@ -1,7 +1,7 @@
 import React from 'react';
 import { Outlet, NavLink, useLocation } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
-import { ClipboardList, BarChart3, Lightbulb, LogOut } from 'lucide-react';
+import { LayoutDashboard, ClipboardList, BarChart3, Lightbulb, LogOut } from 'lucide-react';
 
 function CognalityLogoMark() {
   return (
@@ -13,6 +13,7 @@ function CognalityLogoMark() {
 }
 
 const teacherNav = [
+  { to: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
   { to: '/assign', label: 'Assign', icon: ClipboardList },
   { to: '/report', label: 'Report', icon: BarChart3 },
   { to: '/recommendations', label: 'Recommendations', icon: Lightbulb },
@@ -30,6 +31,7 @@ function getInitials(name) {
 
 function getPageTitle(pathname) {
   const map = {
+    '/dashboard': 'Teacher Dashboard',
     '/assign': 'Assign tasks',
     '/report': 'Class report',
     '/recommendations': 'Recommendations',

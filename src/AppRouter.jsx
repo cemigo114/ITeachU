@@ -1,98 +1,215 @@
 import React from 'react';
-import { Routes, Route, Navigate } from 'react-router-dom';
+import { Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 import ProtectedRoute from './components/ProtectedRoute';
 import AppShell from './components/layout/AppShell';
+import { useAppState } from './contexts/AppStateContext';
+import { useAuth } from './contexts/AuthContext';
 
-// Public views
 import LandingPage from './views/LandingPage.new';
 import SignupPage from './views/SignupPage';
 import LoginPage from './views/LoginPage';
-
-// Protected views — teacher
 import ClassSetupWizard from './views/ClassSetupWizard';
-import AssignView from './views/AssignView';
-import ReportView from './views/ReportView';
-import RecommendationsView from './views/RecommendationsView';
-
-// Protected views — student
+import TeacherDashboard from './views/TeacherDashboard';
+import TeacherBrowseTasks from './views/TeacherBrowseTasks';
+import TeacherTaskDetail from './views/TeacherTaskDetail';
+import TeacherAssignTask from './views/TeacherAssignTask';
+import TeacherReviewAssignments from './views/TeacherReviewAssignments';
+import TeacherFeedbackView from './views/TeacherFeedbackView';
+import StudentDetailView from './views/StudentDetailView';
 import StudentDashboard from './views/StudentDashboard';
-import TeachingSessionWrapper from './views/TeachingSessionWrapper';
-import StudentReviewView from './views/StudentReviewView';
-
-// Protected views — parent
 import ParentDashboard from './views/ParentDashboard';
+import FeedbackView from './views/FeedbackView';
+import TeachingSessionWrapper from './views/TeachingSessionWrapper';
 
 export default function AppRouter() {
   return (
     <Routes>
-      {/* Public routes */}
       <Route path="/" element={<LandingPage />} />
       <Route path="/signup" element={<SignupPage />} />
       <Route path="/login" element={<LoginPage />} />
 
-      {/* Protected routes with AppShell layout */}
-      <Route
-        element={
-          <ProtectedRoute>
-            <AppShell />
-          </ProtectedRoute>
-        }
-      >
+      <Route element={<ProtectedRoute><AppShell /></ProtectedRoute>}>
         <Route path="/setup" element={<ClassSetupWizard />} />
-        <Route path="/assign" element={<AssignView />} />
-        <Route path="/report" element={<ReportView />} />
-        <Route path="/recommendations" element={<RecommendationsView />} />
-        <Route path="/student" element={<StudentDashboardWrapper />} />
-        <Route path="/review/:taskId" element={<StudentReviewView />} />
-        <Route path="/parent" element={<ParentDashboardWrapper />} />
+        <Route path="/dashboard" element={<TeacherDashboardWired />} />
+        <Route path="/assign" element={<BrowseTasksWired />} />
+        <Route path="/assign/detail" element={<TaskDetailWired />} />
+        <Route path="/assign/create" element={<AssignTaskWired />} />
+        <Route path="/report" element={<ReviewAssignmentsWired />} />
+        <Route path="/report/student" element={<StudentDetailWired />} />
+        <Route path="/report/feedback" element={<FeedbackWired />} />
+        <Route path="/student" element={<StudentDashboardWired />} />
+        <Route path="/feedback" element={<StudentFeedbackWired />} />
+        <Route path="/parent" element={<ParentDashboardWired />} />
       </Route>
 
-      {/* Teaching session — full-screen, outside AppShell */}
-      <Route
-        path="/teach/:taskId"
-        element={
-          <ProtectedRoute>
-            <TeachingSessionWrapper />
-          </ProtectedRoute>
-        }
-      />
-
-      {/* Catch-all — redirect to landing */}
+      <Route path="/teach/:taskId" element={<ProtectedRoute><TeachingSessionWrapper /></ProtectedRoute>} />
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );
 }
 
-/**
- * Wrapper to pass stub props to existing StudentDashboard
- * until it is refactored to fetch its own data.
- */
-function StudentDashboardWrapper() {
-  const stubProps = {
-    currentUser: null, // will use AuthContext internally later
-    assignments: [],
-    getBadge: () => ({ name: 'Getting Started', icon: '\uD83C\uDF31', color: 'bg-neutral-500' }),
-    onStartTeaching: () => {},
-    onViewFeedback: () => {},
-    onBrowseTasks: () => {},
-    onLogout: () => {},
-  };
-
-  return <StudentDashboard {...stubProps} />;
+function TeacherDashboardWired() {
+  const navigate = useNavigate();
+  const { user } = useAuth();
+  const { assignments, getBadge, EXAMPLE_TASKS } = useAppState();
+  return (
+    <TeacherDashboard
+      currentUser={user}
+      assignments={assignments}
+      onLogout={() => navigate('/')}
+      onNavigate={(view) => {
+        const map = { teacherBrowseTasks: '/assign', teacherReviewAssignments: '/report' };
+        navigate(map[view] || '/dashboard');
+      }}
+      getBadge={getBadge}
+      EXAMPLE_TASKS={EXAMPLE_TASKS}
+    />
+  );
 }
 
-/**
- * Wrapper to pass stub props to existing ParentDashboard
- * until it is refactored to fetch its own data.
- */
-function ParentDashboardWrapper() {
-  const stubProps = {
-    currentUser: null,
-    assignments: [],
-    getBadge: () => ({ name: 'Getting Started', icon: '\uD83C\uDF31', color: 'bg-neutral-500' }),
-    onViewFeedback: () => {},
-    onLogout: () => {},
-  };
+function BrowseTasksWired() {
+  const navigate = useNavigate();
+  const s = useAppState();
+  return (
+    <TeacherBrowseTasks
+      EXAMPLE_TASKS={s.EXAMPLE_TASKS}
+      onBack={() => navigate('/dashboard')}
+      onViewDetail={(task) => { s.setSelectedTaskForDetail(task); navigate('/assign/detail'); }}
+      onAssignTask={(task) => { s.setSelectedTaskForAssignment(task); navigate('/assign/create'); }}
+      searchQuery={s.searchQuery} setSearchQuery={s.setSearchQuery}
+      selectedGrade={s.selectedGrade} setSelectedGrade={s.setSelectedGrade}
+      selectedDomain={s.selectedDomain} setSelectedDomain={s.setSelectedDomain}
+      showFilters={s.showFilters} setShowFilters={s.setShowFilters}
+      collectionView={s.collectionView} setCollectionView={s.setCollectionView}
+    />
+  );
+}
 
-  return <ParentDashboard {...stubProps} />;
+function TaskDetailWired() {
+  const navigate = useNavigate();
+  const { selectedTaskForDetail, setSelectedTaskForAssignment } = useAppState();
+  if (!selectedTaskForDetail) return <Navigate to="/assign" replace />;
+  return (
+    <TeacherTaskDetail
+      task={selectedTaskForDetail}
+      onBack={() => navigate('/assign')}
+      onAssign={() => { setSelectedTaskForAssignment(selectedTaskForDetail); navigate('/assign/create'); }}
+    />
+  );
+}
+
+function AssignTaskWired() {
+  const navigate = useNavigate();
+  const s = useAppState();
+  return (
+    <TeacherAssignTask
+      selectedTask={s.selectedTaskForAssignment}
+      setSelectedTask={s.setSelectedTaskForAssignment}
+      TASKS={s.TASKS}
+      MOCK_STUDENTS={s.MOCK_STUDENTS}
+      selectedStudents={s.selectedStudentsForAssignment}
+      setSelectedStudents={s.setSelectedStudentsForAssignment}
+      onCreateAssignment={s.handleCreateAssignment}
+      onBack={() => navigate('/assign')}
+    />
+  );
+}
+
+function ReviewAssignmentsWired() {
+  const navigate = useNavigate();
+  const s = useAppState();
+  return (
+    <TeacherReviewAssignments
+      assignments={s.assignments}
+      evaluationData={s.evaluationData}
+      loadingEvaluations={s.loadingEvaluations}
+      onRefreshEvaluations={s.fetchEvaluations}
+      getBadge={s.getBadge}
+      onSelectStudent={(a) => { s.setSelectedStudentForDetail(a); navigate('/report/student'); }}
+      onBack={() => navigate('/dashboard')}
+      EVALUATION_CATEGORIES={s.EVALUATION_CATEGORIES}
+    />
+  );
+}
+
+function StudentDetailWired() {
+  const navigate = useNavigate();
+  const s = useAppState();
+  if (!s.selectedStudentForDetail) return <Navigate to="/report" replace />;
+  return (
+    <StudentDetailView
+      student={s.selectedStudentForDetail}
+      evaluationData={s.evaluationData}
+      loadingEvaluations={s.loadingEvaluations}
+      getBadge={s.getBadge}
+      onBack={() => navigate('/report')}
+      onViewFeedback={(st) => { s.setSelectedAssignmentForReview(st); navigate('/report/feedback'); }}
+      EVALUATION_CATEGORIES={s.EVALUATION_CATEGORIES}
+    />
+  );
+}
+
+function FeedbackWired() {
+  const navigate = useNavigate();
+  const s = useAppState();
+  if (!s.selectedAssignmentForReview) return <Navigate to="/report" replace />;
+  return (
+    <TeacherFeedbackView
+      assignment={s.selectedAssignmentForReview}
+      evaluationData={s.evaluationData}
+      loadingEvaluations={s.loadingEvaluations}
+      getBadge={s.getBadge}
+      onBack={() => navigate('/report')}
+      EVALUATION_CATEGORIES={s.EVALUATION_CATEGORIES}
+    />
+  );
+}
+
+function StudentDashboardWired() {
+  const navigate = useNavigate();
+  const { user } = useAuth();
+  const s = useAppState();
+  return (
+    <StudentDashboard
+      currentUser={user || { name: 'Student', id: 1 }}
+      assignments={s.assignments}
+      getBadge={s.getBadge}
+      onStartTeaching={(assignment) => navigate(`/teach/${assignment.taskId}`)}
+      onViewFeedback={(a) => { s.setSelectedAssignmentForReview(a); navigate('/feedback'); }}
+      onBrowseTasks={() => navigate('/assign')}
+      onLogout={() => navigate('/')}
+    />
+  );
+}
+
+function StudentFeedbackWired() {
+  const navigate = useNavigate();
+  const { user } = useAuth();
+  const s = useAppState();
+  return (
+    <FeedbackView
+      assignment={s.selectedAssignmentForReview}
+      evaluationData={s.evaluationData}
+      userRole={user?.role || 'student'}
+      getBadge={s.getBadge}
+      onFetchEvaluations={s.fetchEvaluations}
+      onBackToDashboard={() => navigate('/student')}
+      EVALUATION_CATEGORIES={s.EVALUATION_CATEGORIES}
+    />
+  );
+}
+
+function ParentDashboardWired() {
+  const navigate = useNavigate();
+  const { user } = useAuth();
+  const s = useAppState();
+  return (
+    <ParentDashboard
+      currentUser={user || { name: 'Parent', id: 'parent_1', childId: 1 }}
+      assignments={s.assignments}
+      getBadge={s.getBadge}
+      onViewFeedback={(a) => { s.setSelectedAssignmentForReview(a); navigate('/feedback'); }}
+      onLogout={() => navigate('/')}
+    />
+  );
 }
