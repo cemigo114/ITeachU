@@ -10,16 +10,31 @@ import { useThinkingChunks } from '../hooks/useThinkingChunks';
 import { useZippyPerception } from '../hooks/useZippyPerception';
 import LanguageSelector from '../components/LanguageSelector';
 
+// Design tokens from prototype
+const colors = {
+  zippy: 'oklch(60% 0.18 15)',
+  zippyDeep: 'oklch(42% 0.15 15)',
+  zippyPale: 'oklch(97% 0.03 15)',
+  sage: 'oklch(49% 0.08 162)',
+  sageDeep: 'oklch(35% 0.07 162)',
+  ink: 'oklch(17% 0.01 170)',
+  inkSoft: 'oklch(30% 0.01 170)',
+  muted: 'oklch(55% 0.015 170)',
+  border: 'oklch(90% 0.012 170)',
+  white: '#ffffff',
+  studentBg: 'oklch(98.5% 0.008 15)',
+};
+
 function TaskCard({ title, subtitle }) {
   return (
     <div className="flex-shrink-0 px-4 pt-3 pb-2.5 border-b border-gray-100 bg-white">
       <div className="flex items-center gap-2.5">
         <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-amber-100 to-orange-100 flex items-center justify-center flex-shrink-0 text-xl shadow-sm">
-          🥤
+          🤖
         </div>
         <div className="min-w-0">
-          <p className="text-xs font-semibold text-[#0A4D8C] leading-tight truncate">{title}</p>
-          <p className="text-xs text-gray-400 italic mt-0.5">{subtitle}</p>
+          <p className="text-xs font-semibold leading-tight truncate" style={{ color: colors.ink }}>{title}</p>
+          <p className="text-xs italic mt-0.5" style={{ color: colors.muted }}>{subtitle}</p>
         </div>
       </div>
     </div>
@@ -236,11 +251,15 @@ const TeachingSession = ({
 
   if (!task) {
     return (
-      <div className="min-h-screen bg-neutral-50 font-body flex items-center justify-center p-6">
+      <div className="min-h-screen font-body flex items-center justify-center p-6" style={{ background: colors.studentBg }}>
         <div className="max-w-md w-full text-center bg-white rounded-2xl shadow-card p-8">
-          <h2 className="text-2xl font-display font-bold text-coral-600 mb-2">Task Not Found</h2>
-          <p className="text-neutral-600 mb-6">We could not load this task. Try returning to your dashboard.</p>
-          <button onClick={onBack} className="px-6 py-3 bg-teal-600 text-white rounded-xl hover:bg-teal-700 transition-colors">
+          <h2 className="text-2xl font-display font-bold mb-2" style={{ color: colors.zippy }}>Task Not Found</h2>
+          <p className="mb-6" style={{ color: colors.muted }}>We could not load this task. Try returning to your dashboard.</p>
+          <button
+            onClick={onBack}
+            className="px-6 py-3 text-white rounded-xl transition-colors"
+            style={{ background: colors.sage }}
+          >
             Back to Dashboard
           </button>
         </div>
@@ -249,32 +268,71 @@ const TeachingSession = ({
   }
 
   return (
-    <div className="h-screen bg-[#F8FAFC] flex flex-col overflow-hidden">
+    <div className="h-screen flex flex-col overflow-hidden font-body" style={{ background: colors.studentBg }}>
 
-      {/* Header */}
-      <div className="bg-gradient-to-r from-[#0A4D8C] to-[#00A896] px-4 md:px-8 py-4 md:py-5 shadow-lg relative flex-shrink-0">
-        <div className="flex items-center gap-3">
+      {/* ====== ZIPPY HEADER ====== */}
+      <div
+        className="flex items-center gap-3 px-6 py-3.5 flex-shrink-0"
+        style={{ background: colors.white, borderBottom: `1px solid ${colors.border}` }}
+      >
+        {/* Zippy avatar */}
+        <div
+          className="w-[38px] h-[38px] rounded-full flex items-center justify-center flex-shrink-0"
+          style={{
+            background: `linear-gradient(135deg, ${colors.zippy} 0%, ${colors.zippyDeep} 100%)`,
+            boxShadow: `0 2px 8px oklch(60% 0.18 15 / 0.35)`,
+          }}
+        >
+          <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+            <rect x="3" y="7" width="16" height="11" rx="3" fill="white" opacity="0.25"/>
+            <rect x="3" y="7" width="16" height="11" rx="3" stroke="white" strokeWidth="1.3"/>
+            <circle cx="8" cy="12" r="2" fill="white"/>
+            <circle cx="14" cy="12" r="2" fill="white"/>
+            <rect x="9" y="4" width="4" height="4" rx="1" fill="white" opacity="0.5"/>
+            <rect x="10.5" y="3" width="1" height="2" fill="white" opacity="0.5"/>
+          </svg>
+        </div>
+
+        {/* Zippy info */}
+        <div className="flex-1 min-w-0">
+          <h3 className="text-sm font-semibold" style={{ letterSpacing: '-0.01em' }}>Zippy</h3>
+          <span className="text-[11px]" style={{ color: colors.muted }}>
+            Your AI learning buddy &middot; a little confused today
+          </span>
+        </div>
+
+        {/* Task chip */}
+        <div
+          className="hidden sm:block ml-auto rounded-lg px-3 py-1.5 text-[11px] font-semibold flex-shrink-0"
+          style={{
+            background: colors.zippyPale,
+            border: '1px solid oklch(60% 0.18 15 / 0.3)',
+            color: colors.zippyDeep,
+          }}
+        >
+          {task.standard || '7.RP.A.2'} &middot; {getTaskField(task, 'title', language) || 'Unit Rate'}
+        </div>
+
+        {/* Back / Language */}
+        <div className="flex items-center gap-2 ml-2">
+          <LanguageSelector language={language} setLanguage={setLanguage} />
           <button
             onClick={onBack}
-            className="text-white/80 hover:text-white transition-colors text-sm"
+            className="text-xs transition-colors px-2 py-1 rounded"
+            style={{ color: colors.muted }}
           >
-            ← Back
+            &larr; Back
           </button>
-          <div>
-            <h1 className="text-lg md:text-2xl font-bold text-white">{getTaskField(task, 'title', language)}</h1>
-            <p className="text-xs md:text-sm text-white/90">{`${task.grade} • ${task.standard}`}</p>
-          </div>
-        </div>
-        <div className="absolute top-4 right-4 md:top-5 md:right-8">
-          <LanguageSelector language={language} setLanguage={setLanguage} />
         </div>
       </div>
 
-      {/* Main Content */}
+      {/* ====== MAIN CONTENT ====== */}
       <div className="flex-1 flex flex-col md:flex-row overflow-hidden">
 
-        {/* Zippy Sidebar */}
-        <div className="bg-white border-b md:border-b-0 md:border-r border-gray-200 shadow-md flex-shrink-0 md:w-80 lg:w-96 flex flex-col">
+        {/* Chat Sidebar */}
+        <div className="bg-white border-b md:border-b-0 md:border-r flex-shrink-0 md:w-80 lg:w-96 flex flex-col"
+          style={{ borderColor: colors.border }}
+        >
           <TaskCard
             title={getTaskField(task, 'title', language)}
             subtitle={`Help Zippy understand ${task.standard}`}
@@ -349,7 +407,7 @@ const TeachingSession = ({
           </div>
 
           {/* Input Panel */}
-          <div className="bg-white border-t border-gray-200 shadow-lg flex-shrink-0">
+          <div className="flex-shrink-0" style={{ background: colors.white, borderTop: `1px solid ${colors.border}` }}>
             <div className="p-4 md:px-8 md:py-5">
 
               {/* Post-completion options */}
@@ -360,26 +418,29 @@ const TeachingSession = ({
                     animate={{ opacity: 1, y: 0, scale: 1 }}
                     exit={{ opacity: 0, y: 8, scale: 0.97 }}
                     transition={{ type: 'spring', stiffness: 320, damping: 28 }}
-                    className="mb-4 rounded-2xl overflow-hidden border border-[#00A896]/30 shadow-lg max-w-4xl mx-auto"
-                    style={{ background: 'linear-gradient(135deg, #f0fafa 0%, #e8f4ff 100%)' }}
+                    className="mb-4 rounded-2xl overflow-hidden border shadow-lg max-w-4xl mx-auto"
+                    style={{
+                      borderColor: `oklch(49% 0.08 162 / 0.3)`,
+                      background: `linear-gradient(135deg, oklch(96% 0.025 162 / 0.5) 0%, oklch(97% 0.03 75 / 0.5) 100%)`,
+                    }}
                   >
-                    <div className="flex items-center gap-2 px-4 py-3 border-b border-[#00A896]/20">
+                    <div className="flex items-center gap-2 px-4 py-3" style={{ borderBottom: `1px solid oklch(49% 0.08 162 / 0.2)` }}>
                       <motion.div
                         initial={{ scale: 0, rotate: -30 }}
                         animate={{ scale: 1, rotate: 0 }}
                         transition={{ type: 'spring', stiffness: 400, damping: 18, delay: 0.1 }}
                       >
-                        <div className="w-7 h-7 rounded-full bg-[#00A896] flex items-center justify-center shadow-md">
+                        <div className="w-7 h-7 rounded-full flex items-center justify-center shadow-md" style={{ background: colors.sage }}>
                           <Check className="h-4 w-4 text-white" strokeWidth={3} />
                         </div>
                       </motion.div>
-                      <p className="text-sm text-[#0A4D8C] font-medium">Great thinking — what would you like to do next?</p>
+                      <p className="text-sm font-medium" style={{ color: colors.ink }}>Great thinking -- what would you like to do next?</p>
                     </div>
                     <div className="p-3 flex flex-col sm:flex-row gap-2">
                       {[
-                        { label: tl('continueExplaining'), sub: 'Add more to your explanation', icon: <MessageCircle className="h-4 w-4" />, color: '#0A4D8C', handler: handleContinueExplaining, delay: 0.15 },
-                        { label: tl('reviewThinking'), sub: 'Look back at what you wrote', icon: <Eye className="h-4 w-4" />, color: '#00A896', handler: handleReviewThinking, delay: 0.22 },
-                        { label: tl('newProblem'), sub: 'Try a fresh challenge', icon: <Sparkles className="h-4 w-4" />, color: '#FF6B4A', handler: handleNewProblem, delay: 0.29 },
+                        { label: tl('continueExplaining'), sub: 'Add more to your explanation', icon: <MessageCircle className="h-4 w-4" />, color: colors.sage, handler: handleContinueExplaining, delay: 0.15 },
+                        { label: tl('reviewThinking'), sub: 'Look back at what you wrote', icon: <Eye className="h-4 w-4" />, color: colors.zippy, handler: handleReviewThinking, delay: 0.22 },
+                        { label: tl('newProblem'), sub: 'Try a fresh challenge', icon: <Sparkles className="h-4 w-4" />, color: colors.amber, handler: handleNewProblem, delay: 0.29 },
                       ].map(opt => (
                         <motion.button
                           key={opt.label}
@@ -424,14 +485,14 @@ const TeachingSession = ({
                       />
 
                       {!isTranscribing && getActiveContent().length === 0 && !messages.some(m => m.role === 'user') && (
-                        <p className="text-center text-xs text-gray-400 mt-3">{tl('hint')}</p>
+                        <p className="text-center text-xs mt-3" style={{ color: colors.muted }}>{tl('hint')}</p>
                       )}
                     </motion.div>
                   )}
                 </AnimatePresence>
 
-                {/* Completed Button */}
-                <div className="mt-4 pt-4 border-t border-gray-200">
+                {/* Complete task button */}
+                <div className="mt-4 pt-4" style={{ borderTop: `1px solid ${colors.border}` }}>
                   <AnimatePresence mode="wait">
                     {!isCompleted ? (
                       <motion.div key="btn" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0, scale: 0.95 }}>
@@ -440,7 +501,13 @@ const TeachingSession = ({
                           disabled={(!messages.some(m => m.role === 'user') && getActiveContent().length === 0) || completionFlash}
                           whileHover={(messages.some(m => m.role === 'user') || getActiveContent().length > 0) ? { scale: 1.01 } : {}}
                           whileTap={(messages.some(m => m.role === 'user') || getActiveContent().length > 0) ? { scale: 0.98 } : {}}
-                          className={`w-full h-12 md:h-14 rounded-2xl flex items-center justify-center gap-3 text-white shadow-lg transition-all duration-300 disabled:opacity-40 disabled:cursor-not-allowed ${completionFlash ? 'bg-[#00A896]' : 'bg-[#0A4D8C] hover:bg-[#0A4D8C]/90 active:bg-[#083d70]'}`}
+                          className="w-full h-12 md:h-14 rounded-2xl flex items-center justify-center gap-3 text-white shadow-lg transition-all duration-300 disabled:opacity-40 disabled:cursor-not-allowed"
+                          style={{
+                            background: completionFlash
+                              ? colors.sage
+                              : `linear-gradient(135deg, ${colors.zippy}, ${colors.zippyDeep})`,
+                            boxShadow: `0 2px 8px oklch(60% 0.18 15 / 0.3)`,
+                          }}
                         >
                           <AnimatePresence mode="wait">
                             {completionFlash ? (
@@ -454,18 +521,18 @@ const TeachingSession = ({
                             )}
                           </AnimatePresence>
                           <span className="text-base font-medium tracking-wide">
-                            {completionFlash ? 'Nice work!' : tl('completed')}
+                            {completionFlash ? 'Nice work!' : 'Complete task \u2014 review your work \u2192'}
                           </span>
                         </motion.button>
-                        <p className="text-xs text-center text-gray-400 mt-2">{tl('completedSubtitle')}</p>
+                        <p className="text-xs text-center mt-2" style={{ color: colors.muted }}>{tl('completedSubtitle')}</p>
                       </motion.div>
                     ) : (
                       <motion.div key="done" initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="flex items-center justify-center gap-2 py-2">
-                        <div className="w-5 h-5 rounded-full bg-[#00A896] flex items-center justify-center">
+                        <div className="w-5 h-5 rounded-full flex items-center justify-center" style={{ background: colors.sage }}>
                           <Check className="h-3 w-3 text-white" strokeWidth={3} />
                         </div>
-                        <span className="text-sm text-[#00A896] font-medium">Completed</span>
-                        <button onClick={() => { setIsCompleted(false); setShowPostOptions(false); }} className="ml-2 text-xs text-gray-400 hover:text-gray-600 underline underline-offset-2">undo</button>
+                        <span className="text-sm font-medium" style={{ color: colors.sage }}>Completed</span>
+                        <button onClick={() => { setIsCompleted(false); setShowPostOptions(false); }} className="ml-2 text-xs underline underline-offset-2" style={{ color: colors.muted }}>undo</button>
                       </motion.div>
                     )}
                   </AnimatePresence>

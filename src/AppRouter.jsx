@@ -10,6 +10,9 @@ import SignupPage from './views/SignupPage';
 import LoginPage from './views/LoginPage';
 import ClassSetupWizard from './views/ClassSetupWizard';
 import TeacherDashboard from './views/TeacherDashboard';
+import AssignView from './views/AssignView';
+import ReportView from './views/ReportView';
+import RecommendationsView from './views/RecommendationsView';
 import TeacherBrowseTasks from './views/TeacherBrowseTasks';
 import TeacherTaskDetail from './views/TeacherTaskDetail';
 import TeacherAssignTask from './views/TeacherAssignTask';
@@ -31,10 +34,13 @@ export default function AppRouter() {
       <Route element={<ProtectedRoute><AppShell /></ProtectedRoute>}>
         <Route path="/setup" element={<ClassSetupWizard />} />
         <Route path="/dashboard" element={<TeacherDashboardWired />} />
-        <Route path="/assign" element={<BrowseTasksWired />} />
+        <Route path="/assign" element={<AssignView />} />
+        <Route path="/assign/browse" element={<BrowseTasksWired />} />
         <Route path="/assign/detail" element={<TaskDetailWired />} />
         <Route path="/assign/create" element={<AssignTaskWired />} />
-        <Route path="/report" element={<ReviewAssignmentsWired />} />
+        <Route path="/report" element={<ReportView />} />
+        <Route path="/report/old" element={<ReviewAssignmentsWired />} />
+        <Route path="/recommendations" element={<RecommendationsView />} />
         <Route path="/report/student" element={<StudentDetailWired />} />
         <Route path="/report/feedback" element={<FeedbackWired />} />
         <Route path="/student" element={<StudentDashboardWired />} />
