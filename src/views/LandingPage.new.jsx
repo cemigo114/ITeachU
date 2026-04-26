@@ -51,17 +51,26 @@ export default function LandingPage() {
       {/* Feature cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 border-t border-border bg-border gap-px">
         <div className="bg-white p-8">
-          <div className="w-9 h-9 rounded-sm bg-sage-pale flex items-center justify-center text-base mb-3">
-            &#129504;
+          <div className="w-9 h-9 rounded-sm flex items-center justify-center mb-3" style={{ background: 'oklch(96% 0.025 162)' }}>
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+              <circle cx="10" cy="10" r="8" stroke="oklch(49% 0.08 162)" strokeWidth="1.5"/>
+              <circle cx="7" cy="10" r="1.2" fill="oklch(49% 0.08 162)"/>
+              <circle cx="10" cy="10" r="1.2" fill="oklch(49% 0.08 162)"/>
+              <circle cx="13" cy="10" r="1.2" fill="oklch(49% 0.08 162)"/>
+            </svg>
           </div>
-          <h3 className="font-display text-[15px] font-medium mb-1.5">Reasoning visible</h3>
+          <h3 className="font-display text-[15px] font-medium mb-1.5">Reasoning made visible</h3>
           <p className="text-xs text-muted leading-relaxed">
-            Every explanation students give reveals how they think &mdash; not just whether they got the answer right.
+            Every explanation a student gives reveals how they actually think — not just whether they got the answer right.
           </p>
         </div>
         <div className="bg-white p-8">
-          <div className="w-9 h-9 rounded-sm bg-amber-pale flex items-center justify-center text-base mb-3">
-            &#128202;
+          <div className="w-9 h-9 rounded-sm flex items-center justify-center mb-3" style={{ background: 'oklch(97% 0.03 75)' }}>
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+              <rect x="2" y="13" width="4" height="5" rx="1" fill="oklch(64% 0.13 55)"/>
+              <rect x="8" y="9" width="4" height="9" rx="1" fill="oklch(64% 0.13 55)"/>
+              <rect x="14" y="5" width="4" height="13" rx="1" fill="oklch(64% 0.13 55)"/>
+            </svg>
           </div>
           <h3 className="font-display text-[15px] font-medium mb-1.5">Instant class insights</h3>
           <p className="text-xs text-muted leading-relaxed">
@@ -69,12 +78,16 @@ export default function LandingPage() {
           </p>
         </div>
         <div className="bg-white p-8">
-          <div className="w-9 h-9 rounded-sm bg-sky-pale flex items-center justify-center text-base mb-3">
-            &#127919;
+          <div className="w-9 h-9 rounded-sm flex items-center justify-center mb-3" style={{ background: 'oklch(96% 0.025 240)' }}>
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+              <circle cx="10" cy="10" r="8" stroke="oklch(52% 0.1 240)" strokeWidth="1.5"/>
+              <circle cx="10" cy="10" r="4" stroke="oklch(52% 0.1 240)" strokeWidth="1.5"/>
+              <circle cx="10" cy="10" r="1.5" fill="oklch(52% 0.1 240)"/>
+            </svg>
           </div>
           <h3 className="font-display text-[15px] font-medium mb-1.5">Targeted next steps</h3>
           <p className="text-xs text-muted leading-relaxed">
-            AI-generated groupings and recommended interventions &mdash; ready to act on the same day students complete tasks.
+            AI-generated groupings and recommended interventions — ready to act on the same day students complete tasks.
           </p>
         </div>
       </div>
