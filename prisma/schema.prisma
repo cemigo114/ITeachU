@@ -53,3 +53,37 @@ model Evaluation {
 
   conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
 }
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String
+  role      String
+  googleId  String?  @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  classes   ClassMember[]
+}
+
+model Class {
+  id          String   @id @default(cuid())
+  name        String
+  gradeLevel  String
+  subject     String   @default("Math")
+  inviteCode  String   @unique
+  teacherId   String
+  createdAt   DateTime @default(now())
+  members     ClassMember[]
+}
+
+model ClassMember {
+  id      String @id @default(cuid())
+  classId String
+  userId  String
+  role    String
+  class   Class  @relation(fields: [classId], references: [id], onDelete: Cascade)
+  user    User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  @@unique([classId, userId])
+  @@index([classId])
+  @@index([userId])
+}

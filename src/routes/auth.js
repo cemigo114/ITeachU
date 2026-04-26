@@ -1,0 +1,118 @@
+import express from 'express';
+import { OAuth2Client } from 'google-auth-library';
+import fs from 'fs';
+import path from 'path';
+import { generateToken, authMiddleware } from '../middleware/auth.js';
+
+const router = express.Router();
+const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
+
+// File-based persistence for users (JSON fallback)
+const DATA_DIR = path.join(process.cwd(), 'data');
+const USERS_FILE = path.join(DATA_DIR, 'users.json');
+
+function loadUsers() {
+  try {
+    if (fs.existsSync(USERS_FILE)) {
+      return JSON.parse(fs.readFileSync(USERS_FILE, 'utf-8'));
+    }
+  } catch (error) {
+    console.error('Error loading users.json:', error.message);
+  }
+  return [];
+}
+
+function saveUsers(users) {
+  try {
+    if (!fs.existsSync(DATA_DIR)) {
+      fs.mkdirSync(DATA_DIR, { recursive: true });
+    }
+    fs.writeFileSync(USERS_FILE, JSON.stringify(users, null, 2), 'utf-8');
+  } catch (error) {
+    console.error('Error saving users.json:', error.message);
+  }
+}
+
+/**
+ * POST /api/auth/google
+ * Verify a Google ID token, find or create the user, return a JWT.
+ */
+router.post('/google', async (req, res) => {
+  try {
+    const { credential, role } = req.body;
+
+    if (!credential) {
+      return res.status(400).json({ error: 'credential is required' });
+    }
+    if (!role || !['teacher', 'student'].includes(role)) {
+      return res.status(400).json({ error: 'role must be "teacher" or "student"' });
+    }
+
+    // Verify the Google ID token
+    let payload;
+    try {
+      const ticket = await googleClient.verifyIdToken({
+        idToken: credential,
+        audience: process.env.GOOGLE_CLIENT_ID
+      });
+      payload = ticket.getPayload();
+    } catch (verifyError) {
+      console.error('Google token verification failed:', verifyError.message);
+      return res.status(401).json({ error: 'Invalid Google credential' });
+    }
+
+    const { sub: googleId, email, name } = payload;
+
+    // Find or create user — Prisma if available, JSON fallback
+    let user;
+
+    if (req.app.locals.useDatabase && req.app.locals.prisma) {
+      const prisma = req.app.locals.prisma;
+
+      user = await prisma.user.findUnique({ where: { googleId } });
+      if (!user) {
+        user = await prisma.user.create({
+          data: { email, name, role, googleId }
+        });
+        console.log(`👤 New user created (DB): ${email} as ${role}`);
+      }
+    } else {
+      const users = loadUsers();
+      user = users.find(u => u.googleId === googleId);
+      if (!user) {
+        user = {
+          id: `usr_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+          email,
+          name,
+          role,
+          googleId,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString()
+        };
+        users.push(user);
+        saveUsers(users);
+        console.log(`👤 New user created (JSON): ${email} as ${role}`);
+      }
+    }
+
+    const token = generateToken(user);
+
+    res.json({
+      token,
+      user: { id: user.id, email: user.email, name: user.name, role: user.role }
+    });
+  } catch (error) {
+    console.error('Auth error:', error);
+    res.status(500).json({ error: 'Authentication failed' });
+  }
+});
+
+/**
+ * GET /api/auth/me
+ * Return the current user from the JWT.
+ */
+router.get('/me', authMiddleware, (req, res) => {
+  res.json({ user: req.user });
+});
+
+export default router;

@@ -10,8 +10,11 @@ import { parseTaskMarkdown } from './src/utils/parseMarkdown.js';
 import {
   connectDatabase, disconnectDatabase, useDatabase,
   upsertConversation, getAllConversations,
-  upsertEvaluation, getEvaluation
+  upsertEvaluation, getEvaluation,
+  prisma
 } from './db.js';
+import authRouter from './src/routes/auth.js';
+import classRouter from './src/routes/classes.js';
 
 const app = express();
 const PORT = process.env.PORT || 3002;
@@ -57,6 +60,14 @@ app.use((req, res, next) => {
   });
   next();
 });
+
+// Share database context with routers via app.locals
+app.locals.useDatabase = useDatabase;
+app.locals.prisma = prisma;
+
+// Mount auth and class routers
+app.use('/api/auth', authRouter);
+app.use('/api/classes', classRouter);
 
 // Health/diagnostic endpoint
 app.get('/api/health', async (req, res) => {
