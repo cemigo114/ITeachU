@@ -34,8 +34,7 @@ export default function AppRouter() {
       <Route element={<ProtectedRoute><AppShell /></ProtectedRoute>}>
         <Route path="/setup" element={<ClassSetupWizard />} />
         <Route path="/dashboard" element={<TeacherDashboardWired />} />
-        <Route path="/assign" element={<AssignView />} />
-        <Route path="/assign/browse" element={<BrowseTasksWired />} />
+        <Route path="/assign" element={<BrowseTasksWired />} />
         <Route path="/assign/detail" element={<TaskDetailWired />} />
         <Route path="/assign/create" element={<AssignTaskWired />} />
         <Route path="/report" element={<ReportView />} />
