@@ -19,11 +19,14 @@ export default function SignupPage() {
   const [selectedRole, setSelectedRole] = useState('teacher');
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
+  const [inviteCode, setInviteCode] = useState('');
   const [error, setError] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
   const { login } = useAuth();
   const navigate = useNavigate();
+
+  const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3002';
 
   function getPostLoginRoute(role) {
     if (role === 'teacher') return '/setup';
@@ -31,11 +34,39 @@ export default function SignupPage() {
     return '/parent';
   }
 
+  async function joinClassWithCode(token) {
+    if (!inviteCode.trim()) return;
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/classes/join`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ inviteCode: inviteCode.trim().toUpperCase() }),
+      });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        console.warn('Could not join class:', data.error || res.status);
+      }
+    } catch (err) {
+      console.warn('Class join failed:', err.message);
+    }
+  }
+
   async function handleGoogleSuccess(credentialResponse) {
     setError('');
     setSubmitting(true);
     try {
-      const user = await login(credentialResponse.credential, selectedRole);
+      if (selectedRole === 'student' && !inviteCode.trim()) {
+        setError('Please enter your class invitation code');
+        setSubmitting(false);
+        return;
+      }
+      const { user, token } = await login(credentialResponse.credential, selectedRole);
+      if (selectedRole === 'student' && inviteCode.trim()) {
+        await joinClassWithCode(token);
+      }
       navigate(getPostLoginRoute(user.role), { replace: true });
     } catch (err) {
       setError(err.message || 'Google sign-in failed');
@@ -116,6 +147,26 @@ export default function SignupPage() {
               </button>
             ))}
           </div>
+
+          {/* Invitation code for students */}
+          {selectedRole === 'student' && (
+            <div className="mb-5 bg-amber-pale border border-amber/30 rounded-sm p-4">
+              <label className="block text-[11px] font-medium text-amber-deep uppercase tracking-wide mb-2">
+                Class invitation code
+              </label>
+              <input
+                type="text"
+                value={inviteCode}
+                onChange={(e) => setInviteCode(e.target.value.toUpperCase())}
+                placeholder="e.g. ZPPY42"
+                maxLength={6}
+                className="w-full px-3 py-2.5 border border-amber/40 rounded-sm text-center text-lg font-mono font-semibold tracking-[0.3em] text-amber-deep bg-white focus:outline-none focus:border-amber transition-colors"
+              />
+              <p className="text-[11px] text-muted mt-1.5">
+                Ask your teacher for the code to join their class
+              </p>
+            </div>
+          )}
 
           {/* Google login */}
           <div className="mb-4">

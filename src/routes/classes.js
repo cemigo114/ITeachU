@@ -255,6 +255,60 @@ router.post('/:id/students', async (req, res) => {
 });
 
 /**
+ * POST /api/classes/join
+ * Student joins a class using an invitation code.
+ * Body: { inviteCode: string }
+ */
+router.post('/join', async (req, res) => {
+  try {
+    const { inviteCode } = req.body;
+    if (!inviteCode) {
+      return res.status(400).json({ error: 'inviteCode is required' });
+    }
+
+    const code = inviteCode.trim().toUpperCase();
+
+    if (req.app.locals.useDatabase && req.app.locals.prisma) {
+      const prisma = req.app.locals.prisma;
+      const cls = await prisma.class.findUnique({ where: { inviteCode: code } });
+      if (!cls) return res.status(404).json({ error: 'Invalid invitation code' });
+
+      const existing = await prisma.classMember.findUnique({
+        where: { classId_userId: { classId: cls.id, userId: req.user.id } }
+      });
+      if (existing) return res.json({ message: 'Already a member', classId: cls.id, className: cls.name });
+
+      await prisma.classMember.create({
+        data: { classId: cls.id, userId: req.user.id, role: 'student' }
+      });
+      return res.json({ message: 'Joined class', classId: cls.id, className: cls.name });
+    }
+
+    // JSON fallback
+    const classes = loadJson(CLASSES_FILE);
+    const members = loadJson(CLASS_MEMBERS_FILE);
+    const cls = classes.find(c => c.inviteCode === code);
+    if (!cls) return res.status(404).json({ error: 'Invalid invitation code' });
+
+    const existing = members.find(m => m.classId === cls.id && m.userId === req.user.id);
+    if (existing) return res.json({ message: 'Already a member', classId: cls.id, className: cls.name });
+
+    members.push({
+      id: `mem_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+      classId: cls.id,
+      userId: req.user.id,
+      role: 'student'
+    });
+    saveJson(CLASS_MEMBERS_FILE, members);
+
+    res.json({ message: 'Joined class', classId: cls.id, className: cls.name });
+  } catch (error) {
+    console.error('Join class error:', error);
+    res.status(500).json({ error: 'Failed to join class' });
+  }
+});
+
+/**
  * DELETE /api/classes/:id/students/:userId
  * Remove a student from a class (teacher only).
  */
