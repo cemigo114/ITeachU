@@ -63,11 +63,15 @@ export default function SignupPage() {
         setSubmitting(false);
         return;
       }
-      const { user, token } = await login(credentialResponse.credential, selectedRole);
-      if (selectedRole === 'student' && inviteCode.trim()) {
-        await joinClassWithCode(token);
+      const result = await login(credentialResponse.credential, selectedRole, 'signup');
+      if (result.existing) {
+        navigate('/login', { replace: true, state: { message: 'Account already exists. Please sign in.' } });
+        return;
       }
-      navigate(getPostLoginRoute(user.role), { replace: true });
+      if (selectedRole === 'student' && inviteCode.trim()) {
+        await joinClassWithCode(result.token);
+      }
+      navigate(getPostLoginRoute(result.user.role), { replace: true });
     } catch (err) {
       setError(err.message || 'Google sign-in failed');
     } finally {

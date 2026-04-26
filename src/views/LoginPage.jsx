@@ -4,7 +4,6 @@ import { GoogleLogin } from '@react-oauth/google';
 import { useAuth } from '../contexts/AuthContext';
 
 export default function LoginPage() {
-  const [selectedRole, setSelectedRole] = useState('teacher');
   const [error, setError] = useState('');
   const { login } = useAuth();
   const navigate = useNavigate();
@@ -18,17 +17,20 @@ export default function LoginPage() {
   async function handleGoogleSuccess(credentialResponse) {
     setError('');
     try {
-      const user = await login(credentialResponse.credential, selectedRole);
+      const { user } = await login(credentialResponse.credential, null, 'login');
       navigate(getPostLoginRoute(user.role), { replace: true });
     } catch (err) {
-      setError(err.message || 'Login failed');
+      if (err.message?.includes('No account found')) {
+        setError('No account found. Please sign up first.');
+      } else {
+        setError(err.message || 'Login failed');
+      }
     }
   }
 
   return (
     <div className="min-h-screen bg-surface font-body flex items-center justify-center p-4">
       <div className="w-full max-w-md bg-white rounded-lg border border-border p-8 shadow-card">
-        {/* Logo */}
         <div className="text-center mb-8">
           <div className="w-10 h-10 bg-sage rounded-sm flex items-center justify-center mx-auto mb-3">
             <svg viewBox="0 0 16 16" fill="none" className="w-5 h-5">
@@ -40,28 +42,6 @@ export default function LoginPage() {
           <p className="text-sm text-muted mt-1">Sign in to Cognality</p>
         </div>
 
-        {/* Role selection */}
-        <div className="flex gap-2 mb-6">
-          {[
-            { key: 'teacher', label: 'Teacher', color: 'sage' },
-            { key: 'student', label: 'Student', color: 'amber' },
-            { key: 'parent', label: 'Parent', color: 'sky' },
-          ].map(({ key, label, color }) => (
-            <button
-              key={key}
-              onClick={() => setSelectedRole(key)}
-              className={`flex-1 py-2 text-xs font-medium rounded-sm border transition-all ${
-                selectedRole === key
-                  ? `border-${color} bg-${color}-pale text-${color}-deep`
-                  : 'border-border text-muted hover:border-sage-light'
-              }`}
-            >
-              {label}
-            </button>
-          ))}
-        </div>
-
-        {/* Google Login */}
         <GoogleLogin
           onSuccess={handleGoogleSuccess}
           onError={() => setError('Google sign-in failed')}

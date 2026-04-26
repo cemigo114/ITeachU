@@ -55,11 +55,11 @@ export function AuthProvider({ children }) {
     validateToken();
   }, []);
 
-  const login = useCallback(async (googleCredential, role) => {
+  const login = useCallback(async (googleCredential, role, action) => {
     const response = await fetch(`${API_BASE_URL}/api/auth/google`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ credential: googleCredential, role }),
+      body: JSON.stringify({ credential: googleCredential, role, action }),
     });
 
     if (!response.ok) {
@@ -68,10 +68,16 @@ export function AuthProvider({ children }) {
     }
 
     const data = await response.json();
+    if (data.existing) {
+      localStorage.setItem('iteachu_token', data.token);
+      setToken(data.token);
+      setUser(data.user);
+      return { user: data.user, token: data.token, existing: true };
+    }
     localStorage.setItem('iteachu_token', data.token);
     setToken(data.token);
     setUser(data.user);
-    return data.user;
+    return { user: data.user, token: data.token, existing: false };
   }, []);
 
   const logout = useCallback(() => {

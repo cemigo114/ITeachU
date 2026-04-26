@@ -39,13 +39,17 @@ function saveUsers(users) {
  */
 router.post('/google', async (req, res) => {
   try {
-    const { credential, role } = req.body;
+    const { credential, role, action } = req.body;
 
     if (!credential) {
       return res.status(400).json({ error: 'credential is required' });
     }
-    if (!role || !['teacher', 'student'].includes(role)) {
-      return res.status(400).json({ error: 'role must be "teacher" or "student"' });
+
+    const isLogin = action === 'login';
+    const isSignup = action === 'signup';
+
+    if (!isLogin && (!role || !['teacher', 'student', 'parent'].includes(role))) {
+      return res.status(400).json({ error: 'role must be "teacher", "student", or "parent"' });
     }
 
     // Verify the Google ID token
@@ -65,32 +69,43 @@ router.post('/google', async (req, res) => {
 
     // Find or create user — Prisma if available, JSON fallback
     let user;
+    let isNewUser = false;
 
     if (req.app.locals.useDatabase && req.app.locals.prisma) {
       const prisma = req.app.locals.prisma;
-
       user = await prisma.user.findUnique({ where: { googleId } });
+
+      if (user && isSignup) {
+        return res.json({ existing: true, token: generateToken(user), user: { id: user.id, email: user.email, name: user.name, role: user.role } });
+      }
+      if (!user && isLogin) {
+        return res.status(404).json({ error: 'No account found. Please sign up first.' });
+      }
       if (!user) {
-        user = await prisma.user.create({
-          data: { email, name, role, googleId }
-        });
+        user = await prisma.user.create({ data: { email, name, role, googleId } });
+        isNewUser = true;
         console.log(`👤 New user created (DB): ${email} as ${role}`);
       }
     } else {
       const users = loadUsers();
       user = users.find(u => u.googleId === googleId);
+
+      if (user && isSignup) {
+        return res.json({ existing: true, token: generateToken(user), user: { id: user.id, email: user.email, name: user.name, role: user.role } });
+      }
+      if (!user && isLogin) {
+        return res.status(404).json({ error: 'No account found. Please sign up first.' });
+      }
       if (!user) {
         user = {
           id: `usr_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-          email,
-          name,
-          role,
-          googleId,
+          email, name, role, googleId,
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString()
         };
         users.push(user);
         saveUsers(users);
+        isNewUser = true;
         console.log(`👤 New user created (JSON): ${email} as ${role}`);
       }
     }
