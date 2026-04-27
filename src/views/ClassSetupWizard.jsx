@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 
@@ -12,6 +12,11 @@ const GRADE_OPTIONS = [
 const SUBJECT_OPTIONS = ['Math', 'ELA', 'Science', 'Social Studies'];
 
 
+function getInitials(name) {
+  if (!name) return '?';
+  return name.split(/\s+/).map(w => w[0]).join('').toUpperCase().slice(0, 2);
+}
+
 export default function ClassSetupWizard() {
   const { token } = useAuth();
   const navigate = useNavigate();
@@ -19,10 +24,63 @@ export default function ClassSetupWizard() {
   const [className, setClassName] = useState('7th Grade Math \u2014 Period 3');
   const [grade, setGrade] = useState('Grade 7');
   const [subject, setSubject] = useState('Math');
+  const [classId, setClassId] = useState(null);
   const [inviteCode, setInviteCode] = useState(null);
+  const [students, setStudents] = useState([]);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
   const [codeCopied, setCodeCopied] = useState(false);
+
+  // Also check if teacher already has a class
+  useEffect(() => {
+    if (!token) return;
+    (async () => {
+      try {
+        const res = await fetch(`${API_BASE_URL}/api/classes`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        if (res.ok) {
+          const data = await res.json();
+          if (data.classes?.length > 0) {
+            const cls = data.classes[0];
+            setClassId(cls.id);
+            setClassName(cls.name);
+            setGrade(cls.gradeLevel || 'Grade 7');
+            setSubject(cls.subject || 'Math');
+            setInviteCode(cls.inviteCode);
+          }
+        }
+      } catch {}
+    })();
+  }, [token]);
+
+  // Fetch class members when we have a classId
+  const fetchMembers = useCallback(async () => {
+    if (!classId || !token) return;
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/classes/${classId}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (res.ok) {
+        const data = await res.json();
+        const memberList = (data.members || [])
+          .filter(m => m.role === 'student')
+          .map(m => ({
+            name: m.user?.name || m.userName || 'Student',
+            initials: getInitials(m.user?.name || m.userName || '?'),
+          }));
+        setStudents(memberList);
+      }
+    } catch {}
+  }, [classId, token]);
+
+  useEffect(() => {
+    fetchMembers();
+    if (classId) {
+      const interval = setInterval(fetchMembers, 5000);
+      return () => clearInterval(interval);
+    }
+  }, [classId, fetchMembers]);
 
   const copyCode = async () => {
     try {
@@ -60,6 +118,7 @@ export default function ClassSetupWizard() {
       if (response.ok) {
         const data = await response.json();
         if (data.inviteCode) {
+          setClassId(data.id);
           setInviteCode(data.inviteCode);
         } else {
           navigate('/assign', { replace: true });
@@ -197,31 +256,69 @@ export default function ClassSetupWizard() {
           </select>
         </div>
 
-        {/* Students — empty until they join with code */}
+        {/* Students in class */}
         <div className="mb-4">
-          <label
-            className="block text-ink-soft font-semibold uppercase mb-1.5"
-            style={{ fontSize: '11px', letterSpacing: '0.05em' }}
-          >
-            Students in your class
-          </label>
+          <div className="flex items-center justify-between mb-1.5">
+            <label
+              className="text-ink-soft font-semibold uppercase"
+              style={{ fontSize: '11px', letterSpacing: '0.05em' }}
+            >
+              Students in your class ({students.length})
+            </label>
+            {classId && (
+              <button
+                onClick={fetchMembers}
+                className="text-sage hover:text-sage-deep transition-colors"
+                style={{ fontSize: '11px' }}
+              >
+                Refresh
+              </button>
+            )}
+          </div>
           <div
-            className="flex items-center justify-center text-center bg-surface"
+            className="bg-surface"
             style={{
-              padding: '1.5rem 1rem',
-              border: '1.5px dashed #d8e4e0',
+              padding: '1rem',
+              border: `1.5px ${students.length > 0 ? 'solid' : 'dashed'} #d8e4e0`,
               borderRadius: '8px',
               minHeight: '80px',
             }}
           >
-            <div>
-              <p className="text-muted" style={{ fontSize: '12px' }}>
-                No students yet
-              </p>
-              <p className="text-muted mt-1" style={{ fontSize: '11px' }}>
-                Students will appear here after they sign up with your invitation code
-              </p>
-            </div>
+            {students.length > 0 ? (
+              <div className="flex flex-wrap gap-1.5">
+                {students.map((s, i) => (
+                  <div
+                    key={i}
+                    className="flex items-center gap-1.5 bg-white text-ink-soft"
+                    style={{
+                      border: '1px solid #d8e4e0',
+                      borderRadius: '20px',
+                      padding: '4px 10px',
+                      fontSize: '11.5px',
+                    }}
+                  >
+                    <div
+                      className="bg-sage-pale text-sage-deep flex items-center justify-center font-semibold"
+                      style={{ width: '20px', height: '20px', borderRadius: '50%', fontSize: '9px' }}
+                    >
+                      {s.initials}
+                    </div>
+                    {s.name}
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="flex items-center justify-center text-center" style={{ minHeight: '48px' }}>
+                <div>
+                  <p className="text-muted" style={{ fontSize: '12px' }}>
+                    {inviteCode ? 'Waiting for students to join...' : 'No students yet'}
+                  </p>
+                  <p className="text-muted mt-1" style={{ fontSize: '11px' }}>
+                    Students will appear here after they sign up with your invitation code
+                  </p>
+                </div>
+              </div>
+            )}
           </div>
         </div>
 

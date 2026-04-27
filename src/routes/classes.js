@@ -186,7 +186,13 @@ router.get('/:id', async (req, res) => {
     const isMember = classMembers.some(m => m.userId === req.user.id);
     if (!isMember) return res.status(403).json({ error: 'Not a member of this class' });
 
-    res.json({ ...cls, members: classMembers });
+    const users = loadJson(path.join(DATA_DIR, 'users.json'));
+    const membersWithNames = classMembers.map(m => {
+      const user = users.find(u => u.id === m.userId);
+      return { ...m, user: user ? { id: user.id, name: user.name, email: user.email, role: user.role } : null };
+    });
+
+    res.json({ ...cls, members: membersWithNames });
   } catch (error) {
     console.error('Get class error:', error);
     res.status(500).json({ error: 'Failed to get class' });
