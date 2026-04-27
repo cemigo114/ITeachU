@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import tasksData from '../data/tasks.json';
-import { MOCK_STUDENTS, EVALUATION_CATEGORIES } from '../data/mockData';
+import { EVALUATION_CATEGORIES } from '../data/mockData';
 import { API_ENDPOINTS } from '../config/api';
 import { useAuth } from './AuthContext';
 
@@ -34,6 +34,8 @@ export function AppStateProvider({ children }) {
   const navigate = useNavigate();
   const { user, token } = useAuth();
 
+  const [classStudents, setClassStudents] = useState([]);
+  const [currentClassId, setCurrentClassId] = useState(null);
   const [assignments, setAssignments] = useState([]);
   const [loadingAssignments, setLoadingAssignments] = useState(false);
   const [selectedTaskForAssignment, setSelectedTaskForAssignment] = useState(null);
@@ -81,6 +83,39 @@ export function AppStateProvider({ children }) {
     }
   }, [user, token, fetchAssignments]);
 
+  // Fetch real students from teacher's class
+  useEffect(() => {
+    if (!token || !user || user.role !== 'teacher') return;
+    (async () => {
+      try {
+        const res = await fetch(`${API_BASE_URL}/api/classes`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        if (!res.ok) return;
+        const data = await res.json();
+        if (data.classes?.length > 0) {
+          const cls = data.classes[0];
+          setCurrentClassId(cls.id);
+          const detailRes = await fetch(`${API_BASE_URL}/api/classes/${cls.id}`, {
+            headers: { Authorization: `Bearer ${token}` },
+          });
+          if (detailRes.ok) {
+            const detail = await detailRes.json();
+            const students = (detail.members || [])
+              .filter(m => m.role === 'student')
+              .map(m => ({
+                id: m.userId,
+                name: m.user?.name || 'Student',
+                email: m.user?.email || '',
+                grade: '',
+              }));
+            setClassStudents(students);
+          }
+        }
+      } catch {}
+    })();
+  }, [token, user]);
+
   const fetchEvaluations = async () => {
     setLoadingEvaluations(true);
     try {
@@ -111,6 +146,7 @@ export function AppStateProvider({ children }) {
           ...(token ? { Authorization: `Bearer ${token}` } : {}),
         },
         body: JSON.stringify({
+          classId: currentClassId,
           taskId,
           taskTitle,
           studentIds: selectedStudentsForAssignment,
@@ -155,7 +191,7 @@ export function AppStateProvider({ children }) {
   }, [token, fetchAssignments]);
 
   const value = {
-    TASKS, EXAMPLE_TASKS, MOCK_STUDENTS, EVALUATION_CATEGORIES,
+    TASKS, EXAMPLE_TASKS, MOCK_STUDENTS: classStudents, EVALUATION_CATEGORIES,
     assignments, setAssignments, loadingAssignments, fetchAssignments, updateAssignment,
     selectedTaskForAssignment, setSelectedTaskForAssignment,
     selectedStudentsForAssignment, setSelectedStudentsForAssignment,
