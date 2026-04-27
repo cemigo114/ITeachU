@@ -66,7 +66,7 @@ const TeacherBrowseTasks = ({
     (selectedGrade !== 'all' ? 1 : 0) + (selectedDomain !== 'all' ? 1 : 0);
 
   return (
-    <div className="min-h-screen bg-neutral-50 font-body view-enter">
+    <div className="min-h-screen bg-surface font-body view-enter">
       <PageHeader
         role="teacher"
         title="Task Bank"
@@ -79,7 +79,7 @@ const TeacherBrowseTasks = ({
           <div className="flex flex-col md:flex-row gap-4">
             <div className="flex-1 relative">
               <Search
-                className="w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2 text-neutral-400 pointer-events-none"
+                className="w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2 text-muted pointer-events-none"
                 aria-hidden
               />
               <input
@@ -87,7 +87,7 @@ const TeacherBrowseTasks = ({
                 placeholder="Search by task name or standard code..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-10 pr-4 py-2.5 border border-neutral-300 rounded-xl font-body text-neutral-900 focus-ring focus:border-brand-500 focus:ring-2 focus:ring-brand-500/30"
+                className="w-full pl-10 pr-4 py-2.5 border border-border rounded-sm font-body text-ink focus-ring focus:border-sage focus:ring-2 focus:ring-sage/20"
               />
             </div>
 
@@ -115,7 +115,7 @@ const TeacherBrowseTasks = ({
             <select
               value={collectionView}
               onChange={(e) => setCollectionView(e.target.value)}
-              className="px-4 py-2.5 border border-neutral-300 rounded-xl font-body text-neutral-900 bg-white focus-ring focus:border-brand-500 focus:ring-2 focus:ring-brand-500/30 shrink-0"
+              className="px-4 py-2.5 border border-border rounded-sm font-body text-ink bg-white focus-ring focus:border-sage focus:ring-2 focus:ring-sage/20 shrink-0"
             >
               <option value="all">All Tasks</option>
               <option value="byGrade">Group by Grade</option>
@@ -124,15 +124,15 @@ const TeacherBrowseTasks = ({
           </div>
 
           {showFilters && (
-            <div className="mt-4 pt-4 border-t border-neutral-200 grid grid-cols-1 md:grid-cols-2 gap-4 animate-slide-up">
+            <div className="mt-4 pt-4 border-t border-border grid grid-cols-1 md:grid-cols-2 gap-4 animate-slide-up">
               <div>
-                <label className="block text-sm font-medium text-neutral-700 mb-2 font-display">
+                <label className="block text-sm font-medium text-ink-soft mb-2 font-display">
                   Grade Level
                 </label>
                 <select
                   value={selectedGrade}
                   onChange={(e) => setSelectedGrade(e.target.value)}
-                  className="w-full px-3 py-2 border border-neutral-300 rounded-xl font-body focus-ring focus:border-brand-500 focus:ring-2 focus:ring-brand-500/30"
+                  className="w-full px-3 py-2 border border-border rounded-sm font-body focus-ring focus:border-sage focus:ring-2 focus:ring-sage/20"
                 >
                   <option value="all">All Grades</option>
                   {grades.map((grade) => (
@@ -144,13 +144,13 @@ const TeacherBrowseTasks = ({
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-neutral-700 mb-2 font-display">
+                <label className="block text-sm font-medium text-ink-soft mb-2 font-display">
                   Domain
                 </label>
                 <select
                   value={selectedDomain}
                   onChange={(e) => setSelectedDomain(e.target.value)}
-                  className="w-full px-3 py-2 border border-neutral-300 rounded-xl font-body focus-ring focus:border-brand-500 focus:ring-2 focus:ring-brand-500/30"
+                  className="w-full px-3 py-2 border border-border rounded-sm font-body focus-ring focus:border-sage focus:ring-2 focus:ring-sage/20"
                 >
                   <option value="all">All Domains</option>
                   {domains.map((domain) => (
@@ -169,7 +169,7 @@ const TeacherBrowseTasks = ({
                       setSelectedGrade('all');
                       setSelectedDomain('all');
                     }}
-                    className="text-sm text-brand-600 hover:text-brand-700 font-medium flex items-center gap-1 focus-ring rounded-lg px-1 py-0.5"
+                    className="text-sm text-sage hover:text-sage-deep font-medium flex items-center gap-1 focus-ring rounded-lg px-1 py-0.5"
                   >
                     <X className="w-4 h-4" aria-hidden />
                     Clear all filters
@@ -183,7 +183,7 @@ const TeacherBrowseTasks = ({
         {Object.entries(groupedTasks).map(([groupName, tasks]) => (
           <div key={groupName} className="mb-8">
             {collectionView !== 'all' && (
-              <h2 className="text-xl font-display font-bold text-neutral-900 mb-4">{groupName}</h2>
+              <h2 className="text-xl font-display font-medium text-ink mb-4">{groupName}</h2>
             )}
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 stagger-children">
@@ -193,22 +193,22 @@ const TeacherBrowseTasks = ({
                   variant="default"
                   accent="teacher"
                   padding="md"
-                  className="shadow-card hover:shadow-elevated transition-shadow border-2 border-transparent hover:border-brand-200"
+                  className="shadow-card hover:shadow-elevated transition-shadow border-2 border-transparent hover:border-sage-light"
                 >
                   <div className="flex items-start justify-between mb-2">
-                    <h3 className="font-display font-semibold text-lg text-neutral-900 flex-1 pr-2">
+                    <h3 className="font-display font-semibold text-lg text-ink flex-1 pr-2">
                       {task.title}
                     </h3>
                   </div>
 
                   <div className="mb-3">
-                    <p className={`text-sm text-neutral-600 ${expandedDescriptions.has(task.id) ? '' : 'line-clamp-2'}`}>
+                    <p className={`text-sm text-ink-soft ${expandedDescriptions.has(task.id) ? '' : 'line-clamp-2'}`}>
                       {task.description}
                     </p>
                     <button
                       type="button"
                       onClick={(e) => { e.stopPropagation(); toggleDescription(task.id); }}
-                      className="mt-1 text-xs font-medium text-brand-600 hover:text-brand-700 focus-ring rounded px-0.5 transition-colors"
+                      className="mt-1 text-xs font-medium text-sage hover:text-sage-deep focus-ring rounded px-0.5 transition-colors"
                     >
                       {expandedDescriptions.has(task.id) ? 'Show less' : 'Show more'}
                     </button>
@@ -227,7 +227,7 @@ const TeacherBrowseTasks = ({
                     )}
                   </div>
 
-                  <div className="text-xs text-neutral-500 mb-4">{task.domain}</div>
+                  <div className="text-xs text-muted mb-4">{task.domain}</div>
 
                   <div className="flex gap-2">
                     <Button
@@ -255,7 +255,7 @@ const TeacherBrowseTasks = ({
 
             {tasks.length === 0 && (
               <Card variant="flat" padding="lg" className="text-center">
-                <p className="text-neutral-500">No tasks found matching your criteria.</p>
+                <p className="text-muted">No tasks found matching your criteria.</p>
               </Card>
             )}
           </div>
