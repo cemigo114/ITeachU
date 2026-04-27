@@ -129,12 +129,12 @@ export default function SignupPage() {
         return;
       }
       const result = await login(credentialResponse.credential, selectedRole, 'signup');
-      if (result.existing) {
-        navigate('/login', { replace: true });
-        return;
-      }
       if ((selectedRole === 'student' || selectedRole === 'parent') && inviteCode.trim()) {
         await joinClassWithCode(result.token);
+      }
+      if (result.existing) {
+        navigate(getPostLoginRoute(result.user.role), { replace: true });
+        return;
       }
       navigate(getPostLoginRoute(result.user.role), { replace: true });
     } catch (err) {
