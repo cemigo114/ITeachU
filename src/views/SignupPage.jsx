@@ -145,9 +145,9 @@ export default function SignupPage() {
   }
 
   const roleCards = [
-    { key: 'teacher', label: 'Teacher', Icon: TeacherIcon, selectedClass: 'border-sage bg-sage-pale shadow-[0_0_0_3px_rgba(74,124,111,0.1)]' },
-    { key: 'student', label: 'Student', Icon: StudentIcon, selectedClass: 'border-amber bg-amber-pale shadow-[0_0_0_3px_rgba(212,133,58,0.1)]' },
-    { key: 'parent', label: 'Parent', Icon: ParentIcon, selectedClass: 'border-sky bg-sky-pale shadow-[0_0_0_3px_rgba(58,122,184,0.1)]' },
+    { key: 'teacher', label: 'Teacher', emoji: '👩‍🏫', selectedClass: 'border-sage bg-sage-pale shadow-[0_0_0_3px_rgba(74,124,111,0.1)]' },
+    { key: 'student', label: 'Student', emoji: '🎒', selectedClass: 'border-amber bg-amber-pale shadow-[0_0_0_3px_rgba(212,133,58,0.1)]' },
+    { key: 'parent', label: 'Parent', emoji: '👤', selectedClass: 'border-sky bg-sky-pale shadow-[0_0_0_3px_rgba(58,122,184,0.1)]' },
   ];
 
   return (
@@ -187,7 +187,7 @@ export default function SignupPage() {
 
           {/* Role picker */}
           <div className="grid grid-cols-3 gap-2 mb-6">
-            {roleCards.map(({ key, label, Icon, selectedClass }) => (
+            {roleCards.map(({ key, label, emoji, selectedClass }) => (
               <button
                 key={key}
                 onClick={() => { setSelectedRole(key); setError(''); }}
@@ -195,7 +195,7 @@ export default function SignupPage() {
                   selectedRole === key ? selectedClass : 'border-border hover:border-sage-light hover:shadow-soft'
                 }`}
               >
-                <div className="mb-2 flex justify-center"><Icon /></div>
+                <div className="text-[28px] mb-2">{emoji}</div>
                 <div className="text-xs font-semibold text-ink-soft tracking-tight">{label}</div>
               </button>
             ))}
