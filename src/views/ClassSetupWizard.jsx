@@ -226,53 +226,70 @@ export default function ClassSetupWizard() {
         </div>
 
         {/* Invitation code box */}
-        <div
-          className="flex items-center"
-          style={{
-            marginTop: '1.25rem',
-            padding: '1rem 1.125rem',
-            background: '#e8f2ef',
-            borderRadius: '8px',
-            gap: '10px',
-            border: '1.5px solid oklch(62% 0.08 162 / 0.3)',
-          }}
-        >
-          <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-            <path
-              d="M10 2L12 8h6l-5 3.6 1.9 6L10 14l-4.9 3.6L7 11.6 2 8h6z"
-              stroke="#4a7c6f"
-              strokeWidth="1.3"
-              fill="none"
-              strokeLinejoin="round"
-            />
-          </svg>
-          <div>
-            <div className="text-sage-deep font-semibold" style={{ fontSize: '12px' }}>
-              Student invitation code:{' '}
-              <strong style={{ fontSize: '14px', letterSpacing: '0.05em' }}>
-                {inviteCode}
-              </strong>
-            </div>
-            <div className="text-muted" style={{ fontSize: '11px', marginTop: '1px' }}>
-              Share this with students to join your class
-            </div>
-          </div>
-          <button
-            onClick={copyCode}
-            className="text-muted font-medium transition-colors"
+        {inviteCode ? (
+          <div
+            className="flex items-center"
             style={{
-              marginLeft: 'auto',
-              fontSize: '11px',
-              background: 'transparent',
-              border: '1px solid #d8e4e0',
+              marginTop: '1.25rem',
+              padding: '1rem 1.125rem',
+              background: '#e8f2ef',
               borderRadius: '8px',
-              padding: '7px 16px',
-              cursor: 'pointer',
+              gap: '10px',
+              border: '1.5px solid oklch(62% 0.08 162 / 0.3)',
             }}
           >
-            {codeCopied ? 'Copied!' : 'Copy'}
-          </button>
-        </div>
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+              <path
+                d="M10 2L12 8h6l-5 3.6 1.9 6L10 14l-4.9 3.6L7 11.6 2 8h6z"
+                stroke="#4a7c6f"
+                strokeWidth="1.3"
+                fill="none"
+                strokeLinejoin="round"
+              />
+            </svg>
+            <div>
+              <div className="text-sage-deep font-semibold" style={{ fontSize: '12px' }}>
+                Student invitation code:{' '}
+                <strong style={{ fontSize: '14px', letterSpacing: '0.05em' }}>
+                  {inviteCode}
+                </strong>
+              </div>
+              <div className="text-muted" style={{ fontSize: '11px', marginTop: '1px' }}>
+                Share this with students to join your class
+              </div>
+            </div>
+            <button
+              onClick={copyCode}
+              className="text-muted font-medium transition-colors"
+              style={{
+                marginLeft: 'auto',
+                fontSize: '11px',
+                background: 'transparent',
+                border: '1px solid #d8e4e0',
+                borderRadius: '8px',
+                padding: '7px 16px',
+                cursor: 'pointer',
+              }}
+            >
+              {codeCopied ? 'Copied!' : 'Copy'}
+            </button>
+          </div>
+        ) : (
+          <div
+            className="text-center"
+            style={{
+              marginTop: '1.25rem',
+              padding: '1rem',
+              background: '#f5f8f6',
+              borderRadius: '8px',
+              border: '1.5px dashed #d8e4e0',
+            }}
+          >
+            <p className="text-muted" style={{ fontSize: '12px' }}>
+              An invitation code will be generated when you create the class
+            </p>
+          </div>
+        )}
 
         {error && (
           <p className="text-xs text-coral mt-2">{error}</p>
