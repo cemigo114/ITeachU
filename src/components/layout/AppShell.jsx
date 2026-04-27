@@ -1,7 +1,7 @@
 import React from 'react';
-import { Outlet, NavLink, useLocation } from 'react-router-dom';
+import { Outlet, NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
-import { ClipboardList, BarChart3, Lightbulb, LogOut } from 'lucide-react';
+import { ClipboardList, BarChart3, Lightbulb, LogOut, Settings } from 'lucide-react';
 
 function CognalityLogoMark() {
   return (
@@ -28,26 +28,31 @@ function getInitials(name) {
     .slice(0, 2);
 }
 
-function getPageTitle(pathname) {
-  const map = {
-    '/assign': 'Assign tasks',
-    '/report': 'Class report',
-    '/recommendations': 'Recommendations',
-    '/setup': 'Set up your class',
-    '/student': 'My assignments',
-    '/parent': "Your child's progress",
+function getPageInfo(pathname) {
+  const routes = {
+    '/assign/create': { title: 'Assign task', breadcrumb: [{ label: 'Task bank', to: '/assign' }] },
+    '/assign/detail': { title: 'Task details', breadcrumb: [{ label: 'Task bank', to: '/assign' }] },
+    '/assign': { title: 'Assign tasks' },
+    '/report/feedback': { title: 'Student feedback', breadcrumb: [{ label: 'Class report', to: '/report' }] },
+    '/report/student': { title: 'Student detail', breadcrumb: [{ label: 'Class report', to: '/report' }] },
+    '/report': { title: 'Class report' },
+    '/recommendations': { title: 'Recommendations' },
+    '/setup': { title: 'Set up your class' },
+    '/student': { title: 'My assignments' },
+    '/parent': { title: "Your child's progress" },
   };
-  for (const [path, title] of Object.entries(map)) {
-    if (pathname.startsWith(path)) return title;
+  for (const [path, info] of Object.entries(routes)) {
+    if (pathname.startsWith(path)) return info;
   }
-  return 'Cognality';
+  return { title: 'Cognality' };
 }
 
 export default function AppShell() {
   const { user, logout } = useAuth();
   const location = useLocation();
+  const navigate = useNavigate();
   const isTeacher = user?.role === 'teacher';
-  const pageTitle = getPageTitle(location.pathname);
+  const pageInfo = getPageInfo(location.pathname);
 
   return (
     <div className="h-screen flex overflow-hidden">
@@ -62,15 +67,21 @@ export default function AppShell() {
             <span className="font-display text-sm text-white font-medium">Cognality</span>
           </div>
 
-          {/* Class chip */}
-          <div className="mx-5 mb-4 bg-white/5 border border-white/10 rounded-sm px-2.5 py-2">
-            <strong className="block text-white/85 font-medium text-xs">
-              7th Grade Math
-            </strong>
+          {/* Class chip — clickable, navigates to class setup */}
+          <button
+            onClick={() => navigate('/setup')}
+            className="mx-5 mb-4 w-[calc(100%-2.5rem)] text-left bg-white/5 border border-white/10 rounded-sm px-2.5 py-2 hover:bg-white/[0.08] hover:border-white/20 transition-colors cursor-pointer group"
+          >
+            <div className="flex items-center justify-between">
+              <strong className="block text-white/85 font-medium text-xs">
+                7th Grade Math · P3
+              </strong>
+              <Settings className="w-3 h-3 text-white/30 group-hover:text-white/60 transition-colors" />
+            </div>
             <span className="text-[11px] text-white/50">
-              8 students
+              8 students · Ms. Rivera
             </span>
-          </div>
+          </button>
 
           {/* Nav items */}
           <nav className="flex flex-col">
@@ -122,9 +133,22 @@ export default function AppShell() {
       <main className="flex-1 flex flex-col overflow-hidden bg-surface">
         {/* Top bar */}
         <div className="bg-white border-b border-border px-6 py-3.5 flex items-center justify-between flex-shrink-0">
-          <h1 className="font-display text-[17px] font-medium text-ink">
-            {pageTitle}
-          </h1>
+          <div className="flex items-center gap-1.5">
+            {pageInfo.breadcrumb?.map((crumb, i) => (
+              <React.Fragment key={crumb.to}>
+                <button
+                  onClick={() => navigate(crumb.to)}
+                  className="text-[13px] text-muted hover:text-ink transition-colors"
+                >
+                  {crumb.label}
+                </button>
+                <span className="text-border text-[13px]">›</span>
+              </React.Fragment>
+            ))}
+            <h1 className="font-display text-[17px] font-medium text-ink">
+              {pageInfo.title}
+            </h1>
+          </div>
           {!isTeacher && (
             <div className="flex items-center gap-2">
               <div className="w-7 h-7 rounded-full bg-amber flex items-center justify-center text-[11px] text-white font-medium">

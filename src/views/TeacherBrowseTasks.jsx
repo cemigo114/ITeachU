@@ -66,14 +66,7 @@ const TeacherBrowseTasks = ({
     (selectedGrade !== 'all' ? 1 : 0) + (selectedDomain !== 'all' ? 1 : 0);
 
   return (
-    <div className="min-h-screen bg-surface font-body view-enter">
-      <PageHeader
-        role="teacher"
-        title="Task Bank"
-        subtitle={`${filteredTasks.length} tasks available`}
-        onBack={onBack}
-      />
-
+    <div className="bg-surface font-body view-enter">
       <div className="max-w-7xl mx-auto p-6">
         <Card variant="elevated" padding="md" className="mb-6 animate-fade-in">
           <div className="flex flex-col md:flex-row gap-4">
