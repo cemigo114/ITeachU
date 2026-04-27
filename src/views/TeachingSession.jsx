@@ -338,7 +338,7 @@ const TeachingSession = ({
             <div className="flex-shrink-0 px-4 pt-3 pb-2.5" style={{ borderBottom: `1px solid ${colors.border}`, background: colors.studentBg }}>
               <div className="flex gap-2 items-start">
                 <div className="w-6 h-6 rounded-full flex-shrink-0 flex items-center justify-center text-xs" style={{ background: colors.zippy, color: 'white' }}>🤖</div>
-                <p className="text-xs leading-relaxed" style={{ color: colors.inkSoft }}>{messages[0].content.length > 200 ? messages[0].content.slice(0, 200) + '...' : messages[0].content}</p>
+                <p className="text-sm leading-relaxed" style={{ color: colors.inkSoft }}>{messages[0].content}</p>
               </div>
             </div>
           )}
