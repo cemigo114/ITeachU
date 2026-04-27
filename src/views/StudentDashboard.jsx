@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
 
 /**
  * StudentDashboard -- Screen 7 from the design prototype.
@@ -54,6 +55,151 @@ function CalendarIcon() {
   );
 }
 
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3002';
+
+function JoinClassCard() {
+  const { token } = useAuth();
+  const [code, setCode] = useState('');
+  const [showInput, setShowInput] = useState(false);
+  const [status, setStatus] = useState(null); // 'success' | 'error' | null
+  const [message, setMessage] = useState('');
+  const inputRefs = useRef([]);
+
+  const handleChange = (index, char) => {
+    if (char.length > 1) char = char[0];
+    const newCode = code.split('').concat(Array(6).fill('')).slice(0, 6);
+    newCode[index] = char.toUpperCase();
+    const joined = newCode.join('');
+    setCode(joined);
+    if (char && index < 5) inputRefs.current[index + 1]?.focus();
+  };
+
+  const handleKeyDown = (index, e) => {
+    if (e.key === 'Backspace' && !code[index] && index > 0) {
+      inputRefs.current[index - 1]?.focus();
+    }
+  };
+
+  const handlePaste = (e) => {
+    e.preventDefault();
+    const pasted = e.clipboardData.getData('text').toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 6);
+    setCode(pasted);
+    const nextIdx = Math.min(pasted.length, 5);
+    inputRefs.current[nextIdx]?.focus();
+  };
+
+  const handleJoin = async () => {
+    if (code.replace(/\s/g, '').length < 6) return;
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/classes/join`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ inviteCode: code.trim() }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setStatus('success');
+        setMessage(`Joined ${data.className || 'class'}!`);
+        setTimeout(() => { setShowInput(false); setStatus(null); setCode(''); }, 2000);
+      } else {
+        setStatus('error');
+        setMessage(data.error || 'Invalid code');
+      }
+    } catch {
+      setStatus('error');
+      setMessage('Could not connect to server');
+    }
+  };
+
+  if (!showInput) {
+    return (
+      <button
+        onClick={() => setShowInput(true)}
+        className="w-full flex items-center justify-center gap-2 py-3 rounded-xl cursor-pointer transition-all"
+        style={{
+          background: colors.white,
+          border: `1.5px dashed ${colors.border}`,
+          color: colors.muted,
+          fontSize: '13px',
+          fontWeight: 500,
+        }}
+        onMouseEnter={(e) => { e.currentTarget.style.borderColor = colors.zippy; e.currentTarget.style.color = colors.zippyDeep; }}
+        onMouseLeave={(e) => { e.currentTarget.style.borderColor = colors.border; e.currentTarget.style.color = colors.muted; }}
+      >
+        <span style={{ fontSize: '16px' }}>+</span>
+        Join another class
+      </button>
+    );
+  }
+
+  return (
+    <div
+      className="rounded-xl p-4"
+      style={{
+        background: colors.white,
+        border: `1.5px solid ${colors.border}`,
+        boxShadow: '0 2px 8px rgba(0,0,0,0.05)',
+      }}
+    >
+      <div className="flex items-center justify-between mb-3">
+        <span className="text-[13px] font-medium" style={{ color: colors.ink }}>
+          Enter your class code
+        </span>
+        <button
+          onClick={() => { setShowInput(false); setCode(''); setStatus(null); }}
+          className="text-[11px] transition-colors"
+          style={{ color: colors.muted }}
+        >
+          Cancel
+        </button>
+      </div>
+      <div className="flex gap-[6px] justify-center mb-3">
+        {Array.from({ length: 6 }).map((_, i) => (
+          <input
+            key={i}
+            ref={el => inputRefs.current[i] = el}
+            type="text"
+            maxLength={1}
+            value={code[i] || ''}
+            onChange={e => handleChange(i, e.target.value)}
+            onKeyDown={e => handleKeyDown(i, e)}
+            onPaste={i === 0 ? handlePaste : undefined}
+            className="text-center font-semibold font-body outline-none transition-all"
+            style={{
+              width: '40px', height: '48px',
+              border: `1.5px solid ${colors.border}`,
+              borderRadius: '8px',
+              fontSize: '20px',
+              color: colors.ink,
+            }}
+            onFocus={(e) => { e.target.style.borderColor = colors.zippy; e.target.style.boxShadow = `0 0 0 3px oklch(60% 0.18 15 / 0.12)`; }}
+            onBlur={(e) => { e.target.style.borderColor = colors.border; e.target.style.boxShadow = 'none'; }}
+          />
+        ))}
+      </div>
+      {status === 'success' && (
+        <p className="text-center text-[12px] mb-2" style={{ color: colors.sage }}>{message}</p>
+      )}
+      {status === 'error' && (
+        <p className="text-center text-[12px] mb-2" style={{ color: 'oklch(57% 0.12 28)' }}>{message}</p>
+      )}
+      <button
+        onClick={handleJoin}
+        disabled={code.replace(/\s/g, '').length < 6}
+        className="w-full py-2.5 text-white text-[13px] font-medium transition-colors disabled:opacity-40"
+        style={{
+          background: colors.zippy,
+          borderRadius: '8px',
+          border: 'none',
+          cursor: code.replace(/\s/g, '').length >= 6 ? 'pointer' : 'default',
+        }}
+      >
+        Join class →
+      </button>
+    </div>
+  );
+}
+
 const StudentDashboard = ({
   currentUser,
   assignments,
@@ -100,6 +246,11 @@ const StudentDashboard = ({
         <p className="mt-1 text-[13px]" style={{ color: colors.muted }}>
           You have {pendingAssignments.length} assignment{pendingAssignments.length !== 1 ? 's' : ''} waiting
         </p>
+      </div>
+
+      {/* Join another class */}
+      <div className="px-6 mb-4 max-w-lg mx-auto">
+        <JoinClassCard />
       </div>
 
       {/* Active assignments */}
