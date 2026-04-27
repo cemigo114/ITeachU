@@ -52,7 +52,7 @@ export default function ClassSetupWizard() {
         },
         body: JSON.stringify({
           name: className.trim(),
-          grade,
+          gradeLevel: grade,
           subject,
         }),
       });
@@ -65,7 +65,8 @@ export default function ClassSetupWizard() {
           navigate('/assign', { replace: true });
         }
       } else {
-        setError('Could not create class. Please try again.');
+        const errData = await response.json().catch(() => ({}));
+        setError(errData.error || 'Could not create class. Please try again.');
       }
     } catch {
       setError('Could not connect to server.');
