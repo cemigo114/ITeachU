@@ -15,6 +15,7 @@ import {
 } from './db.js';
 import authRouter from './src/routes/auth.js';
 import classRouter from './src/routes/classes.js';
+import assignmentRouter from './src/routes/assignments.js';
 
 const app = express();
 const PORT = process.env.PORT || 3002;
@@ -65,9 +66,10 @@ app.use((req, res, next) => {
 app.locals.useDatabase = useDatabase;
 app.locals.prisma = prisma;
 
-// Mount auth and class routers
+// Mount auth, class, and assignment routers
 app.use('/api/auth', authRouter);
 app.use('/api/classes', classRouter);
+app.use('/api/assignments', assignmentRouter);
 
 // Health/diagnostic endpoint
 app.get('/api/health', async (req, res) => {

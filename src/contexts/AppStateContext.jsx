@@ -1,8 +1,11 @@
-import React, { createContext, useContext, useState, useCallback } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import tasksData from '../data/tasks.json';
-import { MOCK_STUDENTS, MOCK_ASSIGNMENTS, EVALUATION_CATEGORIES } from '../data/mockData';
+import { MOCK_STUDENTS, EVALUATION_CATEGORIES } from '../data/mockData';
 import { API_ENDPOINTS } from '../config/api';
+import { useAuth } from './AuthContext';
+
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3002';
 
 const AppStateContext = createContext(null);
 
@@ -22,15 +25,17 @@ const EXAMPLE_TASKS = Object.values(tasksData.tasks);
 
 const getBadge = (totalScore) => {
   if (totalScore >= 85) return { name: 'Master Teacher', icon: '🏆', color: 'bg-yellow-500' };
-  if (totalScore >= 70) return { name: 'Great Explainer', icon: '⭐', color: 'bg-brand-500' };
-  if (totalScore >= 50) return { name: 'Good Helper', icon: '👍', color: 'bg-teal-500' };
-  return { name: 'Getting Started', icon: '🌱', color: 'bg-neutral-500' };
+  if (totalScore >= 70) return { name: 'Great Explainer', icon: '⭐', color: 'bg-sage' };
+  if (totalScore >= 50) return { name: 'Good Helper', icon: '👍', color: 'bg-amber' };
+  return { name: 'Getting Started', icon: '🌱', color: 'bg-muted' };
 };
 
 export function AppStateProvider({ children }) {
   const navigate = useNavigate();
+  const { user, token } = useAuth();
 
-  const [assignments, setAssignments] = useState(MOCK_ASSIGNMENTS);
+  const [assignments, setAssignments] = useState([]);
+  const [loadingAssignments, setLoadingAssignments] = useState(false);
   const [selectedTaskForAssignment, setSelectedTaskForAssignment] = useState(null);
   const [selectedStudentsForAssignment, setSelectedStudentsForAssignment] = useState([]);
   const [selectedTaskForDetail, setSelectedTaskForDetail] = useState(null);
@@ -51,6 +56,31 @@ export function AppStateProvider({ children }) {
   const dismissToast = useCallback(() => setToast(prev => ({ ...prev, visible: false })), []);
   const dismissConfirmModal = () => setConfirmModal({ show: false, title: '', message: '', onConfirm: null });
 
+  // Fetch real assignments from backend when user is authenticated
+  const fetchAssignments = useCallback(async () => {
+    if (!token) return;
+    setLoadingAssignments(true);
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/assignments`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setAssignments(data.assignments || []);
+      }
+    } catch (e) {
+      console.error('Error fetching assignments:', e);
+    } finally {
+      setLoadingAssignments(false);
+    }
+  }, [token]);
+
+  useEffect(() => {
+    if (user && token) {
+      fetchAssignments();
+    }
+  }, [user, token, fetchAssignments]);
+
   const fetchEvaluations = async () => {
     setLoadingEvaluations(true);
     try {
@@ -65,52 +95,68 @@ export function AppStateProvider({ children }) {
     }
   };
 
-  const handleCreateAssignment = () => {
+  const handleCreateAssignment = async () => {
     if (!selectedTaskForAssignment || selectedStudentsForAssignment.length === 0) {
       alert('Please select a task and at least one student');
       return;
     }
     const taskId = selectedTaskForAssignment.id || selectedTaskForAssignment.slug;
-    const duplicateStudentIds = selectedStudentsForAssignment.filter((studentId) =>
-      assignments.some((a) => a.studentId === studentId && a.taskId === taskId)
-    );
+    const taskTitle = selectedTaskForAssignment.title;
 
-    const doAssign = (studentIds) => {
-      if (studentIds.length === 0) { dismissConfirmModal(); return; }
-      const newAssignments = studentIds.map((studentId) => {
-        const student = MOCK_STUDENTS.find((s) => s.id === studentId);
-        return {
-          id: assignments.length + studentId,
-          studentId: student.id, studentName: student.name,
-          taskId, taskTitle: selectedTaskForAssignment.title,
-          status: 'assigned', completedDate: null, messages: [],
-        };
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/assignments`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+        body: JSON.stringify({
+          taskId,
+          taskTitle,
+          studentIds: selectedStudentsForAssignment,
+        }),
       });
-      setAssignments((prev) => [...prev, ...newAssignments]);
-      setSelectedTaskForAssignment(null);
-      setSelectedStudentsForAssignment([]);
-      dismissConfirmModal();
-      navigate('/assign');
-      showToast(`Task "${selectedTaskForAssignment.title}" assigned to ${studentIds.length} student(s)!`);
-    };
 
-    if (duplicateStudentIds.length > 0) {
-      const duplicateNames = duplicateStudentIds
-        .map((id) => MOCK_STUDENTS.find((s) => s.id === id)?.name)
-        .filter(Boolean).join(', ');
-      setConfirmModal({
-        show: true, title: 'Duplicate Assignment',
-        message: `${duplicateNames} already assigned "${selectedTaskForAssignment.title}". Assign anyway?`,
-        onConfirm: () => doAssign(selectedStudentsForAssignment),
-      });
-      return;
+      if (res.ok) {
+        const data = await res.json();
+        showToast(`Task "${taskTitle}" assigned to ${data.created} student(s)!`);
+        setSelectedTaskForAssignment(null);
+        setSelectedStudentsForAssignment([]);
+        dismissConfirmModal();
+        fetchAssignments();
+        navigate('/assign');
+      } else {
+        const err = await res.json().catch(() => ({}));
+        alert(err.error || 'Failed to assign task');
+      }
+    } catch (e) {
+      console.error('Assignment error:', e);
+      alert('Could not connect to server');
     }
-    doAssign(selectedStudentsForAssignment);
   };
+
+  const updateAssignment = useCallback(async (assignmentId, updates) => {
+    if (!token) return;
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/assignments/${assignmentId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(updates),
+      });
+      if (res.ok) {
+        fetchAssignments();
+      }
+    } catch (e) {
+      console.error('Error updating assignment:', e);
+    }
+  }, [token, fetchAssignments]);
 
   const value = {
     TASKS, EXAMPLE_TASKS, MOCK_STUDENTS, EVALUATION_CATEGORIES,
-    assignments, setAssignments,
+    assignments, setAssignments, loadingAssignments, fetchAssignments, updateAssignment,
     selectedTaskForAssignment, setSelectedTaskForAssignment,
     selectedStudentsForAssignment, setSelectedStudentsForAssignment,
     selectedTaskForDetail, setSelectedTaskForDetail,

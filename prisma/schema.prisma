@@ -87,3 +87,20 @@ model ClassMember {
   @@index([classId])
   @@index([userId])
 }
+
+model Assignment {
+  id            String    @id @default(cuid())
+  classId       String
+  studentId     String
+  taskId        String
+  taskTitle     String
+  status        String    @default("assigned")
+  dueDate       DateTime?
+  notes         String?
+  sessionId     String?
+  completedDate DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  @@index([studentId])
+  @@index([classId])
+}
