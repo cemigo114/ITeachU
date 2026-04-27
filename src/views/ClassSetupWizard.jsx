@@ -11,16 +11,6 @@ const GRADE_OPTIONS = [
 
 const SUBJECT_OPTIONS = ['Math', 'ELA', 'Science', 'Social Studies'];
 
-const INITIAL_STUDENTS = [
-  { initials: 'AM', name: 'Alex M.' },
-  { initials: 'JT', name: 'Jamie T.' },
-  { initials: 'PL', name: 'Priya L.' },
-  { initials: 'OW', name: 'Omar W.' },
-  { initials: 'CJ', name: 'Casey J.' },
-  { initials: 'RN', name: 'Rohan N.' },
-  { initials: 'ZB', name: 'Zoe B.' },
-  { initials: 'DK', name: 'Danny K.' },
-];
 
 export default function ClassSetupWizard() {
   const { token } = useAuth();
@@ -29,8 +19,7 @@ export default function ClassSetupWizard() {
   const [className, setClassName] = useState('7th Grade Math \u2014 Period 3');
   const [grade, setGrade] = useState('Grade 7');
   const [subject, setSubject] = useState('Math');
-  const [students, setStudents] = useState(INITIAL_STUDENTS);
-  const [inviteCode] = useState('ZPPY42');
+  const [inviteCode, setInviteCode] = useState(null);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
   const [codeCopied, setCodeCopied] = useState(false);
@@ -69,14 +58,17 @@ export default function ClassSetupWizard() {
       });
 
       if (response.ok) {
-        navigate('/assign', { replace: true });
+        const data = await response.json();
+        if (data.inviteCode) {
+          setInviteCode(data.inviteCode);
+        } else {
+          navigate('/assign', { replace: true });
+        }
       } else {
-        console.warn('Class creation API not available, proceeding to dashboard');
-        navigate('/assign', { replace: true });
+        setError('Could not create class. Please try again.');
       }
     } catch {
-      console.warn('Class creation API not reachable, proceeding to dashboard');
-      navigate('/assign', { replace: true });
+      setError('Could not connect to server.');
     } finally {
       setSubmitting(false);
     }
@@ -204,65 +196,30 @@ export default function ClassSetupWizard() {
           </select>
         </div>
 
-        {/* Add students */}
+        {/* Students — empty until they join with code */}
         <div className="mb-4">
-          <div className="flex items-center justify-between mb-1.5">
-            <label
-              className="text-ink-soft font-semibold uppercase"
-              style={{ fontSize: '11px', letterSpacing: '0.05em' }}
-            >
-              Add students
-            </label>
-            <span className="text-muted" style={{ fontSize: '11px' }}>
-              Or import from Google Classroom
-            </span>
-          </div>
+          <label
+            className="block text-ink-soft font-semibold uppercase mb-1.5"
+            style={{ fontSize: '11px', letterSpacing: '0.05em' }}
+          >
+            Students in your class
+          </label>
           <div
-            className="flex flex-wrap gap-1.5 bg-surface"
+            className="flex items-center justify-center text-center bg-surface"
             style={{
-              padding: '1rem',
-              border: '1.5px solid #d8e4e0',
+              padding: '1.5rem 1rem',
+              border: '1.5px dashed #d8e4e0',
               borderRadius: '8px',
               minHeight: '80px',
             }}
           >
-            {students.map((s) => (
-              <div
-                key={s.initials}
-                className="flex items-center gap-1.5 bg-white text-ink-soft"
-                style={{
-                  border: '1px solid #d8e4e0',
-                  borderRadius: '20px',
-                  padding: '4px 10px',
-                  fontSize: '11.5px',
-                  fontWeight: 400,
-                }}
-              >
-                <div
-                  className="bg-sage-pale text-sage-deep flex items-center justify-center font-semibold"
-                  style={{
-                    width: '20px',
-                    height: '20px',
-                    borderRadius: '50%',
-                    fontSize: '9px',
-                  }}
-                >
-                  {s.initials}
-                </div>
-                {s.name}
-              </div>
-            ))}
-            {/* Dashed "+ Add" chip */}
-            <div
-              className="flex items-center text-muted cursor-pointer"
-              style={{
-                border: '1px dashed #d8e4e0',
-                borderRadius: '20px',
-                padding: '4px 10px',
-                fontSize: '11.5px',
-              }}
-            >
-              + Add
+            <div>
+              <p className="text-muted" style={{ fontSize: '12px' }}>
+                No students yet
+              </p>
+              <p className="text-muted mt-1" style={{ fontSize: '11px' }}>
+                Students will appear here after they sign up with your invitation code
+              </p>
             </div>
           </div>
         </div>
@@ -320,28 +277,51 @@ export default function ClassSetupWizard() {
           <p className="text-xs text-coral mt-2">{error}</p>
         )}
 
-        {/* Finish setup button */}
-        <button
-          onClick={handleSubmit}
-          disabled={submitting || !className.trim()}
-          className="w-full text-white font-medium transition-all disabled:opacity-50"
-          style={{
-            marginTop: '1.25rem',
-            padding: '11px',
-            borderRadius: '8px',
-            fontSize: '12px',
-            fontWeight: 500,
-            border: 'none',
-            cursor: 'pointer',
-            background: 'linear-gradient(135deg, #4a7c6f 0%, #2d5249 100%)',
-            boxShadow: '0 1px 3px rgba(0,0,0,0.15), inset 0 1px 0 rgba(255,255,255,0.1)',
-            display: 'flex',
-            justifyContent: 'center',
-            letterSpacing: '-0.01em',
-          }}
-        >
-          {submitting ? 'Setting up...' : 'Finish setup \u2014 go to dashboard \u2192'}
-        </button>
+        {/* Action button */}
+        {inviteCode ? (
+          <button
+            onClick={() => navigate('/assign', { replace: true })}
+            className="w-full text-white font-medium transition-all"
+            style={{
+              marginTop: '1.25rem',
+              padding: '11px',
+              borderRadius: '8px',
+              fontSize: '12px',
+              fontWeight: 500,
+              border: 'none',
+              cursor: 'pointer',
+              background: 'linear-gradient(135deg, #4a7c6f 0%, #2d5249 100%)',
+              boxShadow: '0 1px 3px rgba(0,0,0,0.15), inset 0 1px 0 rgba(255,255,255,0.1)',
+              display: 'flex',
+              justifyContent: 'center',
+              letterSpacing: '-0.01em',
+            }}
+          >
+            Go to dashboard →
+          </button>
+        ) : (
+          <button
+            onClick={handleSubmit}
+            disabled={submitting || !className.trim()}
+            className="w-full text-white font-medium transition-all disabled:opacity-50"
+            style={{
+              marginTop: '1.25rem',
+              padding: '11px',
+              borderRadius: '8px',
+              fontSize: '12px',
+              fontWeight: 500,
+              border: 'none',
+              cursor: 'pointer',
+              background: 'linear-gradient(135deg, #4a7c6f 0%, #2d5249 100%)',
+              boxShadow: '0 1px 3px rgba(0,0,0,0.15), inset 0 1px 0 rgba(255,255,255,0.1)',
+              display: 'flex',
+              justifyContent: 'center',
+              letterSpacing: '-0.01em',
+            }}
+          >
+            {submitting ? 'Creating class...' : 'Create class & get invitation code →'}
+          </button>
+        )}
       </div>
     </div>
   );
