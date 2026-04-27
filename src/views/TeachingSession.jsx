@@ -333,15 +333,25 @@ const TeachingSession = ({
         <div className="bg-white border-b md:border-b-0 md:border-r flex-1 flex flex-col"
           style={{ borderColor: colors.border }}
         >
+          {/* Pinned first message (task intro) */}
+          {messages.length > 0 && messages[0].role === 'assistant' && (
+            <div className="flex-shrink-0 px-4 pt-3 pb-2.5" style={{ borderBottom: `1px solid ${colors.border}`, background: colors.studentBg }}>
+              <div className="flex gap-2 items-start">
+                <div className="w-6 h-6 rounded-full flex-shrink-0 flex items-center justify-center text-xs" style={{ background: colors.zippy, color: 'white' }}>🤖</div>
+                <p className="text-xs leading-relaxed" style={{ color: colors.inkSoft }}>{messages[0].content.length > 200 ? messages[0].content.slice(0, 200) + '...' : messages[0].content}</p>
+              </div>
+            </div>
+          )}
+
           <div className="overflow-y-auto p-4 space-y-3 h-40 md:h-auto md:flex-1" style={{ minHeight: 0 }}>
             <AnimatePresence>
-              {messages.map((m, i) => (
+              {messages.slice(1).map((m, i) => (
                 m.role === 'user' ? (
                   <ChatBubble
-                    key={`msg-user-${i}`}
+                    key={`msg-user-${i + 1}`}
                     role="user"
                     message={{ content: m.content }}
-                    messageIndex={i}
+                    messageIndex={i + 1}
                     onEditSave={handleEditUserMessage}
                     editDisabled={loading || isCompleted}
                     labels={{
@@ -353,7 +363,7 @@ const TeachingSession = ({
                   />
                 ) : (
                   <ChatBubble
-                    key={`msg-asst-${i}`}
+                    key={`msg-asst-${i + 1}`}
                     role="assistant"
                     message={{ content: m.content }}
                     mood={detectMood(m.content)}
@@ -374,6 +384,51 @@ const TeachingSession = ({
 
             {showThinkingDots && <ChatBubble isTyping />}
             <div ref={messagesEndRef} />
+          </div>
+
+          {/* Input controls — inside chat panel */}
+          <div className="flex-shrink-0 p-4" style={{ borderTop: `1px solid ${colors.border}` }}>
+            <AnimatePresence>
+              {showPostOptions ? (
+                <motion.div
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0 }}
+                  className="flex flex-col gap-2"
+                >
+                  {[
+                    { label: tl('continueExplaining'), icon: <MessageCircle className="h-3.5 w-3.5" />, color: colors.sage, handler: handleContinueExplaining },
+                    { label: tl('reviewThinking'), icon: <Eye className="h-3.5 w-3.5" />, color: colors.zippy, handler: handleReviewThinking },
+                    { label: tl('newProblem'), icon: <Sparkles className="h-3.5 w-3.5" />, color: colors.amber, handler: handleNewProblem },
+                  ].map(opt => (
+                    <button
+                      key={opt.label}
+                      onClick={opt.handler}
+                      className="flex items-center gap-2 px-3 py-2 rounded-lg bg-white border text-left text-xs font-medium transition-all hover:shadow-sm"
+                      style={{ borderColor: colors.border, color: opt.color }}
+                    >
+                      {opt.icon}
+                      {opt.label}
+                    </button>
+                  ))}
+                </motion.div>
+              ) : (
+                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+                  <ChatInput
+                    value={input}
+                    onChange={(e) => setInput(e.target.value)}
+                    onSend={handleTextSubmit}
+                    onVoiceTranscript={handleVoiceTranscript}
+                    placeholder={tl('placeholder')}
+                    voiceRecordingHint={tl('tapMicWhenDone')}
+                    disabled={loading || isCompleted}
+                    loading={loading}
+                    isRevising={!!selectedItemForRevision}
+                    onCancelRevision={() => { setSelectedItemForRevision(null); setInput(''); }}
+                  />
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
         </div>
 
@@ -420,93 +475,9 @@ const TeachingSession = ({
             </div>
           </div>
 
-          {/* Input Panel */}
-          <div className="flex-shrink-0" style={{ background: colors.white, borderTop: `1px solid ${colors.border}` }}>
-            <div className="p-4 md:px-8 md:py-5">
-
-              {/* Post-completion options */}
-              <AnimatePresence>
-                {showPostOptions && (
-                  <motion.div
-                    initial={{ opacity: 0, y: 16, scale: 0.97 }}
-                    animate={{ opacity: 1, y: 0, scale: 1 }}
-                    exit={{ opacity: 0, y: 8, scale: 0.97 }}
-                    transition={{ type: 'spring', stiffness: 320, damping: 28 }}
-                    className="mb-4 rounded-2xl overflow-hidden border shadow-lg max-w-4xl mx-auto"
-                    style={{
-                      borderColor: `oklch(49% 0.08 162 / 0.3)`,
-                      background: `linear-gradient(135deg, oklch(96% 0.025 162 / 0.5) 0%, oklch(97% 0.03 75 / 0.5) 100%)`,
-                    }}
-                  >
-                    <div className="flex items-center gap-2 px-4 py-3" style={{ borderBottom: `1px solid oklch(49% 0.08 162 / 0.2)` }}>
-                      <motion.div
-                        initial={{ scale: 0, rotate: -30 }}
-                        animate={{ scale: 1, rotate: 0 }}
-                        transition={{ type: 'spring', stiffness: 400, damping: 18, delay: 0.1 }}
-                      >
-                        <div className="w-7 h-7 rounded-full flex items-center justify-center shadow-md" style={{ background: colors.sage }}>
-                          <Check className="h-4 w-4 text-white" strokeWidth={3} />
-                        </div>
-                      </motion.div>
-                      <p className="text-sm font-medium" style={{ color: colors.ink }}>Great thinking -- what would you like to do next?</p>
-                    </div>
-                    <div className="p-3 flex flex-col sm:flex-row gap-2">
-                      {[
-                        { label: tl('continueExplaining'), sub: 'Add more to your explanation', icon: <MessageCircle className="h-4 w-4" />, color: colors.sage, handler: handleContinueExplaining, delay: 0.15 },
-                        { label: tl('reviewThinking'), sub: 'Look back at what you wrote', icon: <Eye className="h-4 w-4" />, color: colors.zippy, handler: handleReviewThinking, delay: 0.22 },
-                        { label: tl('newProblem'), sub: 'Try a fresh challenge', icon: <Sparkles className="h-4 w-4" />, color: colors.amber, handler: handleNewProblem, delay: 0.29 },
-                      ].map(opt => (
-                        <motion.button
-                          key={opt.label}
-                          initial={{ opacity: 0, x: -10 }}
-                          animate={{ opacity: 1, x: 0 }}
-                          transition={{ delay: opt.delay }}
-                          onClick={opt.handler}
-                          className="flex-1 flex items-center gap-2.5 px-4 py-3 rounded-xl bg-white border transition-all duration-200 group shadow-sm text-left hover:shadow-md"
-                          style={{ borderColor: `${opt.color}30`, color: opt.color }}
-                        >
-                          <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 transition-colors" style={{ backgroundColor: `${opt.color}15` }}>
-                            {opt.icon}
-                          </div>
-                          <div className="min-w-0 flex-1">
-                            <p className="text-sm font-medium truncate">{opt.label}</p>
-                            <p className="text-xs opacity-60 truncate">{opt.sub}</p>
-                          </div>
-                          <ArrowRight className="h-4 w-4 flex-shrink-0 opacity-40" />
-                        </motion.button>
-                      ))}
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-
-              {/* Input controls */}
-              <div className="max-w-4xl mx-auto">
-                <AnimatePresence>
-                  {!showPostOptions && (
-                    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-                      <ChatInput
-                        value={input}
-                        onChange={(e) => setInput(e.target.value)}
-                        onSend={handleTextSubmit}
-                        onVoiceTranscript={handleVoiceTranscript}
-                        placeholder={tl('placeholder')}
-                        voiceRecordingHint={tl('tapMicWhenDone')}
-                        disabled={loading || isCompleted}
-                        loading={loading}
-                        isRevising={!!selectedItemForRevision}
-                        onCancelRevision={() => { setSelectedItemForRevision(null); setInput(''); }}
-                      />
-
-                      {!isTranscribing && getActiveContent().length === 0 && !messages.some(m => m.role === 'user') && (
-                        <p className="text-center text-xs mt-3" style={{ color: colors.muted }}>{tl('hint')}</p>
-                      )}
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-
-                {/* Complete task button */}
-                <div className="mt-4 pt-4" style={{ borderTop: `1px solid ${colors.border}` }}>
+          {/* Complete task button — under canvas */}
+          <div className="flex-shrink-0 p-4" style={{ background: colors.white, borderTop: `1px solid ${colors.border}` }}>
+                <div>
                   <AnimatePresence mode="wait">
                     {!isCompleted ? (
                       <motion.div key="btn" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0, scale: 0.95 }}>
@@ -551,9 +522,6 @@ const TeachingSession = ({
                     )}
                   </AnimatePresence>
                 </div>
-              </div>
-
-            </div>
           </div>
 
         </div>
