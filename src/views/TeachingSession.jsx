@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import confetti from 'canvas-confetti';
-import { Check, Globe, ChevronDown, MessageCircle, Eye, Sparkles, ArrowRight } from 'lucide-react';
+import { Check, Globe, ChevronDown, MessageCircle, Eye, Sparkles, ArrowRight, Lock } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { t } from '../utils/translations';
 import { WhiteboardPanel } from '../components/WhiteboardPanel';
@@ -329,15 +329,10 @@ const TeachingSession = ({
       {/* ====== MAIN CONTENT ====== */}
       <div className="flex-1 flex flex-col md:flex-row overflow-hidden">
 
-        {/* Chat Sidebar */}
-        <div className="bg-white border-b md:border-b-0 md:border-r flex-shrink-0 md:w-80 lg:w-96 flex flex-col"
+        {/* Chat Panel — takes majority of space */}
+        <div className="bg-white border-b md:border-b-0 md:border-r flex-1 flex flex-col"
           style={{ borderColor: colors.border }}
         >
-          <TaskCard
-            title={getTaskField(task, 'title', language)}
-            subtitle={`Help Zippy understand ${task.standard}`}
-          />
-
           <div className="overflow-y-auto p-4 space-y-3 h-40 md:h-auto md:flex-1" style={{ minHeight: 0 }}>
             <AnimatePresence>
               {messages.map((m, i) => (
@@ -382,28 +377,47 @@ const TeachingSession = ({
           </div>
         </div>
 
-        {/* Right Panel: Whiteboard + Input */}
-        <div className="flex-1 flex flex-col overflow-hidden">
+        {/* Right Panel: Whiteboard (locked) + Input */}
+        <div className="hidden md:flex flex-col overflow-hidden flex-shrink-0" style={{ width: '340px' }}>
 
-          {/* Whiteboard */}
-          <div className="flex-1 flex flex-col overflow-hidden">
-            <WhiteboardPanel
-              whiteboardItems={whiteboardItems}
-              showHistory={showHistory}
-              isCompleted={isCompleted}
-              isTranscribing={isTranscribing}
-              transcribingWords={transcribingWords}
-              onReviseItem={handleReviseItem}
-              onEraseTextItem={handleEraseItem}
-              drawingStrokes={drawingStrokes}
-              onDrawingStrokesChange={setDrawingStrokes}
-              whiteboardEndRef={whiteboardEndRef}
-              t={tl}
-              highlightedDrawingId={perception.highlightedDrawingId}
-              showShareButton={thinkingChunks.showShareButton}
-              isActivelyWorking={thinkingChunks.isActivelyWorking}
-              onShareWithZippy={handleShareWithZippy}
-            />
+          {/* Whiteboard — locked with "Coming soon" overlay */}
+          <div className="flex-1 relative overflow-hidden" style={{ background: colors.studentBg }}>
+            <div className="absolute inset-0 opacity-30 pointer-events-none">
+              <WhiteboardPanel
+                whiteboardItems={whiteboardItems}
+                showHistory={showHistory}
+                isCompleted={isCompleted}
+                isTranscribing={isTranscribing}
+                transcribingWords={transcribingWords}
+                onReviseItem={handleReviseItem}
+                onEraseTextItem={handleEraseItem}
+                drawingStrokes={drawingStrokes}
+                onDrawingStrokesChange={setDrawingStrokes}
+                whiteboardEndRef={whiteboardEndRef}
+                t={tl}
+                highlightedDrawingId={perception.highlightedDrawingId}
+                showShareButton={false}
+                isActivelyWorking={false}
+                onShareWithZippy={() => {}}
+              />
+            </div>
+            {/* Lock overlay */}
+            <div className="absolute inset-0 flex items-center justify-center z-10">
+              <div className="text-center">
+                <div
+                  className="w-12 h-12 rounded-xl mx-auto mb-3 flex items-center justify-center"
+                  style={{ background: 'rgba(0,0,0,0.06)' }}
+                >
+                  <Lock className="w-5 h-5" style={{ color: colors.muted }} />
+                </div>
+                <p className="text-sm font-medium" style={{ color: colors.inkSoft }}>
+                  Canvas
+                </p>
+                <p className="text-xs mt-1 px-8" style={{ color: colors.muted }}>
+                  Coming soon
+                </p>
+              </div>
+            </div>
           </div>
 
           {/* Input Panel */}
