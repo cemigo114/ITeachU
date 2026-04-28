@@ -8,7 +8,7 @@ const TeacherTaskDetail = ({ task, onBack, onAssign }) => {
   if (!task) return null;
 
   return (
-    <div className="min-h-screen bg-neutral-50 font-body view-enter">
+    <div className="min-h-screen bg-surface font-body view-enter">
       <PageHeader
         role="teacher"
         title={task.title}
@@ -30,76 +30,76 @@ const TeacherTaskDetail = ({ task, onBack, onAssign }) => {
             </Badge>
           </div>
 
-          <p className="text-neutral-700 mb-4">{task.description}</p>
-          <p className="text-sm text-neutral-600 italic">{task.standardDescription}</p>
+          <p className="text-ink-soft mb-4">{task.description}</p>
+          <p className="text-sm text-ink-soft italic">{task.standardDescription}</p>
         </Card>
 
         <Card variant="elevated" padding="lg">
-          <h2 className="text-lg font-display font-bold text-brand-900 mb-3">
+          <h2 className="text-lg font-display font-medium text-sage-deep mb-3">
             1. Student Prompt (Low Entry Point)
           </h2>
-          <p className="text-neutral-700">{task.sections.studentPrompt}</p>
+          <p className="text-ink-soft">{task.sections.studentPrompt}</p>
         </Card>
 
         <Card variant="elevated" padding="lg">
-          <h2 className="text-lg font-display font-bold text-brand-900 mb-3">
+          <h2 className="text-lg font-display font-medium text-sage-deep mb-3">
             2. Possible Misconceptions
           </h2>
           <ul className="space-y-2">
             {task.sections.misconceptions.map((misconception, idx) => (
               <li key={idx} className="flex gap-3">
-                <span className="text-brand-600 font-semibold shrink-0">{idx + 1}.</span>
-                <span className="text-neutral-700">{misconception}</span>
+                <span className="text-sage font-semibold shrink-0">{idx + 1}.</span>
+                <span className="text-ink-soft">{misconception}</span>
               </li>
             ))}
           </ul>
         </Card>
 
         <Card variant="elevated" padding="lg">
-          <h2 className="text-lg font-display font-bold text-brand-900 mb-3">
+          <h2 className="text-lg font-display font-medium text-sage-deep mb-3">
             3. Pattern Recognition Prompt
           </h2>
-          <p className="text-neutral-700">{task.sections.patternRecognition}</p>
+          <p className="text-ink-soft">{task.sections.patternRecognition}</p>
         </Card>
 
         <Card variant="elevated" padding="lg">
-          <h2 className="text-lg font-display font-bold text-brand-900 mb-3">
+          <h2 className="text-lg font-display font-medium text-sage-deep mb-3">
             4. Generalization Question (Always/Sometimes/Never)
           </h2>
-          <p className="text-neutral-700">{task.sections.generalization}</p>
+          <p className="text-ink-soft">{task.sections.generalization}</p>
         </Card>
 
         <Card variant="elevated" padding="lg">
-          <h2 className="text-lg font-display font-bold text-brand-900 mb-3">
+          <h2 className="text-lg font-display font-medium text-sage-deep mb-3">
             5. Inference and Prediction
           </h2>
-          <p className="text-neutral-700">{task.sections.inference}</p>
+          <p className="text-ink-soft">{task.sections.inference}</p>
         </Card>
 
         <Card variant="elevated" padding="lg">
-          <h2 className="text-lg font-display font-bold text-brand-900 mb-3">
+          <h2 className="text-lg font-display font-medium text-sage-deep mb-3">
             6. Mapping and Process Data
           </h2>
           <div className="space-y-3">
             <div>
-              <h3 className="font-display font-semibold text-neutral-900 mb-1">Claims:</h3>
+              <h3 className="font-display font-semibold text-ink mb-1">Claims:</h3>
               <ul className="list-disc list-inside space-y-1">
                 {task.sections.mappingData.claims.map((claim, idx) => (
-                  <li key={idx} className="text-neutral-700">
+                  <li key={idx} className="text-ink-soft">
                     {claim}
                   </li>
                 ))}
               </ul>
             </div>
             <div>
-              <h3 className="font-display font-semibold text-neutral-900 mb-1">Evidence:</h3>
-              <p className="text-neutral-700">{task.sections.mappingData.evidence}</p>
+              <h3 className="font-display font-semibold text-ink mb-1">Evidence:</h3>
+              <p className="text-ink-soft">{task.sections.mappingData.evidence}</p>
             </div>
             <div>
-              <h3 className="font-display font-semibold text-neutral-900 mb-1">
+              <h3 className="font-display font-semibold text-ink mb-1">
                 Process Data Revealing Critical Thinking:
               </h3>
-              <p className="text-neutral-700">{task.sections.mappingData.criticalThinking}</p>
+              <p className="text-ink-soft">{task.sections.mappingData.criticalThinking}</p>
             </div>
           </div>
         </Card>
