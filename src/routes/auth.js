@@ -5,7 +5,8 @@ import path from 'path';
 import { generateToken, authMiddleware } from '../middleware/auth.js';
 
 const router = express.Router();
-const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
+const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID || '363552449164-63ca3bo4uc0m12k239rd7b28p0ds8br1.apps.googleusercontent.com';
+const googleClient = new OAuth2Client(GOOGLE_CLIENT_ID);
 
 // File-based persistence for users (JSON fallback)
 const DATA_DIR = path.join(process.cwd(), 'data');
@@ -57,7 +58,7 @@ router.post('/google', async (req, res) => {
     try {
       const ticket = await googleClient.verifyIdToken({
         idToken: credential,
-        audience: process.env.GOOGLE_CLIENT_ID
+        audience: GOOGLE_CLIENT_ID
       });
       payload = ticket.getPayload();
     } catch (verifyError) {
