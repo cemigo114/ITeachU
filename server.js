@@ -8,7 +8,7 @@ import { generateZippyPrompt } from './src/utils/zippyPrompt.js';
 import { parseSignal } from './src/utils/parseSignal.js';
 import { parseTaskMarkdown } from './src/utils/parseMarkdown.js';
 import {
-  connectDatabase, disconnectDatabase, useDatabase,
+  connectDatabase, disconnectDatabase, useDatabase, verifyDatabaseTables,
   upsertConversation, getAllConversations,
   upsertEvaluation, getEvaluation,
   prisma
@@ -62,8 +62,7 @@ app.use((req, res, next) => {
   next();
 });
 
-// Share database context with routers via app.locals
-app.locals.useDatabase = useDatabase;
+// Share database context with routers via app.locals (updated after verifyDatabaseTables in startServer)
 app.locals.prisma = prisma;
 
 // Mount auth, class, and assignment routers
@@ -751,6 +750,10 @@ async function startServer() {
       console.error('⚠️  Migration failed:', e.message);
     }
     await connectDatabase();
+    const tablesReady = await verifyDatabaseTables();
+    app.locals.useDatabase = tablesReady;
+  } else {
+    app.locals.useDatabase = false;
   }
 
   app.listen(PORT, () => {
