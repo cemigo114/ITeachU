@@ -72,22 +72,31 @@ router.post('/google', async (req, res) => {
     let user;
     let isNewUser = false;
 
+    let usedDatabase = false;
     if (req.app.locals.useDatabase && req.app.locals.prisma) {
-      const prisma = req.app.locals.prisma;
-      user = await prisma.user.findUnique({ where: { googleId } });
+      try {
+        const prisma = req.app.locals.prisma;
+        user = await prisma.user.findUnique({ where: { googleId } });
+        usedDatabase = true;
 
-      if (user && isSignup) {
-        return res.json({ existing: true, token: generateToken(user), user: { id: user.id, email: user.email, name: user.name, role: user.role } });
+        if (user && isSignup) {
+          return res.json({ existing: true, token: generateToken(user), user: { id: user.id, email: user.email, name: user.name, role: user.role } });
+        }
+        if (!user && isLogin) {
+          return res.status(404).json({ error: 'No account found. Please sign up first.' });
+        }
+        if (!user) {
+          user = await prisma.user.create({ data: { email, name, role, googleId } });
+          isNewUser = true;
+          console.log(`👤 New user created (DB): ${email} as ${role}`);
+        }
+      } catch (dbError) {
+        console.error('Database auth failed, falling back to JSON:', dbError.message);
+        usedDatabase = false;
       }
-      if (!user && isLogin) {
-        return res.status(404).json({ error: 'No account found. Please sign up first.' });
-      }
-      if (!user) {
-        user = await prisma.user.create({ data: { email, name, role, googleId } });
-        isNewUser = true;
-        console.log(`👤 New user created (DB): ${email} as ${role}`);
-      }
-    } else {
+    }
+
+    if (!usedDatabase) {
       const users = loadUsers();
       user = users.find(u => u.googleId === googleId);
 
@@ -118,8 +127,8 @@ router.post('/google', async (req, res) => {
       user: { id: user.id, email: user.email, name: user.name, role: user.role }
     });
   } catch (error) {
-    console.error('Auth error:', error);
-    res.status(500).json({ error: 'Authentication failed' });
+    console.error('Auth error:', error.message, error.stack);
+    res.status(500).json({ error: 'Authentication failed', detail: error.message });
   }
 });
 
