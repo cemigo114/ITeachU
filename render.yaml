@@ -12,6 +12,6 @@ services:
       - key: VITE_ANTHROPIC_API_KEY
         sync: false
       - key: GOOGLE_CLIENT_ID
-        sync: false
+        value: 363552449164-63ca3bo4uc0m12k239rd7b28p0ds8br1.apps.googleusercontent.com
       - key: JWT_SECRET
-        sync: false
+        value: Rap3W8f5RcDgSjr48rdIaBThAHOiIyYe9Heehk30tk8=
