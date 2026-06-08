@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Privacy & Data Protection - Cognality Learning by Cognality Learning</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      line-height: 1.6; color: #333; background: #fff;
+    }
+    .container { max-width: 900px; margin: 0 auto; padding: 2rem 1.5rem; }
+    header {
+      text-align: center; margin-bottom: 3rem;
+      padding-bottom: 2rem; border-bottom: 1px solid #ddd;
+    }
+    h1 { font-size: 2.5rem; margin-bottom: 1rem; color: #1a1a1a; }
+    header p { font-size: 1.1rem; color: #666; max-width: 600px; margin: 0 auto; }
+    h2 { font-size: 1.5rem; margin-top: 2.5rem; margin-bottom: 1.5rem; color: #1a1a1a; }
+    h3 { font-size: 1.1rem; margin-top: 1.5rem; margin-bottom: 0.5rem; color: #1a1a1a; }
+
+    /* Badges */
+    .badges {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 2rem; margin: 2rem 0; padding: 2.5rem 2rem;
+      background: #f5f5f5; border-radius: 8px;
+    }
+    .badge { text-align: center; }
+    .badge-image {
+      display: flex; align-items: center; justify-content: center;
+      min-height: 90px; margin-bottom: 0.75rem;
+    }
+    .badge-image img {
+      max-height: 80px; width: auto; object-fit: contain;
+    }
+    .badge-text { font-weight: 600; font-size: 0.95rem; color: #1a1a1a; }
+    .badge-sub { font-size: 0.8rem; color: #666; margin-top: 0.25rem; }
+    .badge a { text-decoration: none; color: inherit; }
+    .badge a:hover .badge-text { color: #1976d2; }
+
+    /* Compliance details */
+    .compliance-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 1.5rem; margin-top: 1.5rem;
+    }
+    .compliance-card {
+      padding: 1.5rem; border: 1px solid #ddd;
+      border-radius: 8px; background: #fafafa;
+    }
+    .compliance-card h3 { margin-top: 0; }
+    .compliance-card p { color: #666; font-size: 0.9rem; line-height: 1.5; }
+    .compliance-card a { color: #1976d2; text-decoration: none; font-weight: 600; }
+    .compliance-card a:hover { text-decoration: underline; }
+
+    /* Commitments */
+    .commitments {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 1.5rem; margin: 2rem 0;
+    }
+    .commitment {
+      padding: 1.5rem; border: 1px solid #ddd;
+      border-radius: 8px; background: #fafafa;
+    }
+    .commitment h3 { margin-top: 0; }
+    .commitment p { color: #666; font-size: 0.95rem; }
+
+    /* Fact box */
+    .fact-box {
+      background: #e3f2fd; border-left: 4px solid #1976d2;
+      padding: 2rem; margin: 2rem 0; border-radius: 4px;
+    }
+    .fact-box h2 { margin-top: 0; }
+    .facts-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1.5rem;
+    }
+    .fact { font-size: 0.95rem; }
+    .fact::before { content: "✓ "; color: #2e7d32; font-weight: bold; }
+
+    /* Practices */
+    .practices { margin: 2rem 0; }
+    .practice {
+      margin-bottom: 2rem; padding-bottom: 1.5rem;
+      border-bottom: 1px solid #ddd;
+    }
+    .practice:last-child { border-bottom: none; }
+    .practice-label { font-weight: 600; color: #1a1a1a; margin-bottom: 0.5rem; display: block; }
+    .practice-desc { color: #666; font-size: 0.95rem; }
+
+    /* Legal framework */
+    .legal-framework {
+      margin: 2rem 0; padding: 2rem; background: #fff3e0;
+      border-left: 4px solid #f57c00; border-radius: 4px;
+    }
+    .legal-framework h2 { margin-top: 0; }
+    .legal-framework p { color: #666; margin-bottom: 1rem; }
+    .framework-list { list-style: none; padding: 0; }
+    .framework-list li {
+      margin-bottom: 1rem; color: #666;
+      font-size: 0.95rem; line-height: 1.6;
+    }
+    .framework-list li strong { color: #333; }
+    .framework-list a { color: #1976d2; text-decoration: none; }
+    .framework-list a:hover { text-decoration: underline; }
+
+    /* Footer */
+    footer {
+      text-align: center; padding-top: 2rem; border-top: 1px solid #ddd;
+      margin-top: 3rem; color: #666; font-size: 0.9rem;
+    }
+    footer a { color: #1976d2; text-decoration: none; margin: 0 1rem; }
+    footer a:hover { text-decoration: underline; }
+
+    @media (max-width: 600px) {
+      h1 { font-size: 1.8rem; }
+      .badges { grid-template-columns: repeat(2, 1fr); gap: 1.5rem; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>Your privacy matters</h1>
+      <p>Cognality Learning is built on trust. We're transparent about how we collect, use, and protect student data. Your data is never sold, shared, or used for commercial purposes.</p>
+    </header>
+
+    <!-- BADGES — Official images from source organizations -->
+    <section>
+      <h2>Compliance & certifications</h2>
+      <div class="badges">
+        <div class="badge">
+          <a href="https://studentprivacy.ed.gov/ferpa" target="_blank">
+            <div class="badge-image">
+              <img src="https://studentprivacy.ed.gov/themes/custom/edu27/logo.png" alt="U.S. Department of Education — Protecting Student Privacy (FERPA)">
+            </div>
+            <div class="badge-text">FERPA Compliant</div>
+            <div class="badge-sub">School Official Exception</div>
+          </a>
+        </div>
+        <div class="badge">
+          <a href="https://www.ftc.gov/legal-library/browse/rules/childrens-online-privacy-protection-rule-coppa" target="_blank">
+            <div class="badge-image">
+              <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/6/69/Seal_of_the_United_States_Federal_Trade_Commission.svg/200px-Seal_of_the_United_States_Federal_Trade_Commission.svg.png" alt="Federal Trade Commission — COPPA Enforcement">
+            </div>
+            <div class="badge-text">COPPA Compliant</div>
+            <div class="badge-sub">FTC — School Exception</div>
+          </a>
+        </div>
+        <div class="badge">
+          <a href="https://studentprivacy.ed.gov/content/ppra" target="_blank">
+            <div class="badge-image">
+              <img src="https://studentprivacy.ed.gov/themes/custom/edu27/logo.png" alt="U.S. Department of Education — PPRA">
+            </div>
+            <div class="badge-text">PPRA Compliant</div>
+            <div class="badge-sub">No sensitive surveys</div>
+          </a>
+        </div>
+        <div class="badge">
+          <a href="https://kidsafe.com/our-seals" target="_blank">
+            <div class="badge-image">
+              <img src="https://kidsafe.com/build/assets/logo-gzQA05iI.png" alt="kidSAFE Seal Program">
+            </div>
+            <div class="badge-text">kidSAFE Certification</div>
+            <div class="badge-sub">Planned — Year 2</div>
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <!-- COMPLIANCE DETAILS -->
+    <section>
+      <div class="compliance-grid">
+        <div class="compliance-card">
+          <h3><a href="https://studentprivacy.ed.gov/ferpa" target="_blank">FERPA</a></h3>
+          <p>We operate as a "school official" under the <a href="https://studentprivacy.ed.gov/faq/what-ferpa" target="_blank">Family Educational Rights and Privacy Act</a>. Your school retains full custodianship of all student records. We handle data with the same protections as your school.</p>
+        </div>
+        <div class="compliance-card">
+          <h3><a href="https://www.ftc.gov/legal-library/browse/rules/childrens-online-privacy-protection-rule-coppa" target="_blank">COPPA</a></h3>
+          <p>Under the <a href="https://www.ftc.gov/business-guidance/resources/complying-coppa-frequently-asked-questions" target="_blank">Children's Online Privacy Protection Act</a>, we operate via the school authorization model. Schools obtain parental consent; we never collect data directly from students under 13.</p>
+        </div>
+        <div class="compliance-card">
+          <h3><a href="https://studentprivacy.ed.gov/content/ppra" target="_blank">PPRA</a></h3>
+          <p>We comply with the <a href="https://studentprivacy.ed.gov/faq/what-protection-pupil-rights-amendment-ppra" target="_blank">Protection of Pupil Rights Amendment</a>. We do not administer surveys collecting sensitive information (political beliefs, mental health, religious views, sexual behavior).</p>
+        </div>
+        <div class="compliance-card">
+          <h3><a href="https://kidsafe.com/our-seals/coppa-seal" target="_blank">kidSAFE (Planned)</a></h3>
+          <p>We are pursuing <a href="https://kidsafe.com/our-seals/edu-seal" target="_blank">+EDU CERTIFIED</a> (FERPA) and <a href="https://kidsafe.com/our-seals/coppa-seal" target="_blank">+COPPA CERTIFIED</a> seals from kidSAFE, an FTC-approved Safe Harbor program for independent third-party verification.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- COMMITMENTS -->
+    <section class="commitments">
+      <div class="commitment">
+        <h3>👥 No data sales</h3>
+        <p>We never sell, rent, or trade student data to third parties. Period.</p>
+      </div>
+      <div class="commitment">
+        <h3>🔒 End-to-end encryption</h3>
+        <p>TLS 1.2+ in transit. AES-256 at rest. Teaching sessions and performance data are encrypted.</p>
+      </div>
+      <div class="commitment">
+        <h3>🧠 Learning-only use</h3>
+        <p>Data used solely for educational purposes. Never for advertising, behavioral profiling, or targeting.</p>
+      </div>
+      <div class="commitment">
+        <h3>🗑️ Automatic purge</h3>
+        <p>Session data auto-deletes after 1 year of inactivity. Schools can request deletion anytime.</p>
+      </div>
+      <div class="commitment">
+        <h3>📊 Transparency reports</h3>
+        <p>We respond to all data requests within 5 business days. Detailed access logs maintained.</p>
+      </div>
+      <div class="commitment">
+        <h3>🛡️ School stays in control</h3>
+        <p>Under FERPA, your school is the data custodian. We're a service provider acting on your behalf.</p>
+      </div>
+    </section>
+
+    <!-- WHAT WE COLLECT -->
+    <div class="fact-box">
+      <h2>What we collect and why</h2>
+      <div class="facts-grid">
+        <div class="fact">Age group (for compliance)</div>
+        <div class="fact">Teaching interactions (for learning)</div>
+        <div class="fact">Cognitive profile (personalization)</div>
+        <div class="fact">Session timestamps (technical)</div>
+      </div>
+    </div>
+
+    <!-- DATA PRACTICES -->
+    <section class="practices">
+      <h2>Our data practices</h2>
+      <div class="practice">
+        <span class="practice-label">Collection</span>
+        <p class="practice-desc">Minimal, essential data only. Under the FERPA School Official Exception, schools handle student enrollment and parental consent. We receive no personally identifiable information (PII) directly from students under 13 (COPPA compliance).</p>
+      </div>
+      <div class="practice">
+        <span class="practice-label">Use</span>
+        <p class="practice-desc">Exclusively for personalized learning and assessment. Never for advertising, profiling, or commercial purposes. Aligned with FERPA's legitimate educational purpose requirement and COPPA's restrictions on data use.</p>
+      </div>
+      <div class="practice">
+        <span class="practice-label">Storage</span>
+        <p class="practice-desc">Encrypted PostgreSQL database on secure AWS infrastructure (AES-256 at rest, TLS 1.2+ in transit). Access restricted to authorized personnel only. Schools retain custodianship under FERPA.</p>
+      </div>
+      <div class="practice">
+        <span class="practice-label">Retention</span>
+        <p class="practice-desc">Kept while actively in use. Schools can request deletion anytime. Auto-deleted after 1 year of inactivity. Compliant with FERPA record retention requirements and COPPA's minimization principles.</p>
+      </div>
+      <div class="practice">
+        <span class="practice-label">Breach response</span>
+        <p class="practice-desc">Notify affected schools within 72 hours per FERPA requirements. Maintain detailed incident logs. Schools are responsible for notifying parents/guardians under state law and COPPA where applicable.</p>
+      </div>
+      <div class="practice">
+        <span class="practice-label">Third parties</span>
+        <p class="practice-desc">No data sharing with third parties. Schools remain the data custodian. We do not engage in behavioral advertising, data sales, or commercial profiling—prohibited under FERPA, COPPA, and PPRA.</p>
+      </div>
+    </section>
+
+    <!-- LEGAL FRAMEWORK -->
+    <section class="legal-framework">
+      <h2>Legal framework</h2>
+      <p>Cognality Learning operates under established U.S. education privacy laws:</p>
+      <ul class="framework-list">
+        <li><strong>FERPA</strong> (Family Educational Rights and Privacy Act): We operate as a "school official" under the School Official Exception. Your school retains full custodianship of student records. <a href="https://studentprivacy.ed.gov/ferpa" target="_blank">Learn more at studentprivacy.ed.gov</a></li>
+        <li><strong>COPPA</strong> (Children's Online Privacy Protection Act): We comply via the school exception model—schools obtain parental consent; we don't collect data directly from students under 13. <a href="https://www.ftc.gov/legal-library/browse/rules/childrens-online-privacy-protection-rule-coppa" target="_blank">FTC COPPA Rule</a></li>
+        <li><strong>PPRA</strong> (Protection of Pupil Rights Amendment): We do not conduct surveys collecting sensitive information about students' political beliefs, mental health, or other protected topics. <a href="https://studentprivacy.ed.gov/content/ppra" target="_blank">Learn more at studentprivacy.ed.gov</a></li>
+        <li><strong>State Data Breach Laws:</strong> We comply with state requirements to notify schools of any data breaches within required timeframes.</li>
+      </ul>
+    </section>
+
+    <footer>
+      <a href="mailto:privacy@cognalitylearning.com">Privacy Contact</a> •
+      <a href="/report-concern">Report a Concern</a> •
+      <a href="/security">Security Documentation</a>
+    </footer>
+  </div>
+</body>
+</html>

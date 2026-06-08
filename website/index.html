@@ -574,8 +574,9 @@
         .footer-container {
             max-width: 1280px;
             margin: 0 auto;
-            display: grid;
-            grid-template-columns: 2fr 1fr 1fr 1fr;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
             gap: 2rem;
         }
 
@@ -590,23 +591,25 @@
             line-height: 1.6;
         }
 
-        .footer-column h4 {
-            margin-bottom: 1rem;
+        .footer-links {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+            flex-shrink: 0;
+        }
+
+        .footer-links-label {
             color: white;
+            font-weight: 600;
         }
 
-        .footer-column ul {
-            list-style: none;
-        }
-
-        .footer-column a {
+        .footer-links a {
             color: var(--gray-medium);
             text-decoration: none;
-            line-height: 2;
             transition: color 0.3s;
         }
 
-        .footer-column a:hover {
+        .footer-links a:hover {
             color: var(--accent-teal);
         }
 
@@ -669,8 +672,13 @@
             }
 
             .footer-container {
-                grid-template-columns: 1fr;
+                flex-direction: column;
                 text-align: center;
+            }
+
+            .footer-links {
+                justify-content: center;
+                flex-wrap: wrap;
             }
 
             .process-steps::before {
@@ -714,9 +722,7 @@
                     making their understanding visible and providing educators with a clearer, more defensible view of learning.
                 </p>
                 <div class="hero-buttons">
-                    <a href="app/" class="btn btn-primary">Try It For Free →</a>
-                    <a href="https://youtu.be/b1aCeuOZ7b8" target="_blank" rel="noopener noreferrer" class="btn btn-secondary">Watch Demo</a>
-                    <a href="/pilot" class="btn btn-secondary">Join Our Pilot</a>
+                    <a href="/pilot" class="btn btn-primary">Join Our Pilot →</a>
                 </div>
             </div>
             <div class="hero-visual">
@@ -835,32 +841,11 @@
                 <h3>Cognality Learning</h3>
                 <p>Building the next generation of assessment for the AI era, one that looks beyond answers to understand how students think.</p>
             </div>
-            <div class="footer-column">
-                <h4>Product</h4>
-                <ul>
-                    <li><a href="#features">Features</a></li>
-                    <li><a href="#how">How It Works</a></li>
-                    <li><a href="#pricing">Pricing</a></li>
-                    <li><a href="#demo">Demo</a></li>
-                </ul>
-            </div>
-            <div class="footer-column">
-                <h4>Resources</h4>
-                <ul>
-                    <li><a href="#research">Research</a></li>
-                    <li><a href="#blog">Blog</a></li>
-                    <li><a href="#case-studies">Case Studies</a></li>
-                    <li><a href="#support">Support</a></li>
-                </ul>
-            </div>
-            <div class="footer-column">
-                <h4>Company</h4>
-                <ul>
-                    <li><a href="#about">About Us</a></li>
-                    <li><a href="#careers">Careers</a></li>
-                    <li><a href="#contact">Contact</a></li>
-                    <li><a href="#privacy">Privacy</a></li>
-                </ul>
+            <div class="footer-links">
+                <span class="footer-links-label">Company</span>
+                <a href="#about">About Us</a>
+                <a href="mailto:support@cognalitylearning.com">Contact</a>
+                <a href="privacy.html">Privacy</a>
             </div>
         </div>
         <div class="footer-bottom">
