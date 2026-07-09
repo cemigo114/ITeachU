@@ -1,10 +1,10 @@
 import React from 'react';
 
 const variantStyles = {
-  default: 'bg-white rounded-2xl shadow-soft border border-neutral-200/60',
-  elevated: 'bg-white rounded-2xl shadow-card',
-  interactive: 'bg-white rounded-2xl shadow-soft border border-neutral-200/60 card-interactive cursor-pointer hover:border-brand-300',
-  flat: 'bg-neutral-50 rounded-2xl border border-neutral-200/60',
+  default: 'bg-white rounded-sm shadow-soft border border-border',
+  elevated: 'bg-white rounded-sm shadow-card',
+  interactive: 'bg-white rounded-sm shadow-soft border border-border card-interactive cursor-pointer hover:border-sage-light',
+  flat: 'bg-surface rounded-sm border border-border',
 };
 
 const Card = ({

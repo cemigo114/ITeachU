@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { BookOpen, BarChart3, LogOut } from 'lucide-react';
 import PageHeader from '../components/ui/PageHeader';
 import Card from '../components/ui/Card';
@@ -20,6 +20,19 @@ const TeacherDashboard = ({
   getBadge,
   EXAMPLE_TASKS,
 }) => {
+  const taskOverview = useMemo(() => {
+    const map = {};
+    assignments.forEach((a) => {
+      if (!map[a.taskId]) {
+        map[a.taskId] = { taskId: a.taskId, taskTitle: a.taskTitle, totalAssigned: 0, completed: 0, inProgress: 0 };
+      }
+      map[a.taskId].totalAssigned += 1;
+      if (a.status === 'completed') map[a.taskId].completed += 1;
+      if (a.status === 'in_progress') map[a.taskId].inProgress += 1;
+    });
+    return Object.values(map).sort((a, b) => b.totalAssigned - a.totalAssigned);
+  }, [assignments]);
+
   return (
     <div className="min-h-screen bg-neutral-50 font-body view-enter">
       <PageHeader
@@ -105,6 +118,51 @@ const TeacherDashboard = ({
             ))}
           </div>
         </Card>
+
+        {taskOverview.length > 0 && (
+          <Card variant="elevated" padding="lg" className="mt-6 animate-fade-in">
+            <h2 className="text-xl font-display font-semibold text-neutral-900 mb-4">
+              Task Overview
+            </h2>
+            <div className="space-y-4">
+              {taskOverview.map((task) => {
+                const completionPct = task.totalAssigned > 0
+                  ? Math.round((task.completed / task.totalAssigned) * 100)
+                  : 0;
+                return (
+                  <div key={task.taskId} className="space-y-1.5">
+                    <div className="flex items-center justify-between gap-4">
+                      <span className="text-sm font-semibold text-neutral-900 flex-1 truncate">
+                        {task.taskTitle}
+                      </span>
+                      <div className="flex items-center gap-3 flex-shrink-0 text-xs">
+                        <span className="text-teal-700 font-medium">
+                          {task.completed}/{task.totalAssigned} completed
+                        </span>
+                        {task.inProgress > 0 && (
+                          <span className="text-coral-600 font-medium">
+                            {task.inProgress} in progress
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                    <div className="h-2 bg-neutral-100 rounded-full overflow-hidden">
+                      <div
+                        className="h-full bg-teal-500 rounded-full transition-all duration-500"
+                        style={{ width: `${completionPct}%` }}
+                        role="progressbar"
+                        aria-valuenow={completionPct}
+                        aria-valuemin={0}
+                        aria-valuemax={100}
+                        aria-label={`${task.taskTitle}: ${completionPct}% completed`}
+                      />
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </Card>
+        )}
       </div>
     </div>
   );

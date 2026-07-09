@@ -21,9 +21,10 @@ const LumoMascot = ({ emotion = 'happy', size = 'medium', showControls = false }
 
   // Size configurations
   const sizes = {
-    small: { width: 160, height: 180, scale: 0.5 },
-    medium: { width: 240, height: 270, scale: 0.75 },
-    large: { width: 320, height: 360, scale: 1 }
+    xsmall: { width: 68, height: 68, scale: 0.31 },
+    small: { width: 108, height: 108, scale: 0.5 },
+    medium: { width: 160, height: 160, scale: 0.75 },
+    large: { width: 215, height: 215, scale: 1 }
   };
 
   const sizeConfig = sizes[size] || sizes.medium;
@@ -91,7 +92,7 @@ const LumoMascot = ({ emotion = 'happy', size = 'medium', showControls = false }
   return (
     <div className="lumo-container" style={{ width: '100%', height: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
       <div className={`lumo-display ${getBodyAnimation()}`} style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-        <svg width={sizeConfig.width} height={sizeConfig.height} viewBox="0 0 320 360" style={{ display: 'block' }}>
+        <svg width={sizeConfig.width} height={sizeConfig.height} viewBox="50 50 220 220" style={{ display: 'block' }}>
           {/* Glow effect */}
           <defs>
             <radialGradient id={`bodyGradient-${activeEmotion}`} cx="50%" cy="30%">

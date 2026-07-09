@@ -2,10 +2,10 @@ import React from 'react';
 import { ArrowLeft } from 'lucide-react';
 
 const roleColorStyles = {
-  teacher: 'bg-brand-600',
-  student: 'bg-teal-600',
+  teacher: 'bg-sage',
+  student: 'bg-amber',
   parent: 'bg-plum-600',
-  default: 'bg-brand-600',
+  default: 'bg-sage',
 };
 
 const PageHeader = ({
@@ -32,7 +32,7 @@ const PageHeader = ({
               </button>
             )}
             <div>
-              <h1 className="text-xl font-display font-bold tracking-tight">{title}</h1>
+              <h1 className="text-xl font-display font-medium tracking-tight">{title}</h1>
               {subtitle && (
                 <p className="text-sm mt-0.5 opacity-80">{subtitle}</p>
               )}

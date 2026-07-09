@@ -17,6 +17,19 @@ try {
 
 export { prisma, useDatabase };
 
+export async function verifyDatabaseTables() {
+  if (!prisma || !useDatabase) return false;
+  try {
+    await prisma.user.findFirst();
+    console.log('✅ Database tables verified (User table exists)');
+    return true;
+  } catch (error) {
+    console.error('⚠️  Database tables not ready, falling back to JSON:', error.message);
+    useDatabase = false;
+    return false;
+  }
+}
+
 export async function connectDatabase() {
   if (!prisma) return false;
   try {

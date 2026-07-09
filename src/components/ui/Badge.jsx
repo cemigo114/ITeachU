@@ -1,21 +1,21 @@
 import React from 'react';
 
 const variantStyles = {
-  default: 'bg-neutral-100 text-neutral-700',
-  brand: 'bg-brand-100 text-brand-700',
-  teal: 'bg-teal-100 text-teal-700',
-  coral: 'bg-coral-100 text-coral-700',
+  default: 'bg-surface text-ink-soft',
+  brand: 'bg-sage-pale text-sage-deep',
+  teal: 'bg-sage-pale text-sage-deep',
+  coral: 'bg-coral-pale text-coral',
   plum: 'bg-plum-100 text-plum-700',
-  success: 'bg-teal-100 text-teal-700',
-  warning: 'bg-coral-100 text-coral-700',
-  info: 'bg-brand-100 text-brand-700',
+  success: 'bg-sage-pale text-sage-deep',
+  warning: 'bg-coral-pale text-coral',
+  info: 'bg-sage-pale text-sage-deep',
 };
 
 const statusStyles = {
-  completed: 'bg-teal-100 text-teal-700',
-  in_progress: 'bg-coral-100 text-coral-800',
-  pending: 'bg-neutral-100 text-neutral-600',
-  assigned: 'bg-brand-100 text-brand-700',
+  completed: 'bg-sage-pale text-sage-deep',
+  in_progress: 'bg-amber-pale text-amber-deep',
+  pending: 'bg-surface text-muted',
+  assigned: 'bg-sage-pale text-sage-deep',
 };
 
 const sizeStyles = {

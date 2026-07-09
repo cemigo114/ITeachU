@@ -32,24 +32,24 @@ const TeacherAssignTask = ({
   };
 
   return (
-    <div className="min-h-screen bg-neutral-50 font-body view-enter">
+    <div className="min-h-screen bg-surface font-body view-enter">
       <PageHeader role="teacher" title="Assign New Task" onBack={onBack} />
 
       <div className="max-w-4xl mx-auto p-6 space-y-6 stagger-children">
         <Card variant="elevated" padding="lg" className="animate-fade-in">
-          <h2 className="text-xl font-display font-semibold text-neutral-900 mb-4">
+          <h2 className="text-xl font-display font-semibold text-ink mb-4">
             Step 1: Choose Task
           </h2>
 
           {selectedTask ? (
-            <div className="p-4 rounded-2xl border-2 border-brand-600 bg-brand-50/80">
+            <div className="p-4 rounded-sm border-2 border-sage bg-sage-pale/80">
               <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
                 <div className="flex-1 min-w-0">
-                  <h3 className="font-display font-semibold text-lg text-neutral-900 mb-1">
+                  <h3 className="font-display font-semibold text-lg text-ink mb-1">
                     {selectedTask.title}
                   </h3>
-                  <p className="text-sm text-neutral-600 mb-2">{selectedTask.description}</p>
-                  <div className="flex flex-wrap items-center gap-2 text-xs text-neutral-500">
+                  <p className="text-sm text-ink-soft mb-2">{selectedTask.description}</p>
+                  <div className="flex flex-wrap items-center gap-2 text-xs text-muted">
                     <Badge variant="default" size="sm">
                       {selectedTask.grade}
                     </Badge>
@@ -85,13 +85,13 @@ const TeacherAssignTask = ({
                   accent="teacher"
                   padding="md"
                   onClick={() => setSelectedTask(task)}
-                  className="text-left border-2 border-neutral-200 hover:border-brand-300"
+                  className="text-left border-2 border-border hover:border-sage-light"
                 >
-                  <h3 className="font-display font-semibold text-lg text-neutral-900 mb-1">
+                  <h3 className="font-display font-semibold text-lg text-ink mb-1">
                     {task.title}
                   </h3>
-                  <p className="text-sm text-neutral-600 mb-2">{task.description}</p>
-                  <div className="flex flex-wrap items-center gap-2 text-xs text-neutral-500">
+                  <p className="text-sm text-ink-soft mb-2">{task.description}</p>
+                  <div className="flex flex-wrap items-center gap-2 text-xs text-muted">
                     <Badge variant="default" size="sm">
                       {task.grade}
                     </Badge>
@@ -106,7 +106,7 @@ const TeacherAssignTask = ({
         {selectedTask && (
           <Card variant="elevated" padding="lg" className="animate-slide-up">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">
-              <h2 className="text-xl font-display font-semibold text-neutral-900">
+              <h2 className="text-xl font-display font-semibold text-ink">
                 Step 2: Select Students
               </h2>
 
@@ -115,9 +115,9 @@ const TeacherAssignTask = ({
                   type="checkbox"
                   checked={selectedStudents.length === MOCK_STUDENTS.length}
                   onChange={(e) => toggleSelectAll(e.target.checked)}
-                  className="w-5 h-5 rounded border-neutral-300 text-brand-600 focus:ring-brand-500 focus:ring-2"
+                  className="w-5 h-5 rounded border-border text-sage focus:ring-sage/20 focus:ring-2"
                 />
-                <span className="font-semibold text-brand-600 text-sm sm:text-base">
+                <span className="font-semibold text-sage text-sm sm:text-base">
                   Assign to All Students
                 </span>
               </label>
@@ -127,17 +127,17 @@ const TeacherAssignTask = ({
               {MOCK_STUDENTS.map((student) => (
                 <label
                   key={student.id}
-                  className="flex items-center gap-3 p-3 bg-neutral-50 rounded-xl border border-neutral-100 cursor-pointer hover:bg-neutral-100 transition-colors"
+                  className="flex items-center gap-3 p-3 bg-surface rounded-sm border border-border cursor-pointer hover:bg-sage-pale transition-colors"
                 >
                   <input
                     type="checkbox"
                     checked={selectedStudents.includes(student.id)}
                     onChange={(e) => toggleStudent(student.id, e.target.checked)}
-                    className="w-5 h-5 rounded border-neutral-300 text-brand-600 focus:ring-brand-500 focus:ring-2 shrink-0"
+                    className="w-5 h-5 rounded border-border text-sage focus:ring-sage/20 focus:ring-2 shrink-0"
                   />
                   <div className="flex-1 min-w-0">
-                    <div className="font-semibold text-neutral-900">{student.name}</div>
-                    <div className="text-sm text-neutral-600">
+                    <div className="font-semibold text-ink">{student.name}</div>
+                    <div className="text-sm text-ink-soft">
                       {student.grade} Grade • {student.email}
                     </div>
                   </div>

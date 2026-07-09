@@ -35,3 +35,5 @@ data/*.db-wal
 
 # Git worktrees for design variants
 .worktrees
+.gstack/
+.netlify/
