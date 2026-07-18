@@ -1,0 +1,768 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sample Knowledge Map — Cognality Learning</title>
+<script src="https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js"></script>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --primary-blue: #0A4d8c;
+    --primary-light: #f8fafc;
+    --accent-teal: #00a896;
+    --accent-coral: #ff6b4a;
+    --neutral-white: #ffffff;
+    --neutral-dark: #212b36;
+    --gray-light: #f3f4f6;
+    --gray-medium: #9ca3af;
+    --gray-dark: #4b5563;
+    --shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+    --shadow-lg: 0 10px 25px -5px rgba(0,0,0,0.1);
+  }
+
+  body {
+    background: var(--primary-light);
+    color: var(--neutral-dark);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Inter', sans-serif;
+  }
+
+  /* ── Navigation ── */
+  nav {
+    position: fixed;
+    top: 0;
+    width: 100%;
+    background: var(--neutral-white);
+    box-shadow: var(--shadow);
+    z-index: 1000;
+  }
+
+  .nav-container {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 0.1rem 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--primary-blue);
+    text-decoration: none;
+  }
+
+  .logo-icon {
+    width: 150px;
+    height: 150px;
+    border-radius: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    background: transparent;
+  }
+
+  .logo-icon img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    mix-blend-mode: darken;
+  }
+
+  nav ul {
+    display: flex;
+    list-style: none;
+    gap: 2rem;
+    align-items: center;
+  }
+
+  nav a {
+    color: var(--gray-dark);
+    text-decoration: none;
+    font-weight: 500;
+    font-size: 1.3rem;
+    transition: color 0.3s;
+  }
+
+  nav a:hover { color: var(--primary-blue); }
+
+  .nav-cta {
+    background: var(--accent-coral);
+    color: white !important;
+    padding: 10px 24px;
+    border-radius: 8px;
+    transition: all 0.3s;
+  }
+
+  .nav-cta:hover {
+    background: #e55a3a;
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
+  }
+
+  .mobile-menu-btn {
+    display: none;
+    flex-direction: column;
+    gap: 4px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 8px;
+  }
+
+  .mobile-menu-btn span {
+    width: 25px;
+    height: 3px;
+    background: var(--primary-blue);
+    transition: all 0.3s ease;
+  }
+
+  /* ── Graph wrapper — fills viewport below nav, scrollable ── */
+  #graph-wrapper {
+    position: relative;
+    margin-top: 160px;
+    height: calc(100vh - 160px);
+    min-height: 700px;
+  }
+
+  /* ── Graph SVG ── */
+  #graph {
+    position: absolute;
+    top: 0;
+    left: 250px;
+    width: calc(100% - 250px);
+    height: 100%;
+    display: block;
+  }
+
+  /* ── Node states ── */
+  .node-group { cursor: pointer; }
+
+  /* ── Tooltip ── */
+  #tooltip {
+    position: absolute;
+    background: var(--neutral-white);
+    border-radius: 12px;
+    padding: 16px 20px;
+    max-width: 280px;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.15s;
+    z-index: 100;
+    box-shadow: 0 10px 25px -5px rgba(0,0,0,0.15), 0 4px 6px -2px rgba(0,0,0,0.08);
+    border: 1px solid #e5e7eb;
+  }
+  #tooltip.visible { opacity: 1; }
+  .t-status { font-size: 10px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 4px; }
+  .t-name   { font-size: 16px; font-weight: 700; color: var(--neutral-dark); margin-bottom: 3px; }
+  .t-std    { font-size: 11px; color: var(--gray-medium); margin-bottom: 10px; }
+  .t-insight{ font-size: 12px; line-height: 1.55; color: var(--gray-dark); }
+  .t-tag    { display: inline-block; font-size: 10px; font-weight: 600; padding: 3px 8px; border-radius: 4px; margin-top: 10px; }
+
+  /* ── Student card ── */
+  #student-card {
+    position: absolute;
+    top: 24px;
+    left: 24px;
+    width: 220px;
+    pointer-events: none;
+    background: var(--neutral-white);
+    border-radius: 12px;
+    padding: 20px;
+    border: 1px solid #e5e7eb;
+    box-shadow: var(--shadow-lg);
+    z-index: 10;
+  }
+  .sc-avatar {
+    width: 42px; height: 42px; border-radius: 50%;
+    background: linear-gradient(135deg, var(--accent-teal), var(--primary-blue));
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px; font-weight: 700; color: #fff;
+    margin-bottom: 10px;
+  }
+  .sc-name  { font-size: 18px; font-weight: 700; color: var(--neutral-dark); }
+  .sc-grade { font-size: 11px; color: var(--gray-medium); margin-top: 2px; letter-spacing: 0.03em; }
+  .sc-stats { margin-top: 14px; display: flex; flex-direction: column; gap: 8px; }
+  .sc-stat-row { display: flex; align-items: center; justify-content: space-between; }
+  .sc-stat-label { font-size: 11px; color: var(--gray-medium); }
+  .sc-stat-bar { width: 90px; height: 5px; background: var(--gray-light); border-radius: 3px; overflow: hidden; }
+  .sc-stat-fill { height: 100%; border-radius: 3px; }
+  .sc-divider { height: 1px; background: #e5e7eb; margin: 12px 0; }
+  .sc-label  { font-size: 10px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--gray-medium); margin-bottom: 8px; }
+  .sc-misconception {
+    background: rgba(255,107,74,0.08);
+    border: 1px solid rgba(255,107,74,0.25);
+    border-radius: 8px;
+    padding: 8px 10px;
+    font-size: 11px;
+    color: #9a3412;
+    line-height: 1.45;
+    margin-bottom: 6px;
+  }
+  .sc-misconception strong { color: var(--accent-coral); }
+  .sc-next {
+    background: rgba(217,119,6,0.08);
+    border: 1px solid rgba(217,119,6,0.25);
+    border-radius: 8px;
+    padding: 8px 10px;
+    font-size: 11px;
+    color: #78350f;
+    line-height: 1.45;
+  }
+  .sc-next strong { color: #d97706; }
+
+  /* ── Legend ── */
+  #legend {
+    position: absolute;
+    bottom: 24px;
+    right: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 9px;
+    background: var(--neutral-white);
+    border-radius: 10px;
+    padding: 14px 16px;
+    border: 1px solid #e5e7eb;
+    box-shadow: var(--shadow);
+    z-index: 10;
+  }
+  .leg { display: flex; align-items: center; gap: 9px; font-size: 11px; color: var(--gray-dark); }
+  .leg-icon { width: 14px; height: 14px; border-radius: 50%; flex-shrink: 0; }
+  .leg-icon.mastered      { background: var(--accent-teal); }
+  .leg-icon.progress      { background: var(--primary-blue); border: 2px dashed #4a7fb5; }
+  .leg-icon.blocked       { background: transparent; border: 2px solid #d1d5db; }
+  .leg-icon.misconception { background: var(--accent-coral); }
+  .leg-icon.recommended   { background: #d97706; box-shadow: 0 0 6px rgba(217,119,6,0.5); }
+
+  /* ── Pulse animation for recommended ── */
+  @keyframes pulse {
+    0%   { transform: scale(1); opacity: 0.6; }
+    50%  { transform: scale(1.5); opacity: 0; }
+    100% { transform: scale(1); opacity: 0; }
+  }
+  .pulse-ring { animation: pulse 2s ease-out infinite; transform-origin: center; }
+
+  /* ── Flow animation ── */
+  @keyframes flowOn {
+    from { stroke-dashoffset: 18; }
+    to   { stroke-dashoffset: 0; }
+  }
+  .edge-flow { stroke-dasharray: 5 4; animation: flowOn 0.9s linear infinite; }
+
+  /* ── Demo banner ── */
+  #demo-banner {
+    position: absolute;
+    top: 16px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(10,77,140,0.08);
+    border: 1px solid rgba(10,77,140,0.2);
+    border-radius: 20px;
+    padding: 5px 14px;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--primary-blue);
+    letter-spacing: 0.05em;
+    pointer-events: none;
+    z-index: 10;
+    white-space: nowrap;
+  }
+
+  /* ── Mobile fallback ── */
+  @media (max-width: 768px) {
+    .mobile-menu-btn { display: flex; }
+    nav ul {
+      display: none;
+      position: absolute;
+      top: 100%; left: 0; right: 0;
+      background: var(--neutral-white);
+      flex-direction: column;
+      padding: 1rem;
+      box-shadow: var(--shadow-lg);
+      gap: 0.5rem;
+    }
+    nav ul.mobile-open { display: flex; }
+    nav ul li { width: 100%; text-align: center; }
+    .nav-cta { display: block; width: 100%; }
+    #graph-wrapper { top: 160px; }
+    #mobile-notice {
+      display: flex !important;
+    }
+  }
+
+  #mobile-notice {
+    display: none;
+    position: absolute;
+    inset: 0;
+    background: var(--primary-light);
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 1rem;
+    padding: 2rem;
+    text-align: center;
+    z-index: 200;
+  }
+
+  #mobile-notice p {
+    color: var(--gray-dark);
+    font-size: 1rem;
+    line-height: 1.6;
+    max-width: 300px;
+  }
+
+  #mobile-notice a {
+    color: var(--primary-blue);
+    font-weight: 600;
+    text-decoration: underline;
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-container">
+    <a href="index.html" class="logo">
+      <div class="logo-icon">
+        <img src="logo_transparent.png" alt="Cognality Learning Logo">
+      </div>
+      Cognality Learning
+    </a>
+    <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Toggle menu">
+      <span></span><span></span><span></span>
+    </button>
+    <ul id="navMenu">
+      <li><a href="index.html#features">Features</a></li>
+      <li><a href="index.html#how-it-works">How It Works</a></li>
+      <li><a href="index.html#vision">Vision</a></li>
+      <li><a href="about.html">About</a></li>
+      <li><a href="index.html#resources">Resources</a></li>
+      <li><a href="/pilot" class="nav-cta">Join Our Pilot</a></li>
+    </ul>
+  </div>
+</nav>
+
+<div id="graph-wrapper">
+
+  <!-- Mobile fallback -->
+  <div id="mobile-notice">
+    <p>The interactive knowledge map is best explored on a larger screen.</p>
+    <a href="index.html">← Back to Cognality Learning</a>
+  </div>
+
+  <!-- Demo label -->
+  <div id="demo-banner">Sample Student · Grade 8 Math · Demo View</div>
+
+  <!-- Student card -->
+  <div id="student-card">
+    <div class="sc-avatar">J</div>
+    <div class="sc-name">Jordan M.</div>
+    <div class="sc-grade">Grade 8 · Math · Demo</div>
+    <div class="sc-stats">
+      <div class="sc-stat-row">
+        <span class="sc-stat-label">Mastered</span>
+        <div class="sc-stat-bar"><div class="sc-stat-fill" style="width:45%;background:var(--accent-teal)"></div></div>
+      </div>
+      <div class="sc-stat-row">
+        <span class="sc-stat-label">In Progress</span>
+        <div class="sc-stat-bar"><div class="sc-stat-fill" style="width:25%;background:var(--primary-blue)"></div></div>
+      </div>
+      <div class="sc-stat-row">
+        <span class="sc-stat-label">Blocked</span>
+        <div class="sc-stat-bar"><div class="sc-stat-fill" style="width:30%;background:#d1d5db"></div></div>
+      </div>
+    </div>
+    <div class="sc-divider"></div>
+    <div class="sc-label">Active Misconceptions</div>
+    <div class="sc-misconception">
+      <strong>Linear Equations</strong><br>
+      Moves terms without preserving balance — treats "=" as a separator, not equivalence.
+    </div>
+    <div class="sc-misconception">
+      <strong>Functions</strong><br>
+      Believes every function must be linear; rejects tables with curved relationships.
+    </div>
+    <div class="sc-divider"></div>
+    <div class="sc-label">Recommended Next</div>
+    <div class="sc-next">
+      <strong>Systems of Equations</strong><br>
+      Jordan's algebra fluency is ready — this unlocks the Functions track.
+    </div>
+  </div>
+
+  <svg id="graph"></svg>
+  <div id="tooltip"></div>
+
+  <div id="legend">
+    <div class="leg"><div class="leg-icon mastered"></div> Mastered</div>
+    <div class="leg"><div class="leg-icon progress"></div> In Progress</div>
+    <div class="leg"><div class="leg-icon misconception"></div> Misconception</div>
+    <div class="leg"><div class="leg-icon blocked"></div> Blocked / Not Started</div>
+    <div class="leg"><div class="leg-icon recommended"></div> Recommended Next</div>
+  </div>
+
+</div><!-- #graph-wrapper -->
+
+<script>
+const W = 1400, H = 860;
+
+// ── STUDENT STATE ────────────────────────────────────────────────────────
+const STUDENT = {
+  p1:  { status: "mastered",      score: 94, insight: "Strong foundation. Jordan comfortably converts between fractions, decimals, and negative numbers." },
+  p2:  { status: "mastered",      score: 88, insight: "Proportional reasoning is solid — Jordan correctly sets up unit rates and cross-multiplication." },
+  p3:  { status: "mastered",      score: 82, insight: "Can simplify expressions and solve one-step equations. Struggles slightly with multi-step." },
+  p4:  { status: "progress",      score: 61, insight: "Gets area/perimeter but mixes up surface area and volume formulas when shapes are combined." },
+  p5:  { status: "mastered",      score: 79, insight: "Understands mean, median, mode, and can read bar charts. Ready to interpret scatter plots." },
+  ns1: { status: "mastered",      score: 91, insight: "Correctly identifies π and √2 as irrational. Can place them on a number line using approximation." },
+  ns2: { status: "mastered",      score: 85, insight: "Evaluates √25, ∛27 fluently. Occasionally second-guesses cube roots of non-perfect cubes." },
+  ee1: { status: "mastered",      score: 87, insight: "Applies all 7 exponent rules correctly. Doesn't hesitate on negative exponents." },
+  ee2: { status: "mastered",      score: 80, insight: "Converts to/from scientific notation accurately. Multiplication of SN expressions is reliable." },
+  ee3: { status: "misconception", score: 52, insight: "Solves simple one-step equations but uses ad-hoc term-moving rather than inverse operations. Breaks down on equations with variables on both sides.", tag: "⚠ Misconception: Equality as separator" },
+  ee4: { status: "blocked",       score: null, insight: "Requires fluency with linear equations first. Jordan is not yet ready for two-variable systems." },
+  fn1: { status: "misconception", score: 48, insight: "Can list input/output pairs but rejects non-linear tables as 'not real functions.' Confuses linearity with the definition of a function.", tag: "⚠ Misconception: Functions must be linear" },
+  fn2: { status: "blocked",       score: null, insight: "Comparing functions requires a firm grasp of the function definition, which Jordan is still building." },
+  fn3: { status: "blocked",       score: null, insight: "Interpreting slope and y-intercept depends on equation fluency Jordan hasn't consolidated yet." },
+  g1:  { status: "progress",      score: 68, insight: "Handles translations and reflections well on a grid. Confuses rotation direction (clockwise vs. counterclockwise)." },
+  g2:  { status: "blocked",       score: null, insight: "Congruence via rigid motions requires transformation fluency Jordan is still developing." },
+  g3:  { status: "progress",      score: 71, insight: "Knows a² + b² = c² and can apply it to find a missing side. Trips up when the hypotenuse is given and a leg is missing." },
+  g4:  { status: "blocked",       score: null, insight: "Volume formulas for cones/spheres require stronger geometric intuition. Not yet introduced." },
+  sp1: { status: "progress",      score: 74, insight: "Can construct scatter plots and identify clusters. Tends to draw lines of fit that pass through the origin by default." },
+  sp2: { status: "blocked",       score: null, insight: "Interpreting linear models in context requires the linear equation fluency Jordan is working on." },
+  nx1: { status: "recommended",   score: null, insight: "Jordan's algebra work is almost ready for Algebra I. Fixing the linear equations misconception is the last gate." },
+  nx2: { status: "blocked",       score: null, insight: "Geometry track needs transformation and Pythagorean theorem completion first." },
+  nx3: { status: "blocked",       score: null, insight: "Statistics & Probability requires scatter plot and linear model fluency." },
+};
+
+// ── NODES ────────────────────────────────────────────────────────────────
+const NODES = [
+  { id:"p1",  layer:0, domain:"prereq", name:"Rational\nNumbers",       std:"7.NS",     dy:-210 },
+  { id:"p2",  layer:0, domain:"prereq", name:"Proportional\nReasoning", std:"7.RP",     dy:-80  },
+  { id:"p3",  layer:0, domain:"prereq", name:"Expressions\n& Equations",std:"7.EE",     dy: 60  },
+  { id:"p4",  layer:0, domain:"prereq", name:"Geometry\nBasics",        std:"6–7.G",    dy: 230 },
+  { id:"p5",  layer:0, domain:"prereq", name:"Statistics",              std:"6–7.SP",   dy: 360 },
+
+  { id:"ns1", layer:1, domain:"ns",  name:"Irrational\nNumbers",        std:"8.NS.1–2", dy:-240 },
+  { id:"ns2", layer:1, domain:"ns",  name:"Square &\nCube Roots",       std:"8.EE.2",   dy:-110 },
+  { id:"ee1", layer:1, domain:"ee",  name:"Integer\nExponents",         std:"8.EE.1",   dy: 20  },
+  { id:"ee2", layer:1, domain:"ee",  name:"Scientific\nNotation",       std:"8.EE.3–4", dy: 145 },
+  { id:"g1",  layer:1, domain:"geo", name:"Transformations",            std:"8.G.1–3",  dy: 290 },
+  { id:"g3",  layer:1, domain:"geo", name:"Pythagorean\nTheorem",       std:"8.G.6–8",  dy: 400 },
+  { id:"sp1", layer:1, domain:"sp",  name:"Scatter\nPlots",             std:"8.SP.1–2", dy: 520 },
+
+  { id:"ee3", layer:2, domain:"ee",  name:"Linear\nEquations",          std:"8.EE.7",   dy: 40  },
+  { id:"fn1", layer:2, domain:"fn",  name:"Define\nFunctions",          std:"8.F.1",    dy:-140 },
+  { id:"g2",  layer:2, domain:"geo", name:"Congruence\n& Similarity",   std:"8.G.4–5",  dy: 290 },
+  { id:"sp2", layer:2, domain:"sp",  name:"Linear\nAssociations",       std:"8.SP.3–4", dy: 460 },
+
+  { id:"ee4", layer:3, domain:"ee",  name:"Systems of\nEquations",      std:"8.EE.8",   dy: 40  },
+  { id:"fn2", layer:3, domain:"fn",  name:"Compare\nFunctions",         std:"8.F.2",    dy:-220 },
+  { id:"fn3", layer:3, domain:"fn",  name:"Linear\nFunctions",          std:"8.F.3–5",  dy:-80  },
+  { id:"g4",  layer:3, domain:"geo", name:"Volume of\nSolids",          std:"8.G.9",    dy: 330 },
+
+  { id:"nx1", layer:4, domain:"next", name:"Algebra I",                 std:"HS",        dy:-100 },
+  { id:"nx2", layer:4, domain:"next", name:"Geometry",                  std:"HS",        dy: 160 },
+  { id:"nx3", layer:4, domain:"next", name:"Statistics &\nProbability", std:"HS",        dy: 390 },
+];
+
+const EDGES = [
+  {s:"p1", t:"ns1"},{s:"p1", t:"ns2"},
+  {s:"p2", t:"ee1"},{s:"p2", t:"fn1"},{s:"p2", t:"ee3"},
+  {s:"p3", t:"ee1"},{s:"p3", t:"ee2"},{s:"p3", t:"ee3"},
+  {s:"p4", t:"g1"}, {s:"p4", t:"g3"},
+  {s:"p5", t:"sp1"},
+  {s:"ns2", t:"ee1"},
+  {s:"ee1", t:"ee2"},{s:"ee1", t:"ee3"},
+  {s:"ee3", t:"ee4"},{s:"ee3", t:"fn1"},{s:"ee3", t:"sp2"},
+  {s:"fn1", t:"fn2"},{s:"fn1", t:"fn3"},
+  {s:"fn3", t:"ee4"},{s:"fn3", t:"sp2"},
+  {s:"g1",  t:"g2"}, {s:"g2", t:"g3"},
+  {s:"g3",  t:"g4"},
+  {s:"sp1", t:"sp2"},
+  {s:"ee4", t:"nx1"},{s:"fn3", t:"nx1"},{s:"fn2", t:"nx1"},
+  {s:"g4",  t:"nx2"},{s:"g2", t:"nx2"},
+  {s:"sp2", t:"nx3"},{s:"fn3", t:"nx3"},
+];
+
+// ── STATUS CONFIG — site palette ─────────────────────────────────────────
+const STATUS = {
+  mastered:      { fill:"rgba(0,168,150,0.10)",  stroke:"#00a896", glow:"#00a896", label:"Mastered" },
+  progress:      { fill:"rgba(10,77,140,0.10)",  stroke:"#0A4d8c", glow:"#0A4d8c", label:"In Progress" },
+  misconception: { fill:"rgba(255,107,74,0.10)", stroke:"#ff6b4a", glow:"#ff6b4a", label:"Misconception" },
+  blocked:       { fill:"#f3f4f6",               stroke:"#d1d5db", glow:"none",    label:"Not Yet" },
+  recommended:   { fill:"rgba(217,119,6,0.10)",  stroke:"#d97706", glow:"#d97706", label:"Recommended Next" },
+};
+
+// Layer X positions
+const layerXMap = [0.21, 0.36, 0.53, 0.69, 0.87];
+const CY = H / 2 + 10;
+
+const nodeMap = {};
+NODES.forEach(n => {
+  n.x = W * layerXMap[n.layer];
+  n.y = CY + (n.dy || 0);
+  n.r = 36;
+  const st = STUDENT[n.id] || { status:"blocked" };
+  n.status = st.status;
+  nodeMap[n.id] = n;
+});
+
+// ── SVG SETUP ────────────────────────────────────────────────────────────
+const svg = d3.select("#graph")
+  .attr("viewBox", `0 0 ${W} ${H}`)
+  .attr("preserveAspectRatio","xMidYMid meet");
+
+const defs = svg.append("defs");
+
+// Glow filters (lighter stdDeviation for light background)
+Object.entries(STATUS).forEach(([key, s]) => {
+  if (s.glow === "none") return;
+  const f = defs.append("filter")
+    .attr("id",`glow-${key}`)
+    .attr("x","-60%").attr("y","-60%")
+    .attr("width","220%").attr("height","220%");
+  f.append("feGaussianBlur").attr("stdDeviation","4").attr("result","blur");
+  const m = f.append("feMerge");
+  m.append("feMergeNode").attr("in","blur");
+  m.append("feMergeNode").attr("in","SourceGraphic");
+});
+
+// Edge gradients
+EDGES.forEach((e,i) => {
+  const sn = nodeMap[e.s], tn = nodeMap[e.t];
+  const sc = STATUS[sn.status].stroke, tc = STATUS[tn.status].stroke;
+  const g = defs.append("linearGradient")
+    .attr("id",`eg-${i}`)
+    .attr("gradientUnits","userSpaceOnUse")
+    .attr("x1",sn.x).attr("y1",sn.y)
+    .attr("x2",tn.x).attr("y2",tn.y);
+  g.append("stop").attr("offset","0%").attr("stop-color",sc)
+    .attr("stop-opacity", sn.status==="blocked" ? 0.2 : 0.6);
+  g.append("stop").attr("offset","100%").attr("stop-color",tc)
+    .attr("stop-opacity", tn.status==="blocked" ? 0.2 : 0.6);
+});
+
+// ── LAYER LABELS ─────────────────────────────────────────────────────────
+const LLABELS = [
+  ["Prerequisites","Gr. 6–7"],
+  ["Foundations","8th Grade"],
+  ["Core Skills","8th Grade"],
+  ["Advanced","8th Grade"],
+  ["Next","Courses"]
+];
+layerXMap.forEach((lx, i) => {
+  LLABELS[i].forEach((line, li) => {
+    svg.append("text")
+      .attr("x", W * lx).attr("y", 110 + li * 14)
+      .attr("text-anchor","middle")
+      .attr("font-size", li === 0 ? 11 : 10)
+      .attr("font-weight", li === 0 ? 700 : 400)
+      .attr("letter-spacing","0.08em")
+      .attr("fill","#9ca3af")
+      .text(line.toUpperCase());
+  });
+});
+
+// ── EDGES ────────────────────────────────────────────────────────────────
+const edgeSel = svg.append("g").selectAll("path").data(EDGES).join("path")
+  .attr("fill","none")
+  .attr("stroke", (d,i) => `url(#eg-${i})`)
+  .attr("stroke-width", d => {
+    const ss = STUDENT[d.s]?.status;
+    return (ss==="mastered"||ss==="progress"||ss==="misconception") ? 1.8 : 1;
+  })
+  .attr("class", d => {
+    const ss = STUDENT[d.s]?.status;
+    return (ss==="mastered"||ss==="progress") ? "edge-flow" : "";
+  })
+  .attr("d", d => {
+    const s = nodeMap[d.s], t = nodeMap[d.t];
+    const mx = (s.x + t.x) / 2;
+    return `M${s.x},${s.y} C${mx},${s.y} ${mx},${t.y} ${t.x},${t.y}`;
+  });
+
+// ── NODES ────────────────────────────────────────────────────────────────
+const nodeGroups = svg.append("g").selectAll(".node-group").data(NODES).join("g")
+  .attr("class","node-group")
+  .attr("transform", d => `translate(${d.x},${d.y})`);
+
+
+// Outer halo
+nodeGroups.append("circle")
+  .attr("r", d => d.status==="blocked" ? 0 : 44)
+  .attr("fill", d => STATUS[d.status].stroke + "18")
+  .attr("stroke","none");
+
+// Main circle
+nodeGroups.append("circle")
+  .attr("r", 36)
+  .attr("fill", d => STATUS[d.status].fill)
+  .attr("stroke", d => STATUS[d.status].stroke)
+  .attr("stroke-width", d => d.status==="blocked" ? 1 : d.status==="recommended" ? 2.5 : 2)
+  .attr("stroke-dasharray", d => d.status==="progress" ? "5,3" : null)
+  .attr("filter", d => d.status!=="blocked" ? `url(#glow-${d.status})` : null);
+
+// Score arc for mastered/progress nodes
+nodeGroups.filter(d => STUDENT[d.id]?.score != null).each(function(d) {
+  const score = STUDENT[d.id].score / 100;
+  const r = 40, circ = 2 * Math.PI * r;
+  d3.select(this).append("circle")
+    .attr("r", r)
+    .attr("fill","none")
+    .attr("stroke", STATUS[d.status].stroke)
+    .attr("stroke-width","2")
+    .attr("stroke-dasharray", `${score * circ} ${circ}`)
+    .attr("stroke-dashoffset", circ * 0.25)
+    .attr("opacity","0.3")
+    .attr("transform","rotate(-90)");
+});
+
+// Misconception badge
+nodeGroups.filter(d => d.status==="misconception").append("circle")
+  .attr("cx", 24).attr("cy",-24).attr("r",10)
+  .attr("fill","#ff6b4a").attr("stroke","white").attr("stroke-width",2);
+nodeGroups.filter(d => d.status==="misconception").append("text")
+  .attr("x",24).attr("y",-24).attr("text-anchor","middle").attr("dy","0.35em")
+  .attr("font-size","11").attr("font-weight","700").attr("fill","white").text("!");
+
+// Recommended badge
+nodeGroups.filter(d => d.status==="recommended").append("circle")
+  .attr("cx", 24).attr("cy",-24).attr("r",10)
+  .attr("fill","#d97706").attr("stroke","white").attr("stroke-width",2);
+nodeGroups.filter(d => d.status==="recommended").append("text")
+  .attr("x",24).attr("y",-24).attr("text-anchor","middle").attr("dy","0.35em")
+  .attr("font-size","11").attr("font-weight","700").attr("fill","white").text("→");
+
+// Node labels
+nodeGroups.each(function(d) {
+  const lines = d.name.split("\n");
+  const g = d3.select(this);
+  const startY = lines.length === 1 ? 0 : -9;
+  const col = d.status==="blocked" ? "#9ca3af" : "#212b36";
+  lines.forEach((line, i) => {
+    g.append("text")
+      .attr("text-anchor","middle")
+      .attr("y", startY + i * 14)
+      .attr("dy","0.35em")
+      .attr("font-size","11")
+      .attr("font-weight","600")
+      .attr("fill", col)
+      .attr("pointer-events","none")
+      .text(line);
+  });
+  g.append("text")
+    .attr("text-anchor","middle")
+    .attr("y", lines.length === 1 ? 17 : 23)
+    .attr("font-size","9")
+    .attr("fill", d.status==="blocked" ? "#d1d5db" : "#9ca3af")
+    .attr("pointer-events","none")
+    .text(d.std);
+});
+
+// ── TOOLTIP ──────────────────────────────────────────────────────────────
+const tooltip = document.getElementById("tooltip");
+let activeNode = null;
+
+nodeGroups
+  .on("mouseenter", function(evt, d) {
+    if (activeNode && activeNode !== d.id) return;
+    showTip(evt, d);
+    highlightPaths(d.id);
+  })
+  .on("mousemove", function(evt, d) {
+    if (activeNode && activeNode !== d.id) return;
+    moveTip(evt);
+  })
+  .on("mouseleave", function(evt, d) {
+    if (activeNode) return;
+    tooltip.classList.remove("visible");
+    resetHighlight();
+  })
+  .on("click", function(evt, d) {
+    evt.stopPropagation();
+    if (activeNode === d.id) {
+      activeNode = null;
+      tooltip.classList.remove("visible");
+      resetHighlight();
+    } else {
+      activeNode = d.id;
+      showTip(evt, d);
+      highlightPaths(d.id);
+    }
+  });
+
+d3.select("#graph").on("click", () => {
+  activeNode = null;
+  tooltip.classList.remove("visible");
+  resetHighlight();
+});
+
+function showTip(evt, d) {
+  const st = STUDENT[d.id] || {};
+  const cfg = STATUS[d.status];
+  tooltip.innerHTML = `
+    <div class="t-status" style="color:${cfg.stroke}">${cfg.label}${st.score != null ? ` · ${st.score}%` : ''}</div>
+    <div class="t-name">${d.name.replace("\n"," ")}</div>
+    <div class="t-std">${d.std}</div>
+    <div class="t-insight">${st.insight || ''}</div>
+    ${st.tag ? `<div class="t-tag" style="background:${cfg.stroke}1a;color:${cfg.stroke}">${st.tag}</div>` : ''}
+  `;
+  tooltip.style.border = `1px solid ${cfg.stroke}44`;
+  moveTip(evt);
+  tooltip.classList.add("visible");
+}
+
+function moveTip(evt) {
+  const wrapper = document.getElementById("graph-wrapper");
+  const rect = wrapper.getBoundingClientRect();
+  let tx = evt.clientX - rect.left + 18;
+  let ty = evt.clientY - rect.top - 20;
+  if (tx + 300 > rect.width) tx = evt.clientX - rect.left - 300;
+  tooltip.style.left = tx + "px";
+  tooltip.style.top  = ty + "px";
+}
+
+function getReachable(id) {
+  const fwd = new Set([id]), bwd = new Set([id]);
+  let changed = true;
+  while (changed) {
+    changed = false;
+    EDGES.forEach(e => {
+      if (fwd.has(e.s) && !fwd.has(e.t)) { fwd.add(e.t); changed = true; }
+      if (bwd.has(e.t) && !bwd.has(e.s)) { bwd.add(e.s); changed = true; }
+    });
+  }
+  return new Set([...fwd, ...bwd]);
+}
+
+function highlightPaths(id) {
+  const reach = getReachable(id);
+  nodeGroups.select("circle:nth-child(3)").attr("opacity", d => reach.has(d.id) ? 1 : 0.12);
+  nodeGroups.selectAll("text").attr("opacity", d => reach.has(d.id) ? 1 : 0.12);
+  edgeSel.attr("opacity", d => reach.has(d.s) && reach.has(d.t) ? 0.9 : 0.04);
+}
+
+function resetHighlight() {
+  nodeGroups.select("circle:nth-child(3)").attr("opacity", 1);
+  nodeGroups.selectAll("text").attr("opacity", 1);
+  edgeSel.attr("opacity", null);
+}
+
+// Mobile menu
+document.getElementById("mobileMenuBtn").addEventListener("click", () => {
+  document.getElementById("navMenu").classList.toggle("mobile-open");
+});
+document.querySelectorAll("#navMenu a").forEach(link => {
+  link.addEventListener("click", () => {
+    document.getElementById("navMenu").classList.remove("mobile-open");
+  });
+});
+</script>
+
+</body>
+</html>
