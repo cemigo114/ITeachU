@@ -219,106 +219,11 @@
             height: 500px;
         }
 
-        .assessment-flow {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .flow-container {
-            position: relative;
-            width: 400px;
-            height: 400px;
-        }
-
-        /* Central Student Node */
-        .student-node {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 120px;
-            height: 120px;
-            background: linear-gradient(135deg, var(--accent-teal), var(--primary-blue));
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-weight: bold;
-            box-shadow: 0 0 40px rgba(0, 168, 150, 0.3);
-            animation: pulse 2s ease-in-out infinite;
-        }
-
-        @keyframes pulse {
-            0%, 100% { transform: translate(-50%, -50%) scale(1); }
-            50% { transform: translate(-50%, -50%) scale(1.05); }
-        }
-
-        /* Orbiting Elements */
-        .orbit-item {
-            position: absolute;
-            width: 80px;
-            height: 80px;
-            background: white;
-            border-radius: 50%;
-            box-shadow: var(--shadow-lg);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 14px;
-            text-align: center;
-            padding: 10px;
-        }
-
-        .orbit-1 {
-            animation: orbit 20s linear infinite;
-        }
-
-        .orbit-2 {
-            animation: orbit 25s linear infinite reverse;
-            animation-delay: 5s;
-        }
-
-        .orbit-3 {
-            animation: orbit 30s linear infinite;
-            animation-delay: 10s;
-        }
-
-        @keyframes orbit {
-            from {
-                transform: rotate(0deg) translateX(150px) rotate(0deg);
-            }
-            to {
-                transform: rotate(360deg) translateX(150px) rotate(-360deg);
-            }
-        }
-
-        /* Connection Lines */
-        .connection-line {
-            position: absolute;
-            width: 2px;
-            height: 150px;
-            background: linear-gradient(180deg, transparent, var(--accent-teal), transparent);
-            top: 50%;
-            left: 50%;
-            transform-origin: top;
-            opacity: 0.3;
-            animation: rotate 15s linear infinite;
-        }
-
-        @keyframes rotate {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
-        }
-
         /* Features Section */
         .features {
             padding: 80px 2rem;
             background: white;
+            scroll-margin-top: 160px;
         }
 
         .features-container {
@@ -410,6 +315,7 @@
         .how-it-works {
             padding: 80px 2rem;
             background: linear-gradient(180deg, white 0%, var(--primary-light) 100%);
+            scroll-margin-top: 160px;
         }
 
         .process-steps {
@@ -485,6 +391,7 @@
         .vision-mission {
             padding: 80px 2rem;
             background: white;
+            scroll-margin-top: 160px;
         }
 
         .vm-container {
@@ -621,6 +528,45 @@
             color: var(--gray-medium);
         }
 
+        /* About Teaser */
+        .about-teaser {
+            padding: 64px 2rem;
+            background: linear-gradient(135deg, rgba(10, 77, 140, 0.04) 0%, rgba(0, 168, 150, 0.04) 100%);
+            border-top: 1px solid rgba(10, 77, 140, 0.08);
+            border-bottom: 1px solid rgba(10, 77, 140, 0.08);
+            text-align: center;
+        }
+
+        .about-teaser-container {
+            max-width: 720px;
+            margin: 0 auto;
+        }
+
+        .teaser-question {
+            font-size: clamp(1.25rem, 2.5vw, 1.625rem);
+            font-weight: 700;
+            color: var(--primary-blue);
+            line-height: 1.4;
+            margin: 0 0 1.5rem;
+            font-style: normal;
+        }
+
+        .teaser-link {
+            display: inline-block;
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--accent-teal);
+            text-decoration: none;
+            border-bottom: 2px solid var(--accent-teal);
+            padding-bottom: 2px;
+            transition: color 0.2s, border-color 0.2s;
+        }
+
+        .teaser-link:hover {
+            color: var(--primary-blue);
+            border-color: var(--primary-blue);
+        }
+
         /* Responsive */
         @media (max-width: 768px) {
             .mobile-menu-btn {
@@ -662,11 +608,6 @@
                 height: 300px;
             }
 
-            .flow-container {
-                width: 300px;
-                height: 300px;
-            }
-
             .vm-container {
                 grid-template-columns: 1fr;
             }
@@ -705,6 +646,7 @@
                 <li><a href="#features">Features</a></li>
                 <li><a href="#how-it-works">How It Works</a></li>
                 <li><a href="#vision">Vision</a></li>
+                <li><a href="about.html">About</a></li>
                 <li><a href="#resources">Resources</a></li>
                 <li><a href="/pilot" class="nav-cta">Join Our Pilot</a></li>
             </ul>
@@ -726,17 +668,60 @@
                 </div>
             </div>
             <div class="hero-visual">
-                <div class="assessment-flow">
-                    <div class="flow-container">
-                        <div class="student-node">Student</div>
-                        <div class="orbit-item orbit-1">Teaching AI</div>
-                        <div class="orbit-item orbit-2">Reasoning</div>
-                        <div class="orbit-item orbit-3">Evidence</div>
-                        <div class="connection-line"></div>
-                        <div class="connection-line" style="transform: rotate(120deg);"></div>
-                        <div class="connection-line" style="transform: rotate(240deg);"></div>
-                    </div>
-                </div>
+                <svg viewBox="0 0 480 390" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%;display:block;" role="img" aria-label="Knowledge graph showing connected skills and a student's learning path through mastered concepts">
+                    <defs>
+                        <filter id="node-glow" x="-40%" y="-40%" width="180%" height="180%">
+                            <feGaussianBlur stdDeviation="3.5" result="blur"/>
+                            <feMerge>
+                                <feMergeNode in="blur"/>
+                                <feMergeNode in="SourceGraphic"/>
+                            </feMerge>
+                        </filter>
+                    </defs>
+
+                    <!-- Gray edges (skills not yet reached) -->
+                    <line x1="88" y1="140" x2="78" y2="295" stroke="#e5e7eb" stroke-width="1.5" stroke-linecap="round"/>
+                    <line x1="78" y1="295" x2="215" y2="228" stroke="#e5e7eb" stroke-width="1.5" stroke-linecap="round"/>
+                    <line x1="210" y1="78" x2="215" y2="228" stroke="#e5e7eb" stroke-width="1.5" stroke-linecap="round"/>
+                    <line x1="215" y1="228" x2="325" y2="152" stroke="#e5e7eb" stroke-width="1.5" stroke-linecap="round"/>
+                    <line x1="325" y1="152" x2="428" y2="78" stroke="#e5e7eb" stroke-width="1.5" stroke-linecap="round"/>
+                    <line x1="325" y1="152" x2="418" y2="262" stroke="#e5e7eb" stroke-width="1.5" stroke-linecap="round"/>
+                    <line x1="325" y1="152" x2="285" y2="335" stroke="#e5e7eb" stroke-width="1.5" stroke-linecap="round"/>
+                    <line x1="428" y1="78" x2="418" y2="262" stroke="#e5e7eb" stroke-width="1.5" stroke-linecap="round"/>
+
+                    <!-- Teal edges (learned path) -->
+                    <line x1="88" y1="140" x2="210" y2="78" stroke="#00a896" stroke-width="2.5" stroke-linecap="round"/>
+                    <line x1="210" y1="78" x2="325" y2="152" stroke="#00a896" stroke-width="2.5" stroke-linecap="round"/>
+
+                    <!-- Gray nodes (not yet reached) -->
+                    <circle cx="78" cy="295" r="17" fill="#f3f4f6" stroke="#e5e7eb" stroke-width="1.5"/>
+                    <circle cx="215" cy="228" r="15" fill="#f3f4f6" stroke="#e5e7eb" stroke-width="1.5"/>
+                    <circle cx="428" cy="78" r="16" fill="#f3f4f6" stroke="#e5e7eb" stroke-width="1.5"/>
+                    <circle cx="418" cy="262" r="16" fill="#f3f4f6" stroke="#e5e7eb" stroke-width="1.5"/>
+                    <circle cx="285" cy="335" r="14" fill="#f3f4f6" stroke="#e5e7eb" stroke-width="1.5"/>
+
+                    <!-- Teal nodes (mastered) -->
+                    <circle cx="88" cy="140" r="20" fill="#00a896" filter="url(#node-glow)"/>
+                    <circle cx="210" cy="78" r="18" fill="#00a896" filter="url(#node-glow)"/>
+
+                    <!-- Current node (primary blue, with outer ring) -->
+                    <circle cx="325" cy="152" r="32" fill="none" stroke="#0A4d8c" stroke-width="1.5" opacity="0.2"/>
+                    <circle cx="325" cy="152" r="23" fill="#0A4d8c" filter="url(#node-glow)"/>
+
+                    <!-- Gray node labels -->
+                    <text x="78" y="322" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="11" fill="#9ca3af">Fractions</text>
+                    <text x="215" y="255" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="11" fill="#9ca3af">Proportions</text>
+                    <text x="428" y="106" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="11" fill="#9ca3af">Graphing</text>
+                    <text x="418" y="290" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="11" fill="#9ca3af">Geometry</text>
+                    <text x="285" y="361" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="11" fill="#9ca3af">Statistics</text>
+
+                    <!-- Teal node labels (mastered) -->
+                    <text x="88" y="172" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="11" font-weight="500" fill="#374151">Number Sense</text>
+                    <text x="210" y="108" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="11" font-weight="500" fill="#374151">Ratios</text>
+
+                    <!-- Current node label -->
+                    <text x="325" y="192" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="11" font-weight="600" fill="#374151">Linear Equations</text>
+                </svg>
             </div>
         </div>
     </section>
@@ -835,7 +820,7 @@
         </div>
     </section>
 
-    <footer>
+    <footer id="resources">
         <div class="footer-container">
             <div class="footer-brand">
                 <h3>Cognality Learning</h3>
@@ -843,7 +828,7 @@
             </div>
             <div class="footer-links">
                 <span class="footer-links-label">Company</span>
-                <a href="#about">About Us</a>
+                <a href="about.html">About Us</a>
                 <a href="mailto:support@cognalitylearning.com">Contact</a>
                 <a href="privacy.html">Privacy</a>
             </div>
