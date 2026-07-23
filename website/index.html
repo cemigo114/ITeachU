@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cognality Learning - Let Students Show What They Truly Know</title>
+    <link rel="preload" as="image" href="logo_transparent.png">
     <style>
         * {
             margin: 0;
@@ -42,7 +43,7 @@
             background: var(--neutral-white);
             box-shadow: var(--shadow);
             z-index: 1000;
-            transition: all 0.3s ease;
+            transition: box-shadow 0.3s ease;
         }
 
         .nav-container {
@@ -79,7 +80,6 @@
             height: 100%;
             object-fit: contain;
             background: transparent;
-            mix-blend-mode: darken;
         }
 
         nav ul {
@@ -146,8 +146,8 @@
             max-width: 1280px;
             margin: 0 auto;
             display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 4rem;
+            grid-template-columns: 5.5fr 6.5fr;
+            gap: 3rem;
             align-items: center;
         }
 
@@ -216,7 +216,88 @@
         /* Hero Visual */
         .hero-visual {
             position: relative;
-            height: 500px;
+        }
+
+        /* Product Demo Split Panel */
+        .product-demo {
+            display: grid;
+            grid-template-columns: 0.72fr 1.43fr;
+            gap: 1rem;
+            align-items: stretch;
+        }
+
+        .demo-task-panel {
+            background: white;
+            border-radius: 16px;
+            padding: 1.25rem;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.08);
+            display: flex;
+            flex-direction: column;
+            gap: 0.85rem;
+            border: 1px solid #e5e7eb;
+        }
+
+        .demo-task-eyebrow {
+            font-size: 0.68rem;
+            font-weight: 700;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: var(--accent-teal);
+        }
+
+        .demo-task-title {
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: var(--neutral-dark);
+            line-height: 1.3;
+        }
+
+        .demo-cups-table {
+            background: var(--primary-light);
+            border-radius: 10px;
+            padding: 0.75rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.4rem;
+        }
+
+        .demo-cups-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.8rem;
+        }
+
+        .demo-cups-row .label {
+            color: var(--gray-dark);
+        }
+
+        .demo-cups-row .value {
+            font-weight: 700;
+            color: var(--primary-blue);
+        }
+
+        .demo-cups-row .value.unknown {
+            color: var(--accent-coral);
+        }
+
+        .demo-cups-divider {
+            height: 1px;
+            background: #e5e7eb;
+            margin: 0.1rem 0;
+        }
+
+        .demo-task-prompt {
+            font-size: 0.8rem;
+            color: var(--gray-dark);
+            line-height: 1.6;
+            flex: 1;
+        }
+
+        .demo-task-prompt em {
+            color: var(--primary-blue);
+            font-style: normal;
+            font-weight: 600;
         }
 
         /* Features Section */
@@ -578,6 +659,166 @@
             margin-top: 2.5rem;
         }
 
+        /* Chat Demo */
+        .chat-demo {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.12), 0 4px 16px rgba(10,77,140,0.08);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            max-width: 420px;
+            margin: 0 auto;
+        }
+
+        .chat-demo-header {
+            background: linear-gradient(135deg, var(--primary-blue) 0%, #0d6ebd 100%);
+            padding: 1rem 1.25rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            color: white;
+            flex-shrink: 0;
+        }
+
+        .chat-demo-avatar {
+            width: 38px;
+            height: 38px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 1rem;
+            flex-shrink: 0;
+        }
+
+        .chat-demo-name {
+            font-weight: 700;
+            font-size: 0.95rem;
+        }
+
+        .chat-demo-online {
+            font-size: 0.7rem;
+            color: #7fffda;
+            font-weight: 500;
+            margin-left: 6px;
+        }
+
+        .chat-demo-task {
+            font-size: 0.72rem;
+            opacity: 0.75;
+            margin-top: 2px;
+        }
+
+        .chat-demo-messages {
+            flex: 1;
+            overflow: hidden;
+            padding: 1rem 1.1rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            background: #f8fafc;
+        }
+
+        .chat-demo-msg {
+            display: flex;
+            align-items: flex-end;
+            gap: 0.5rem;
+            opacity: 0;
+        }
+
+        .chat-demo-msg.from-student {
+            flex-direction: row-reverse;
+        }
+
+        .chat-demo-msg-avatar {
+            width: 26px;
+            height: 26px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 0.65rem;
+            flex-shrink: 0;
+        }
+
+        .from-zippy .chat-demo-msg-avatar {
+            background: linear-gradient(135deg, var(--accent-teal), var(--primary-blue));
+            color: white;
+        }
+
+        .from-student .chat-demo-msg-avatar {
+            background: var(--accent-coral);
+            color: white;
+        }
+
+        .chat-demo-msg-bubble {
+            max-width: 76%;
+            padding: 0.6rem 0.85rem;
+            border-radius: 14px;
+            font-size: 0.82rem;
+            line-height: 1.55;
+        }
+
+        .from-zippy .chat-demo-msg-bubble {
+            background: white;
+            color: var(--neutral-dark);
+            border-bottom-left-radius: 4px;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.07);
+        }
+
+        .from-student .chat-demo-msg-bubble {
+            background: var(--primary-blue);
+            color: white;
+            border-bottom-right-radius: 4px;
+        }
+
+        .chat-demo-input {
+            padding: 0.7rem 0.9rem;
+            border-top: 1px solid #e5e7eb;
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            background: white;
+            flex-shrink: 0;
+        }
+
+        .chat-demo-input-field {
+            flex: 1;
+            font-size: 0.8rem;
+            color: var(--gray-medium);
+            background: #f3f4f6;
+            padding: 0.45rem 0.75rem;
+            border-radius: 20px;
+        }
+
+        .chat-demo-input-send {
+            width: 30px;
+            height: 30px;
+            background: var(--accent-teal);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.85rem;
+        }
+
+        @keyframes chatMsgIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .chat-demo-msg:nth-child(1) { animation: chatMsgIn 0.35s ease 0.4s both; }
+        .chat-demo-msg:nth-child(2) { animation: chatMsgIn 0.35s ease 1.6s both; }
+        .chat-demo-msg:nth-child(3) { animation: chatMsgIn 0.35s ease 2.7s both; }
+        .chat-demo-msg:nth-child(4) { animation: chatMsgIn 0.35s ease 3.7s both; }
+        .chat-demo-msg:nth-child(5) { animation: chatMsgIn 0.35s ease 4.7s both; }
+
         /* Responsive */
         @media (max-width: 768px) {
             .mobile-menu-btn {
@@ -615,8 +856,8 @@
                 grid-template-columns: 1fr;
             }
 
-            .hero-visual {
-                height: 300px;
+            .product-demo {
+                grid-template-columns: 1fr;
             }
 
             .vm-container {
@@ -644,9 +885,9 @@
         <div class="nav-container">
             <div class="logo">
                 <div class="logo-icon">
-                    <img src="logo_transparent.png" alt="Cognality Learning Logo">
+                    <img src="logo_transparent.png" alt="Cognality Learning Logo" width="150" height="150" loading="eager">
                 </div>
-                Cognality Learning
+                <a href="#" style="text-decoration:none; color:inherit; font-weight:700;">Cognality Learning</a>
             </div>
             <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Toggle menu">
                 <span></span>
@@ -667,72 +908,97 @@
     <section class="hero">
         <div class="hero-container">
             <div class="hero-content">
-                <div class="tagline">Let Students Show What They Truly Know</div>
-                <h1>The Next Generation of Assessment for the AI Era</h1>
+                <div class="tagline">Assess Thinking, Not Just Answers.</div>
+                <h1>The next generation of assessment starts with conversation.</h1>
                 <p class="subhead">
-                    Cognality Learning is building assessment that looks beyond answers and scores to understand how students think.
-                    Through authentic tasks and structured interaction, students explain their reasoning by teaching an AI protégé,
-                    making their understanding visible and providing educators with a clearer, more defensible view of learning.
+                    Cognality uses carefully designed AI conversations to reveal how people think, identify learning gaps, and provide richer evidence of understanding and competence.
                 </p>
                 <div class="hero-buttons">
                     <a href="/pilot" class="btn btn-primary">Join Our Pilot →</a>
                 </div>
             </div>
             <div class="hero-visual">
-                <svg viewBox="0 0 480 390" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%;display:block;" role="img" aria-label="Knowledge graph showing connected skills and a student's learning path through mastered concepts">
-                    <defs>
-                        <filter id="node-glow" x="-40%" y="-40%" width="180%" height="180%">
-                            <feGaussianBlur stdDeviation="3.5" result="blur"/>
-                            <feMerge>
-                                <feMergeNode in="blur"/>
-                                <feMergeNode in="SourceGraphic"/>
-                            </feMerge>
-                        </filter>
-                    </defs>
+                <div class="product-demo">
 
-                    <!-- Gray edges (skills not yet reached) -->
-                    <line x1="88" y1="140" x2="78" y2="295" stroke="#e5e7eb" stroke-width="1.5" stroke-linecap="round"/>
-                    <line x1="78" y1="295" x2="215" y2="228" stroke="#e5e7eb" stroke-width="1.5" stroke-linecap="round"/>
-                    <line x1="210" y1="78" x2="215" y2="228" stroke="#e5e7eb" stroke-width="1.5" stroke-linecap="round"/>
-                    <line x1="215" y1="228" x2="325" y2="152" stroke="#e5e7eb" stroke-width="1.5" stroke-linecap="round"/>
-                    <line x1="325" y1="152" x2="428" y2="78" stroke="#e5e7eb" stroke-width="1.5" stroke-linecap="round"/>
-                    <line x1="325" y1="152" x2="418" y2="262" stroke="#e5e7eb" stroke-width="1.5" stroke-linecap="round"/>
-                    <line x1="325" y1="152" x2="285" y2="335" stroke="#e5e7eb" stroke-width="1.5" stroke-linecap="round"/>
-                    <line x1="428" y1="78" x2="418" y2="262" stroke="#e5e7eb" stroke-width="1.5" stroke-linecap="round"/>
+                    <!-- Left: Task Card -->
+                    <div class="demo-task-panel">
+                        <div class="demo-task-eyebrow">📋 Assessment Task</div>
+                        <div class="demo-task-title">Stacking Cups</div>
+                        <div class="demo-cups-table">
+                            <div class="demo-cups-row">
+                                <span class="label">2 cups</span>
+                                <span class="value">16 cm</span>
+                            </div>
+                            <div class="demo-cups-divider"></div>
+                            <div class="demo-cups-row">
+                                <span class="label">4 cups</span>
+                                <span class="value">20 cm</span>
+                            </div>
+                            <div class="demo-cups-divider"></div>
+                            <div class="demo-cups-row">
+                                <span class="label">8 cups</span>
+                                <span class="value">28 cm</span>
+                            </div>
+                            <div class="demo-cups-divider"></div>
+                            <div class="demo-cups-row">
+                                <span class="label"><em>n</em> cups</span>
+                                <span class="value unknown">? cm</span>
+                            </div>
+                        </div>
+                        <p class="demo-task-prompt">
+                            Teach <em>Zippy</em> how to find the height of any number of nested cups. Explain your reasoning — Zippy is confused and needs your help!
+                        </p>
+                    </div>
 
-                    <!-- Teal edges (learned path) -->
-                    <line x1="88" y1="140" x2="210" y2="78" stroke="#00a896" stroke-width="2.5" stroke-linecap="round"/>
-                    <line x1="210" y1="78" x2="325" y2="152" stroke="#00a896" stroke-width="2.5" stroke-linecap="round"/>
+                    <!-- Right: Chat -->
+                    <div class="chat-demo">
+                        <div class="chat-demo-header">
+                            <div class="chat-demo-avatar">Z</div>
+                            <div>
+                                <div class="chat-demo-name">Zippy <span class="chat-demo-online">● online</span></div>
+                                <div class="chat-demo-task">Linear Patterns</div>
+                            </div>
+                        </div>
+                        <div class="chat-demo-messages">
+                            <div class="chat-demo-msg from-zippy">
+                                <div class="chat-demo-msg-avatar">Z</div>
+                                <div class="chat-demo-msg-bubble">
+                                    If 2 cups = 16cm... wouldn't 8 cups = 64cm?<br>
+                                    But it says 28cm! 🤔 What am I missing?
+                                </div>
+                            </div>
+                            <div class="chat-demo-msg from-student">
+                                <div class="chat-demo-msg-bubble">
+                                    The cups nest inside each other, you can't just multiply.
+                                </div>
+                                <div class="chat-demo-msg-avatar">S</div>
+                            </div>
+                            <div class="chat-demo-msg from-zippy">
+                                <div class="chat-demo-msg-avatar">Z</div>
+                                <div class="chat-demo-msg-bubble">
+                                    Oh! So I need a different formula? 🤔
+                                </div>
+                            </div>
+                            <div class="chat-demo-msg from-student">
+                                <div class="chat-demo-msg-bubble">
+                                    Yes, 14cm for the first cup, then +2cm per extra cup.
+                                </div>
+                                <div class="chat-demo-msg-avatar">S</div>
+                            </div>
+                            <div class="chat-demo-msg from-zippy">
+                                <div class="chat-demo-msg-avatar">Z</div>
+                                <div class="chat-demo-msg-bubble">
+                                    So n cups = 14 + (n−1)×2! 🎉 You're a great teacher!
+                                </div>
+                            </div>
+                        </div>
+                        <div class="chat-demo-input">
+                            <div class="chat-demo-input-field">Explain your thinking to Zippy...</div>
+                            <div class="chat-demo-input-send">→</div>
+                        </div>
+                    </div>
 
-                    <!-- Gray nodes (not yet reached) -->
-                    <circle cx="78" cy="295" r="17" fill="#f3f4f6" stroke="#e5e7eb" stroke-width="1.5"/>
-                    <circle cx="215" cy="228" r="15" fill="#f3f4f6" stroke="#e5e7eb" stroke-width="1.5"/>
-                    <circle cx="428" cy="78" r="16" fill="#f3f4f6" stroke="#e5e7eb" stroke-width="1.5"/>
-                    <circle cx="418" cy="262" r="16" fill="#f3f4f6" stroke="#e5e7eb" stroke-width="1.5"/>
-                    <circle cx="285" cy="335" r="14" fill="#f3f4f6" stroke="#e5e7eb" stroke-width="1.5"/>
-
-                    <!-- Teal nodes (mastered) -->
-                    <circle cx="88" cy="140" r="20" fill="#00a896" filter="url(#node-glow)"/>
-                    <circle cx="210" cy="78" r="18" fill="#00a896" filter="url(#node-glow)"/>
-
-                    <!-- Current node (primary blue, with outer ring) -->
-                    <circle cx="325" cy="152" r="32" fill="none" stroke="#0A4d8c" stroke-width="1.5" opacity="0.2"/>
-                    <circle cx="325" cy="152" r="23" fill="#0A4d8c" filter="url(#node-glow)"/>
-
-                    <!-- Gray node labels -->
-                    <text x="78" y="322" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="11" fill="#9ca3af">Fractions</text>
-                    <text x="215" y="255" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="11" fill="#9ca3af">Proportions</text>
-                    <text x="428" y="106" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="11" fill="#9ca3af">Graphing</text>
-                    <text x="418" y="290" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="11" fill="#9ca3af">Geometry</text>
-                    <text x="285" y="361" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="11" fill="#9ca3af">Statistics</text>
-
-                    <!-- Teal node labels (mastered) -->
-                    <text x="88" y="172" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="11" font-weight="500" fill="#374151">Number Sense</text>
-                    <text x="210" y="108" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="11" font-weight="500" fill="#374151">Ratios</text>
-
-                    <!-- Current node label -->
-                    <text x="325" y="192" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="11" font-weight="600" fill="#374151">Linear Equations</text>
-                </svg>
+                </div>
             </div>
         </div>
     </section>
@@ -825,11 +1091,13 @@
         <div class="vm-container">
             <div class="vm-card vision-card">
                 <h3>Our Vision</h3>
-                <p>A learning environment where students show how they think, educators trust what they see, and evidence of understanding guides growth. We envision classrooms where assessment enhances learning rather than interrupting it, where every student's unique thinking process is valued and understood.</p>
+                <p>A world where important decisions are informed by how people think, not just what they produce.</p>
+                <p style="margin-top: 1rem;">We envision a future where learning, competence, and potential are understood through meaningful interactions rather than isolated answers. From classrooms to workplaces, people should have the opportunity to demonstrate what they truly know and can do.</p>
             </div>
             <div class="vm-card mission-card">
                 <h3>Our Mission</h3>
-                <p>To build trust and transparency in AI-mediated learning by making students' reasoning visible, supporting learner agency, and enabling educators to make informed decisions using authentic evidence of understanding. We're committed to creating assessment tools that celebrate thinking over memorization.</p>
+                <p>To build the next generation of assessment through AI-powered conversations that reveal thinking, deepen understanding, and demonstrate competence.</p>
+                <p style="margin-top: 1rem;">By combining learning science, assessment science, and artificial intelligence, we create meaningful interactions that uncover learning gaps, foster productive collaboration, and provide richer evidence for educational and professional decision making.</p>
             </div>
         </div>
     </section>
@@ -866,7 +1134,12 @@
         document.querySelectorAll('a[href^="#"]').forEach(anchor => {
             anchor.addEventListener('click', function (e) {
                 e.preventDefault();
-                const target = document.querySelector(this.getAttribute('href'));
+                const href = this.getAttribute('href');
+                if (href === '#') {
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                    return;
+                }
+                const target = document.querySelector(href);
                 if (target) {
                     target.scrollIntoView({ behavior: 'smooth', block: 'start' });
                 }

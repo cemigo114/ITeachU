@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>About Us — Cognality Learning</title>
+    <link rel="preload" as="image" href="logo_transparent.png">
     <style>
         * {
             margin: 0;
@@ -78,7 +79,6 @@
             height: 100%;
             object-fit: contain;
             background: transparent;
-            mix-blend-mode: darken;
         }
 
         nav ul {
@@ -384,12 +384,12 @@
 <body>
     <nav>
         <div class="nav-container">
-            <a href="index.html" class="logo">
+            <div class="logo">
                 <div class="logo-icon">
-                    <img src="logo_transparent.png" alt="Cognality Learning Logo">
+                    <img src="logo_transparent.png" alt="Cognality Learning Logo" width="150" height="150" loading="eager">
                 </div>
-                Cognality Learning
-            </a>
+                <a href="index.html" style="text-decoration:none; color:inherit; font-weight:700;">Cognality Learning</a>
+            </div>
             <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Toggle menu">
                 <span></span>
                 <span></span>
@@ -399,7 +399,7 @@
                 <li><a href="index.html#features">Features</a></li>
                 <li><a href="index.html#how-it-works">How It Works</a></li>
                 <li><a href="index.html#vision">Vision</a></li>
-                <li><a href="about.html" class="active">About</a></li>
+                <li><a href="about.html">About</a></li>
                 <li><a href="index.html#resources">Resources</a></li>
                 <li><a href="/pilot" class="nav-cta">Join Our Pilot</a></li>
             </ul>
@@ -408,11 +408,11 @@
 
     <section class="about-hero">
         <div class="about-hero-container">
-            <p class="about-eyebrow">Our Philosophy</p>
+            <p class="about-eyebrow">About Us</p>
             <h1 class="about-question">
-                Why do we still test what students know, when what truly matters &mdash; especially in the age of AI &mdash; is <em>how they think?</em>
+                Cognality is building the next generation of assessment for the <em>age of AI.</em>
             </h1>
-            <p class="about-hero-lead">We have been obsessed with this question for years. It shapes everything we build.</p>
+            <p class="about-hero-lead">For decades, assessments have relied on answers, scores, and finished products to measure learning and ability. But in an AI-powered world, those outputs no longer provide enough evidence of what someone actually understands or can do.</p>
         </div>
     </section>
 
@@ -420,19 +420,20 @@
         <div class="about-container">
 
             <p class="about-intro">
-                Assessment of learning is more than just a score &mdash; it&rsquo;s the reasoning behind it. The metacognition, the depth, the coherence, and the adaptability of thought.
+                We believe assessment should capture thinking in action.
             </p>
 
             <p class="about-text">
-                We built our product backwards from the rest of EdTech. Students don&rsquo;t get taught by AI &mdash; AI starts na&iuml;ve, almost confused; students guide it through problem-solving. Every interaction becomes a window into their thinking, which reveals a cognitive constellation where their understanding unfolds, not as scores but as reasoning patterns. All of it is transparent, explainable, aligned to Evidence-Centered Design.
+                Our platform uses carefully designed AI conversations to help learners explain ideas, defend reasoning, solve authentic problems, collaborate with others, and teach what they know. These interactions provide rich evidence of understanding that traditional assessments cannot capture.
             </p>
 
-            <div class="about-callout">
-                <p class="about-callout-label">Our positioning</p>
-                <p>
-                    Think of us as the &ldquo;Reasoning-Evidence Layer&rdquo; &mdash; the cognitive middleware every AI education platform needs but hasn&rsquo;t built, grounded in learning science and pedagogical rigor.
-                </p>
-            </div>
+            <p class="about-text">
+                Today, we are transforming assessment in K–12 education through products that identify learning gaps, orchestrate productive discussions, and reveal demonstrated competence. Tomorrow, the same technology will support talent acquisition, workforce development, professional certification, and lifelong learning.
+            </p>
+
+            <p class="about-text">
+                <strong>Because the future of assessment isn't about collecting better answers, it's about understanding people more deeply.</strong>
+            </p>
 
             <div class="about-cta">
                 <a href="/pilot" class="btn btn-primary">Join Our Pilot &rarr;</a>
