@@ -42,12 +42,14 @@
             background: var(--neutral-white);
             box-shadow: var(--shadow);
             z-index: 1000;
+            transition: box-shadow 0.3s ease;
+            padding: 0 2rem;
         }
 
         .nav-container {
             max-width: 1280px;
             margin: 0 auto;
-            padding: 0.1rem 2rem;
+            padding: 0.1rem 0;
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -94,15 +96,15 @@
             font-weight: 500;
             font-size: 1.3rem;
             transition: color 0.3s;
+            position: relative;
         }
 
         nav a:hover {
             color: var(--primary-blue);
         }
 
-        nav a.active {
-            color: var(--primary-blue);
-            font-weight: 600;
+        .logo a {
+            font-size: 1.5rem;
         }
 
         .nav-cta {
@@ -396,7 +398,7 @@
                 <span></span>
             </button>
             <ul id="navMenu">
-                <li><a href="index.html#features">Features</a></li>
+                <li><a href="index.html#products">Products</a></li>
                 <li><a href="index.html#how-it-works">How It Works</a></li>
                 <li><a href="index.html#vision">Vision</a></li>
                 <li><a href="about.html">About</a></li>

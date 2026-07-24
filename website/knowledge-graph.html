@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Sample Knowledge Map — Cognality Learning</title>
+<link rel="preload" as="image" href="logo_transparent.png">
 <script src="https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js"></script>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -36,12 +37,14 @@
     background: var(--neutral-white);
     box-shadow: var(--shadow);
     z-index: 1000;
+    transition: box-shadow 0.3s ease;
+    padding: 0 2rem;
   }
 
   .nav-container {
     max-width: 1280px;
     margin: 0 auto;
-    padding: 0.1rem 2rem;
+    padding: 0.1rem 0;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -72,7 +75,7 @@
     width: 100%;
     height: 100%;
     object-fit: contain;
-    mix-blend-mode: darken;
+    background: transparent;
   }
 
   nav ul {
@@ -88,9 +91,12 @@
     font-weight: 500;
     font-size: 1.3rem;
     transition: color 0.3s;
+    position: relative;
   }
 
   nav a:hover { color: var(--primary-blue); }
+
+  .logo a { font-size: 1.5rem; }
 
   .nav-cta {
     background: var(--accent-coral);
@@ -328,17 +334,17 @@
 
 <nav>
   <div class="nav-container">
-    <a href="index.html" class="logo">
+    <div class="logo">
       <div class="logo-icon">
-        <img src="logo_transparent.png" alt="Cognality Learning Logo">
+        <img src="logo_transparent.png" alt="Cognality Learning Logo" width="150" height="150" loading="eager">
       </div>
-      Cognality Learning
-    </a>
+      <a href="index.html" style="text-decoration:none; color:inherit; font-weight:700;">Cognality Learning</a>
+    </div>
     <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Toggle menu">
       <span></span><span></span><span></span>
     </button>
     <ul id="navMenu">
-      <li><a href="index.html#features">Features</a></li>
+      <li><a href="index.html#products">Products</a></li>
       <li><a href="index.html#how-it-works">How It Works</a></li>
       <li><a href="index.html#vision">Vision</a></li>
       <li><a href="about.html">About</a></li>

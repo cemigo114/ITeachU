@@ -44,12 +44,13 @@
             box-shadow: var(--shadow);
             z-index: 1000;
             transition: box-shadow 0.3s ease;
+            padding: 0 2rem;
         }
 
         .nav-container {
             max-width: 1280px;
             margin: 0 auto;
-            padding: 0.1rem 2rem;
+            padding: 0.1rem 0;
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -100,6 +101,10 @@
 
         nav a:hover {
             color: var(--primary-blue);
+        }
+
+        .logo a {
+            font-size: 1.5rem;
         }
 
         .nav-cta {
@@ -390,6 +395,82 @@
         .feature-card p {
             color: var(--gray-dark);
             line-height: 1.7;
+        }
+
+        /* Products Section */
+        .products {
+            padding: 80px 2rem;
+            background: white;
+            scroll-margin-top: 100px;
+        }
+
+        .products-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.5rem;
+            margin-top: 3rem;
+        }
+
+        .product-card {
+            border-radius: 16px;
+            padding: 2rem;
+            border-left: 4px solid var(--accent-teal);
+            box-shadow: 0 4px 16px rgba(0,0,0,0.07);
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .product-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .product-card:nth-child(1) { background: #e8f7f5; border-left-color: var(--accent-teal); }
+        .product-card:nth-child(2) { background: #e8f0f9; border-left-color: var(--primary-blue); }
+        .product-card:nth-child(3) { background: #fef0ec; border-left-color: var(--accent-coral); }
+
+        .product-label {
+            font-size: 0.7rem;
+            font-weight: 700;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+        }
+
+        .product-card:nth-child(1) .product-label { color: var(--accent-teal); }
+        .product-card:nth-child(2) .product-label { color: var(--primary-blue); }
+        .product-card:nth-child(3) .product-label { color: var(--accent-coral); }
+
+        .product-name {
+            font-size: 1.35rem;
+            font-weight: 700;
+            color: var(--neutral-dark);
+            line-height: 1.3;
+        }
+
+        .product-divider {
+            height: 1px;
+            background: #e5e7eb;
+            margin: 0.25rem 0;
+        }
+
+        .product-question {
+            font-size: 1rem;
+            color: var(--primary-blue);
+            font-style: italic;
+            line-height: 1.6;
+            flex: 1;
+        }
+
+        .product-cta {
+            margin-top: 0.5rem;
+        }
+
+        @media (max-width: 768px) {
+            .products-grid {
+                grid-template-columns: 1fr;
+            }
         }
 
         /* How It Works */
@@ -895,7 +976,7 @@
                 <span></span>
             </button>
             <ul id="navMenu">
-                <li><a href="#features">Features</a></li>
+                <li><a href="#products">Products</a></li>
                 <li><a href="#how-it-works">How It Works</a></li>
                 <li><a href="#vision">Vision</a></li>
                 <li><a href="about.html">About</a></li>
@@ -1003,42 +1084,33 @@
         </div>
     </section>
 
-    <section class="features" id="features">
+    <section class="products" id="products">
         <div class="features-container">
             <div class="section-header">
-                <h2>Transform Assessment Through Teaching</h2>
-                <p>Students demonstrate understanding by guiding AI through problems, making their thinking visible and measurable</p>
+                <h2>Our Products</h2>
+                <p>Three tools built on the same AI conversation engine, each designed to reveal a different dimension of student thinking.</p>
             </div>
-            <div class="feature-grid">
-                <div class="feature-card">
-                    <div class="feature-icon">🧠</div>
-                    <h3>Reasoning Made Visible</h3>
-                    <p>Capture not just what students know, but how they think. Every explanation reveals cognitive patterns that traditional tests miss.</p>
+            <div class="products-grid">
+                <div class="product-card">
+                    <div class="product-label">Gap-Finder</div>
+                    <h3 class="product-name">Find Learning Gaps</h3>
+                    <div class="product-divider"></div>
+                    <p class="product-question">Where does understanding break down?</p>
+                    <div class="product-cta">
+                        <a href="knowledge-graph.html" class="btn btn-secondary" style="padding: 10px 20px; font-size: 0.875rem;">Explore a Sample Knowledge Map →</a>
+                    </div>
                 </div>
-                <div class="feature-card">
-                    <div class="feature-icon">🎯</div>
-                    <h3>Evidence-Centered Design</h3>
-                    <p>Built on rigorous pedagogical foundations, every interaction generates authentic evidence of understanding aligned to learning objectives.</p>
+                <div class="product-card">
+                    <div class="product-label">Discussion Orchestrator</div>
+                    <h3 class="product-name">Guide Better Discussions</h3>
+                    <div class="product-divider"></div>
+                    <p class="product-question">How can every student contribute meaningful ideas?</p>
                 </div>
-                <div class="feature-card">
-                    <div class="feature-icon">🤝</div>
-                    <h3>AI as Learning Partner</h3>
-                    <p>Students teach confused AI protégés, transforming assessment from performance to authentic demonstration of mastery.</p>
-                </div>
-                <div class="feature-card">
-                    <div class="feature-icon">📊</div>
-                    <h3>Actionable Insights</h3>
-                    <p>Rich analytics reveal learning progressions, misconceptions, and growth opportunities invisible in traditional assessments.</p>
-                </div>
-                <div class="feature-card">
-                    <div class="feature-icon">🔒</div>
-                    <h3>Trust & Transparency</h3>
-                    <p>Every assessment decision is explainable, evidence-based, and aligned to educational standards, building stakeholder confidence.</p>
-                </div>
-                <div class="feature-card">
-                    <div class="feature-icon">⚡</div>
-                    <h3>Real-Time Feedback</h3>
-                    <p>Immediate insights into student thinking enable timely interventions and personalized learning pathways.</p>
+                <div class="product-card">
+                    <div class="product-label">Competency Revealer</div>
+                    <h3 class="product-name">Reveal Real Understanding</h3>
+                    <div class="product-divider"></div>
+                    <p class="product-question">What can this learner actually do independently?</p>
                 </div>
             </div>
         </div>
@@ -1071,18 +1143,6 @@
                     <h3>Insight Generation</h3>
                     <p>Educators receive detailed reports on student thinking and growth</p>
                 </div>
-            </div>
-        </div>
-    </section>
-
-    <section class="kg-promo">
-        <div class="features-container">
-            <div class="section-header">
-                <h2>What a Student's Knowledge Map Looks Like</h2>
-                <p>Cognality maps each student's understanding across standards — showing what's mastered, what's in progress, and where gaps or misconceptions exist, organized by the prerequisite connections between concepts.</p>
-            </div>
-            <div class="kg-promo-cta">
-                <a href="knowledge-graph.html" target="_blank" rel="noopener" class="btn btn-primary">Explore a Sample Knowledge Map →</a>
             </div>
         </div>
     </section>
