@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cognality Learning - Let Students Show What They Truly Know</title>
+    <link rel="preload" as="image" href="logo_transparent.png">
     <style>
         * {
             margin: 0;
@@ -42,13 +43,14 @@
             background: var(--neutral-white);
             box-shadow: var(--shadow);
             z-index: 1000;
-            transition: all 0.3s ease;
+            transition: box-shadow 0.3s ease;
+            padding: 0 2rem;
         }
 
         .nav-container {
             max-width: 1280px;
             margin: 0 auto;
-            padding: 0.1rem 2rem;
+            padding: 0.1rem 0;
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -79,7 +81,6 @@
             height: 100%;
             object-fit: contain;
             background: transparent;
-            mix-blend-mode: darken;
         }
 
         nav ul {
@@ -100,6 +101,10 @@
 
         nav a:hover {
             color: var(--primary-blue);
+        }
+
+        .logo a {
+            font-size: 1.5rem;
         }
 
         .nav-cta {
@@ -146,8 +151,8 @@
             max-width: 1280px;
             margin: 0 auto;
             display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 4rem;
+            grid-template-columns: 5.5fr 6.5fr;
+            gap: 3rem;
             align-items: center;
         }
 
@@ -216,109 +221,95 @@
         /* Hero Visual */
         .hero-visual {
             position: relative;
-            height: 500px;
         }
 
-        .assessment-flow {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+        /* Product Demo Split Panel */
+        .product-demo {
+            display: grid;
+            grid-template-columns: 0.72fr 1.43fr;
+            gap: 1rem;
+            align-items: stretch;
         }
 
-        .flow-container {
-            position: relative;
-            width: 400px;
-            height: 400px;
-        }
-
-        /* Central Student Node */
-        .student-node {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 120px;
-            height: 120px;
-            background: linear-gradient(135deg, var(--accent-teal), var(--primary-blue));
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-weight: bold;
-            box-shadow: 0 0 40px rgba(0, 168, 150, 0.3);
-            animation: pulse 2s ease-in-out infinite;
-        }
-
-        @keyframes pulse {
-            0%, 100% { transform: translate(-50%, -50%) scale(1); }
-            50% { transform: translate(-50%, -50%) scale(1.05); }
-        }
-
-        /* Orbiting Elements */
-        .orbit-item {
-            position: absolute;
-            width: 80px;
-            height: 80px;
+        .demo-task-panel {
             background: white;
-            border-radius: 50%;
-            box-shadow: var(--shadow-lg);
+            border-radius: 16px;
+            padding: 1.25rem;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.08);
             display: flex;
+            flex-direction: column;
+            gap: 0.85rem;
+            border: 1px solid #e5e7eb;
+        }
+
+        .demo-task-eyebrow {
+            font-size: 0.68rem;
+            font-weight: 700;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: var(--accent-teal);
+        }
+
+        .demo-task-title {
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: var(--neutral-dark);
+            line-height: 1.3;
+        }
+
+        .demo-cups-table {
+            background: var(--primary-light);
+            border-radius: 10px;
+            padding: 0.75rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.4rem;
+        }
+
+        .demo-cups-row {
+            display: flex;
+            justify-content: space-between;
             align-items: center;
-            justify-content: center;
-            font-size: 14px;
-            text-align: center;
-            padding: 10px;
+            font-size: 0.8rem;
         }
 
-        .orbit-1 {
-            animation: orbit 20s linear infinite;
+        .demo-cups-row .label {
+            color: var(--gray-dark);
         }
 
-        .orbit-2 {
-            animation: orbit 25s linear infinite reverse;
-            animation-delay: 5s;
+        .demo-cups-row .value {
+            font-weight: 700;
+            color: var(--primary-blue);
         }
 
-        .orbit-3 {
-            animation: orbit 30s linear infinite;
-            animation-delay: 10s;
+        .demo-cups-row .value.unknown {
+            color: var(--accent-coral);
         }
 
-        @keyframes orbit {
-            from {
-                transform: rotate(0deg) translateX(150px) rotate(0deg);
-            }
-            to {
-                transform: rotate(360deg) translateX(150px) rotate(-360deg);
-            }
+        .demo-cups-divider {
+            height: 1px;
+            background: #e5e7eb;
+            margin: 0.1rem 0;
         }
 
-        /* Connection Lines */
-        .connection-line {
-            position: absolute;
-            width: 2px;
-            height: 150px;
-            background: linear-gradient(180deg, transparent, var(--accent-teal), transparent);
-            top: 50%;
-            left: 50%;
-            transform-origin: top;
-            opacity: 0.3;
-            animation: rotate 15s linear infinite;
+        .demo-task-prompt {
+            font-size: 0.8rem;
+            color: var(--gray-dark);
+            line-height: 1.6;
+            flex: 1;
         }
 
-        @keyframes rotate {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
+        .demo-task-prompt em {
+            color: var(--primary-blue);
+            font-style: normal;
+            font-weight: 600;
         }
 
         /* Features Section */
         .features {
             padding: 80px 2rem;
             background: white;
+            scroll-margin-top: 160px;
         }
 
         .features-container {
@@ -406,10 +397,87 @@
             line-height: 1.7;
         }
 
+        /* Products Section */
+        .products {
+            padding: 80px 2rem;
+            background: white;
+            scroll-margin-top: 100px;
+        }
+
+        .products-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.5rem;
+            margin-top: 3rem;
+        }
+
+        .product-card {
+            border-radius: 16px;
+            padding: 2rem;
+            border-left: 4px solid var(--accent-teal);
+            box-shadow: 0 4px 16px rgba(0,0,0,0.07);
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .product-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .product-card:nth-child(1) { background: #e8f7f5; border-left-color: var(--accent-teal); }
+        .product-card:nth-child(2) { background: #e8f0f9; border-left-color: var(--primary-blue); }
+        .product-card:nth-child(3) { background: #fef0ec; border-left-color: var(--accent-coral); }
+
+        .product-label {
+            font-size: 0.7rem;
+            font-weight: 700;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+        }
+
+        .product-card:nth-child(1) .product-label { color: var(--accent-teal); }
+        .product-card:nth-child(2) .product-label { color: var(--primary-blue); }
+        .product-card:nth-child(3) .product-label { color: var(--accent-coral); }
+
+        .product-name {
+            font-size: 1.35rem;
+            font-weight: 700;
+            color: var(--neutral-dark);
+            line-height: 1.3;
+        }
+
+        .product-divider {
+            height: 1px;
+            background: #e5e7eb;
+            margin: 0.25rem 0;
+        }
+
+        .product-question {
+            font-size: 1rem;
+            color: var(--primary-blue);
+            font-style: italic;
+            line-height: 1.6;
+            flex: 1;
+        }
+
+        .product-cta {
+            margin-top: 0.5rem;
+        }
+
+        @media (max-width: 768px) {
+            .products-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
         /* How It Works */
         .how-it-works {
             padding: 80px 2rem;
             background: linear-gradient(180deg, white 0%, var(--primary-light) 100%);
+            scroll-margin-top: 160px;
         }
 
         .process-steps {
@@ -485,6 +553,7 @@
         .vision-mission {
             padding: 80px 2rem;
             background: white;
+            scroll-margin-top: 160px;
         }
 
         .vm-container {
@@ -621,6 +690,216 @@
             color: var(--gray-medium);
         }
 
+        /* About Teaser */
+        .about-teaser {
+            padding: 64px 2rem;
+            background: linear-gradient(135deg, rgba(10, 77, 140, 0.04) 0%, rgba(0, 168, 150, 0.04) 100%);
+            border-top: 1px solid rgba(10, 77, 140, 0.08);
+            border-bottom: 1px solid rgba(10, 77, 140, 0.08);
+            text-align: center;
+        }
+
+        .about-teaser-container {
+            max-width: 720px;
+            margin: 0 auto;
+        }
+
+        .teaser-question {
+            font-size: clamp(1.25rem, 2.5vw, 1.625rem);
+            font-weight: 700;
+            color: var(--primary-blue);
+            line-height: 1.4;
+            margin: 0 0 1.5rem;
+            font-style: normal;
+        }
+
+        .teaser-link {
+            display: inline-block;
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--accent-teal);
+            text-decoration: none;
+            border-bottom: 2px solid var(--accent-teal);
+            padding-bottom: 2px;
+            transition: color 0.2s, border-color 0.2s;
+        }
+
+        .teaser-link:hover {
+            color: var(--primary-blue);
+            border-color: var(--primary-blue);
+        }
+
+        /* Knowledge Graph Promo */
+        .kg-promo {
+            padding: 80px 2rem;
+            background: white;
+            text-align: center;
+        }
+
+        .kg-promo-cta {
+            margin-top: 2.5rem;
+        }
+
+        /* Chat Demo */
+        .chat-demo {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.12), 0 4px 16px rgba(10,77,140,0.08);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            max-width: 420px;
+            margin: 0 auto;
+        }
+
+        .chat-demo-header {
+            background: linear-gradient(135deg, var(--primary-blue) 0%, #0d6ebd 100%);
+            padding: 1rem 1.25rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            color: white;
+            flex-shrink: 0;
+        }
+
+        .chat-demo-avatar {
+            width: 38px;
+            height: 38px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 1rem;
+            flex-shrink: 0;
+        }
+
+        .chat-demo-name {
+            font-weight: 700;
+            font-size: 0.95rem;
+        }
+
+        .chat-demo-online {
+            font-size: 0.7rem;
+            color: #7fffda;
+            font-weight: 500;
+            margin-left: 6px;
+        }
+
+        .chat-demo-task {
+            font-size: 0.72rem;
+            opacity: 0.75;
+            margin-top: 2px;
+        }
+
+        .chat-demo-messages {
+            flex: 1;
+            overflow: hidden;
+            padding: 1rem 1.1rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            background: #f8fafc;
+        }
+
+        .chat-demo-msg {
+            display: flex;
+            align-items: flex-end;
+            gap: 0.5rem;
+            opacity: 0;
+        }
+
+        .chat-demo-msg.from-student {
+            flex-direction: row-reverse;
+        }
+
+        .chat-demo-msg-avatar {
+            width: 26px;
+            height: 26px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 0.65rem;
+            flex-shrink: 0;
+        }
+
+        .from-zippy .chat-demo-msg-avatar {
+            background: linear-gradient(135deg, var(--accent-teal), var(--primary-blue));
+            color: white;
+        }
+
+        .from-student .chat-demo-msg-avatar {
+            background: var(--accent-coral);
+            color: white;
+        }
+
+        .chat-demo-msg-bubble {
+            max-width: 76%;
+            padding: 0.6rem 0.85rem;
+            border-radius: 14px;
+            font-size: 0.82rem;
+            line-height: 1.55;
+        }
+
+        .from-zippy .chat-demo-msg-bubble {
+            background: white;
+            color: var(--neutral-dark);
+            border-bottom-left-radius: 4px;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.07);
+        }
+
+        .from-student .chat-demo-msg-bubble {
+            background: var(--primary-blue);
+            color: white;
+            border-bottom-right-radius: 4px;
+        }
+
+        .chat-demo-input {
+            padding: 0.7rem 0.9rem;
+            border-top: 1px solid #e5e7eb;
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            background: white;
+            flex-shrink: 0;
+        }
+
+        .chat-demo-input-field {
+            flex: 1;
+            font-size: 0.8rem;
+            color: var(--gray-medium);
+            background: #f3f4f6;
+            padding: 0.45rem 0.75rem;
+            border-radius: 20px;
+        }
+
+        .chat-demo-input-send {
+            width: 30px;
+            height: 30px;
+            background: var(--accent-teal);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.85rem;
+        }
+
+        @keyframes chatMsgIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .chat-demo-msg:nth-child(1) { animation: chatMsgIn 0.35s ease 0.4s both; }
+        .chat-demo-msg:nth-child(2) { animation: chatMsgIn 0.35s ease 1.6s both; }
+        .chat-demo-msg:nth-child(3) { animation: chatMsgIn 0.35s ease 2.7s both; }
+        .chat-demo-msg:nth-child(4) { animation: chatMsgIn 0.35s ease 3.7s both; }
+        .chat-demo-msg:nth-child(5) { animation: chatMsgIn 0.35s ease 4.7s both; }
+
         /* Responsive */
         @media (max-width: 768px) {
             .mobile-menu-btn {
@@ -658,13 +937,8 @@
                 grid-template-columns: 1fr;
             }
 
-            .hero-visual {
-                height: 300px;
-            }
-
-            .flow-container {
-                width: 300px;
-                height: 300px;
+            .product-demo {
+                grid-template-columns: 1fr;
             }
 
             .vm-container {
@@ -692,9 +966,9 @@
         <div class="nav-container">
             <div class="logo">
                 <div class="logo-icon">
-                    <img src="logo_transparent.png" alt="Cognality Learning Logo">
+                    <img src="logo_transparent.png" alt="Cognality Learning Logo" width="150" height="150" loading="eager">
                 </div>
-                Cognality Learning
+                <a href="#" style="text-decoration:none; color:inherit; font-weight:700;">Cognality Learning</a>
             </div>
             <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Toggle menu">
                 <span></span>
@@ -702,9 +976,10 @@
                 <span></span>
             </button>
             <ul id="navMenu">
-                <li><a href="#features">Features</a></li>
+                <li><a href="#products">Products</a></li>
                 <li><a href="#how-it-works">How It Works</a></li>
                 <li><a href="#vision">Vision</a></li>
+                <li><a href="about.html">About</a></li>
                 <li><a href="#resources">Resources</a></li>
                 <li><a href="/pilot" class="nav-cta">Join Our Pilot</a></li>
             </ul>
@@ -714,69 +989,128 @@
     <section class="hero">
         <div class="hero-container">
             <div class="hero-content">
-                <div class="tagline">Let Students Show What They Truly Know</div>
-                <h1>The Next Generation of Assessment for the AI Era</h1>
+                <div class="tagline">Assess Thinking, Not Just Answers.</div>
+                <h1>The next generation of assessment starts with conversation.</h1>
                 <p class="subhead">
-                    Cognality Learning is building assessment that looks beyond answers and scores to understand how students think.
-                    Through authentic tasks and structured interaction, students explain their reasoning by teaching an AI protégé,
-                    making their understanding visible and providing educators with a clearer, more defensible view of learning.
+                    Cognality uses carefully designed AI conversations to reveal how people think, identify learning gaps, and provide richer evidence of understanding and competence.
                 </p>
                 <div class="hero-buttons">
                     <a href="/pilot" class="btn btn-primary">Join Our Pilot →</a>
                 </div>
             </div>
             <div class="hero-visual">
-                <div class="assessment-flow">
-                    <div class="flow-container">
-                        <div class="student-node">Student</div>
-                        <div class="orbit-item orbit-1">Teaching AI</div>
-                        <div class="orbit-item orbit-2">Reasoning</div>
-                        <div class="orbit-item orbit-3">Evidence</div>
-                        <div class="connection-line"></div>
-                        <div class="connection-line" style="transform: rotate(120deg);"></div>
-                        <div class="connection-line" style="transform: rotate(240deg);"></div>
+                <div class="product-demo">
+
+                    <!-- Left: Task Card -->
+                    <div class="demo-task-panel">
+                        <div class="demo-task-eyebrow">📋 Assessment Task</div>
+                        <div class="demo-task-title">Stacking Cups</div>
+                        <div class="demo-cups-table">
+                            <div class="demo-cups-row">
+                                <span class="label">2 cups</span>
+                                <span class="value">16 cm</span>
+                            </div>
+                            <div class="demo-cups-divider"></div>
+                            <div class="demo-cups-row">
+                                <span class="label">4 cups</span>
+                                <span class="value">20 cm</span>
+                            </div>
+                            <div class="demo-cups-divider"></div>
+                            <div class="demo-cups-row">
+                                <span class="label">8 cups</span>
+                                <span class="value">28 cm</span>
+                            </div>
+                            <div class="demo-cups-divider"></div>
+                            <div class="demo-cups-row">
+                                <span class="label"><em>n</em> cups</span>
+                                <span class="value unknown">? cm</span>
+                            </div>
+                        </div>
+                        <p class="demo-task-prompt">
+                            Teach <em>Zippy</em> how to find the height of any number of nested cups. Explain your reasoning — Zippy is confused and needs your help!
+                        </p>
                     </div>
+
+                    <!-- Right: Chat -->
+                    <div class="chat-demo">
+                        <div class="chat-demo-header">
+                            <div class="chat-demo-avatar">Z</div>
+                            <div>
+                                <div class="chat-demo-name">Zippy <span class="chat-demo-online">● online</span></div>
+                                <div class="chat-demo-task">Linear Patterns</div>
+                            </div>
+                        </div>
+                        <div class="chat-demo-messages">
+                            <div class="chat-demo-msg from-zippy">
+                                <div class="chat-demo-msg-avatar">Z</div>
+                                <div class="chat-demo-msg-bubble">
+                                    If 2 cups = 16cm... wouldn't 8 cups = 64cm?<br>
+                                    But it says 28cm! 🤔 What am I missing?
+                                </div>
+                            </div>
+                            <div class="chat-demo-msg from-student">
+                                <div class="chat-demo-msg-bubble">
+                                    The cups nest inside each other, you can't just multiply.
+                                </div>
+                                <div class="chat-demo-msg-avatar">S</div>
+                            </div>
+                            <div class="chat-demo-msg from-zippy">
+                                <div class="chat-demo-msg-avatar">Z</div>
+                                <div class="chat-demo-msg-bubble">
+                                    Oh! So I need a different formula? 🤔
+                                </div>
+                            </div>
+                            <div class="chat-demo-msg from-student">
+                                <div class="chat-demo-msg-bubble">
+                                    Yes, 14cm for the first cup, then +2cm per extra cup.
+                                </div>
+                                <div class="chat-demo-msg-avatar">S</div>
+                            </div>
+                            <div class="chat-demo-msg from-zippy">
+                                <div class="chat-demo-msg-avatar">Z</div>
+                                <div class="chat-demo-msg-bubble">
+                                    So n cups = 14 + (n−1)×2! 🎉 You're a great teacher!
+                                </div>
+                            </div>
+                        </div>
+                        <div class="chat-demo-input">
+                            <div class="chat-demo-input-field">Explain your thinking to Zippy...</div>
+                            <div class="chat-demo-input-send">→</div>
+                        </div>
+                    </div>
+
                 </div>
             </div>
         </div>
     </section>
 
-    <section class="features" id="features">
+    <section class="products" id="products">
         <div class="features-container">
             <div class="section-header">
-                <h2>Transform Assessment Through Teaching</h2>
-                <p>Students demonstrate understanding by guiding AI through problems, making their thinking visible and measurable</p>
+                <h2>Our Products</h2>
+                <p>Three tools built on the same AI conversation engine, each designed to reveal a different dimension of student thinking.</p>
             </div>
-            <div class="feature-grid">
-                <div class="feature-card">
-                    <div class="feature-icon">🧠</div>
-                    <h3>Reasoning Made Visible</h3>
-                    <p>Capture not just what students know, but how they think. Every explanation reveals cognitive patterns that traditional tests miss.</p>
+            <div class="products-grid">
+                <div class="product-card">
+                    <div class="product-label">Gap-Finder</div>
+                    <h3 class="product-name">Find Learning Gaps</h3>
+                    <div class="product-divider"></div>
+                    <p class="product-question">Where does understanding break down?</p>
+                    <div class="product-cta">
+                        <a href="knowledge-graph.html" class="btn btn-secondary" style="padding: 10px 20px; font-size: 0.875rem;">Explore a Sample Knowledge Map →</a>
+                    </div>
                 </div>
-                <div class="feature-card">
-                    <div class="feature-icon">🎯</div>
-                    <h3>Evidence-Centered Design</h3>
-                    <p>Built on rigorous pedagogical foundations, every interaction generates authentic evidence of understanding aligned to learning objectives.</p>
+                <div class="product-card">
+                    <div class="product-label">Discussion Orchestrator</div>
+                    <h3 class="product-name">Guide Better Discussions</h3>
+                    <div class="product-divider"></div>
+                    <p class="product-question">How can every student contribute meaningful ideas?</p>
                 </div>
-                <div class="feature-card">
-                    <div class="feature-icon">🤝</div>
-                    <h3>AI as Learning Partner</h3>
-                    <p>Students teach confused AI protégés, transforming assessment from performance to authentic demonstration of mastery.</p>
-                </div>
-                <div class="feature-card">
-                    <div class="feature-icon">📊</div>
-                    <h3>Actionable Insights</h3>
-                    <p>Rich analytics reveal learning progressions, misconceptions, and growth opportunities invisible in traditional assessments.</p>
-                </div>
-                <div class="feature-card">
-                    <div class="feature-icon">🔒</div>
-                    <h3>Trust & Transparency</h3>
-                    <p>Every assessment decision is explainable, evidence-based, and aligned to educational standards, building stakeholder confidence.</p>
-                </div>
-                <div class="feature-card">
-                    <div class="feature-icon">⚡</div>
-                    <h3>Real-Time Feedback</h3>
-                    <p>Immediate insights into student thinking enable timely interventions and personalized learning pathways.</p>
+                <div class="product-card">
+                    <div class="product-label">Competency Revealer</div>
+                    <h3 class="product-name">Reveal Real Understanding</h3>
+                    <div class="product-divider"></div>
+                    <p class="product-question">What can this learner actually do independently?</p>
                 </div>
             </div>
         </div>
@@ -817,11 +1151,13 @@
         <div class="vm-container">
             <div class="vm-card vision-card">
                 <h3>Our Vision</h3>
-                <p>A learning environment where students show how they think, educators trust what they see, and evidence of understanding guides growth. We envision classrooms where assessment enhances learning rather than interrupting it, where every student's unique thinking process is valued and understood.</p>
+                <p>A world where important decisions are informed by how people think, not just what they produce.</p>
+                <p style="margin-top: 1rem;">We envision a future where learning, competence, and potential are understood through meaningful interactions rather than isolated answers. From classrooms to workplaces, people should have the opportunity to demonstrate what they truly know and can do.</p>
             </div>
             <div class="vm-card mission-card">
                 <h3>Our Mission</h3>
-                <p>To build trust and transparency in AI-mediated learning by making students' reasoning visible, supporting learner agency, and enabling educators to make informed decisions using authentic evidence of understanding. We're committed to creating assessment tools that celebrate thinking over memorization.</p>
+                <p>To build the next generation of assessment through AI-powered conversations that reveal thinking, deepen understanding, and demonstrate competence.</p>
+                <p style="margin-top: 1rem;">By combining learning science, assessment science, and artificial intelligence, we create meaningful interactions that uncover learning gaps, foster productive collaboration, and provide richer evidence for educational and professional decision making.</p>
             </div>
         </div>
     </section>
@@ -835,7 +1171,7 @@
         </div>
     </section>
 
-    <footer>
+    <footer id="resources">
         <div class="footer-container">
             <div class="footer-brand">
                 <h3>Cognality Learning</h3>
@@ -843,7 +1179,7 @@
             </div>
             <div class="footer-links">
                 <span class="footer-links-label">Company</span>
-                <a href="#about">About Us</a>
+                <a href="about.html">About Us</a>
                 <a href="mailto:support@cognalitylearning.com">Contact</a>
                 <a href="privacy.html">Privacy</a>
             </div>
@@ -858,7 +1194,12 @@
         document.querySelectorAll('a[href^="#"]').forEach(anchor => {
             anchor.addEventListener('click', function (e) {
                 e.preventDefault();
-                const target = document.querySelector(this.getAttribute('href'));
+                const href = this.getAttribute('href');
+                if (href === '#') {
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                    return;
+                }
+                const target = document.querySelector(href);
                 if (target) {
                     target.scrollIntoView({ behavior: 'smooth', block: 'start' });
                 }

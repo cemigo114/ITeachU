@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About Us — Cognality Learning</title>
+    <link rel="preload" as="image" href="logo_transparent.png">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary-blue: #0A4d8c;
+            --primary-light: #f8fafc;
+            --accent-teal: #00a896;
+            --accent-coral: #ff6b4a;
+            --neutral-white: #ffffff;
+            --neutral-dark: #212b36;
+            --gray-light: #f3f4f6;
+            --gray-medium: #9ca3af;
+            --gray-dark: #4b5563;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            --shadow-lg: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Inter', sans-serif;
+            background: var(--primary-light);
+            color: var(--neutral-dark);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        /* Navigation */
+        nav {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            background: var(--neutral-white);
+            box-shadow: var(--shadow);
+            z-index: 1000;
+            transition: box-shadow 0.3s ease;
+            padding: 0 2rem;
+        }
+
+        .nav-container {
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 0.1rem 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--primary-blue);
+            text-decoration: none;
+        }
+
+        .logo-icon {
+            width: 150px;
+            height: 150px;
+            border-radius: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            background: transparent;
+        }
+
+        .logo-icon img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            background: transparent;
+        }
+
+        nav ul {
+            display: flex;
+            list-style: none;
+            gap: 2rem;
+            align-items: center;
+        }
+
+        nav a {
+            color: var(--gray-dark);
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 1.3rem;
+            transition: color 0.3s;
+            position: relative;
+        }
+
+        nav a:hover {
+            color: var(--primary-blue);
+        }
+
+        .logo a {
+            font-size: 1.5rem;
+        }
+
+        .nav-cta {
+            background: var(--accent-coral);
+            color: white !important;
+            padding: 10px 24px;
+            border-radius: 8px;
+            transition: all 0.3s;
+        }
+
+        .nav-cta:hover {
+            background: #e55a3a;
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .mobile-menu-btn {
+            display: none;
+            flex-direction: column;
+            gap: 4px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 8px;
+        }
+
+        .mobile-menu-btn span {
+            width: 25px;
+            height: 3px;
+            background: var(--primary-blue);
+            transition: all 0.3s ease;
+        }
+
+        /* Hero */
+        .about-hero {
+            padding: 200px 2rem 80px;
+            background: linear-gradient(135deg, #060f1e 0%, var(--primary-blue) 100%);
+            text-align: center;
+        }
+
+        .about-hero-container {
+            max-width: 820px;
+            margin: 0 auto;
+        }
+
+        .about-eyebrow {
+            font-size: 0.8rem;
+            font-weight: 700;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            color: var(--accent-teal);
+            margin-bottom: 1.5rem;
+        }
+
+        .about-question {
+            font-size: clamp(1.875rem, 4vw, 3rem);
+            font-weight: 800;
+            color: white;
+            line-height: 1.25;
+            margin-bottom: 1.5rem;
+        }
+
+        .about-question em {
+            color: var(--accent-teal);
+            font-style: normal;
+        }
+
+        .about-hero-lead {
+            font-size: 1.125rem;
+            color: rgba(255, 255, 255, 0.72);
+            line-height: 1.7;
+        }
+
+        /* Body */
+        .about-body {
+            padding: 80px 2rem 100px;
+            background: white;
+        }
+
+        .about-container {
+            max-width: 720px;
+            margin: 0 auto;
+        }
+
+        .about-intro {
+            font-size: 1.2rem;
+            font-weight: 500;
+            color: var(--neutral-dark);
+            line-height: 1.8;
+            margin-bottom: 2.5rem;
+            padding-bottom: 2.5rem;
+            border-bottom: 1px solid var(--gray-light);
+        }
+
+        .about-text {
+            font-size: 1.075rem;
+            color: var(--gray-dark);
+            line-height: 1.9;
+            margin-bottom: 2.5rem;
+        }
+
+        .about-callout {
+            margin: 3rem 0;
+            padding: 2rem 2.5rem;
+            background: var(--primary-light);
+            border-left: 4px solid var(--accent-teal);
+            border-radius: 0 12px 12px 0;
+        }
+
+        .about-callout-label {
+            font-size: 0.75rem;
+            font-weight: 700;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: var(--accent-teal);
+            margin-bottom: 0.75rem;
+        }
+
+        .about-callout p {
+            font-size: 1.15rem;
+            font-weight: 600;
+            color: var(--neutral-dark);
+            line-height: 1.65;
+        }
+
+        .about-cta {
+            margin-top: 3.5rem;
+            padding-top: 2.5rem;
+            border-top: 1px solid var(--gray-light);
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 14px 32px;
+            border-radius: 8px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: var(--primary-blue);
+            color: white;
+            box-shadow: var(--shadow);
+        }
+
+        .btn-primary:hover {
+            background: #083e6f;
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .btn-secondary {
+            background: white;
+            color: var(--primary-blue);
+            border: 2px solid var(--primary-blue);
+        }
+
+        .btn-secondary:hover {
+            background: var(--primary-blue);
+            color: white;
+        }
+
+        /* Footer */
+        footer {
+            background: var(--neutral-dark);
+            color: white;
+            padding: 3rem 2rem;
+        }
+
+        .footer-container {
+            max-width: 1280px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 2rem;
+        }
+
+        .footer-brand h3 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            color: var(--accent-teal);
+        }
+
+        .footer-brand p {
+            color: var(--gray-medium);
+            line-height: 1.6;
+        }
+
+        .footer-links {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+            flex-shrink: 0;
+        }
+
+        .footer-links-label {
+            color: white;
+            font-weight: 600;
+        }
+
+        .footer-links a {
+            color: var(--gray-medium);
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+
+        .footer-links a:hover {
+            color: var(--accent-teal);
+        }
+
+        .footer-bottom {
+            margin-top: 3rem;
+            padding-top: 2rem;
+            border-top: 1px solid #374151;
+            text-align: center;
+            color: var(--gray-medium);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .mobile-menu-btn {
+                display: flex;
+            }
+
+            nav ul {
+                display: none;
+                position: absolute;
+                top: 100%;
+                left: 0;
+                right: 0;
+                background: var(--neutral-white);
+                flex-direction: column;
+                padding: 1rem;
+                box-shadow: var(--shadow-lg);
+                gap: 0.5rem;
+            }
+
+            nav ul.mobile-open {
+                display: flex;
+            }
+
+            nav ul li {
+                width: 100%;
+                text-align: center;
+            }
+
+            .nav-cta {
+                display: block;
+                width: 100%;
+            }
+
+            .about-hero {
+                padding: 180px 1.5rem 60px;
+            }
+
+            .about-callout {
+                padding: 1.5rem;
+            }
+
+            .footer-container {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .footer-links {
+                justify-content: center;
+                flex-wrap: wrap;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <div class="nav-container">
+            <div class="logo">
+                <div class="logo-icon">
+                    <img src="logo_transparent.png" alt="Cognality Learning Logo" width="150" height="150" loading="eager">
+                </div>
+                <a href="index.html" style="text-decoration:none; color:inherit; font-weight:700;">Cognality Learning</a>
+            </div>
+            <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Toggle menu">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+            <ul id="navMenu">
+                <li><a href="index.html#products">Products</a></li>
+                <li><a href="index.html#how-it-works">How It Works</a></li>
+                <li><a href="index.html#vision">Vision</a></li>
+                <li><a href="about.html">About</a></li>
+                <li><a href="index.html#resources">Resources</a></li>
+                <li><a href="/pilot" class="nav-cta">Join Our Pilot</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <section class="about-hero">
+        <div class="about-hero-container">
+            <p class="about-eyebrow">About Us</p>
+            <h1 class="about-question">
+                Cognality is building the next generation of assessment for the <em>age of AI.</em>
+            </h1>
+            <p class="about-hero-lead">For decades, assessments have relied on answers, scores, and finished products to measure learning and ability. But in an AI-powered world, those outputs no longer provide enough evidence of what someone actually understands or can do.</p>
+        </div>
+    </section>
+
+    <section class="about-body">
+        <div class="about-container">
+
+            <p class="about-intro">
+                We believe assessment should capture thinking in action.
+            </p>
+
+            <p class="about-text">
+                Our platform uses carefully designed AI conversations to help learners explain ideas, defend reasoning, solve authentic problems, collaborate with others, and teach what they know. These interactions provide rich evidence of understanding that traditional assessments cannot capture.
+            </p>
+
+            <p class="about-text">
+                Today, we are transforming assessment in K–12 education through products that identify learning gaps, orchestrate productive discussions, and reveal demonstrated competence. Tomorrow, the same technology will support talent acquisition, workforce development, professional certification, and lifelong learning.
+            </p>
+
+            <p class="about-text">
+                <strong>Because the future of assessment isn't about collecting better answers, it's about understanding people more deeply.</strong>
+            </p>
+
+            <div class="about-cta">
+                <a href="/pilot" class="btn btn-primary">Join Our Pilot &rarr;</a>
+                <a href="index.html" class="btn btn-secondary">&larr; Back to Home</a>
+            </div>
+
+        </div>
+    </section>
+
+    <footer>
+        <div class="footer-container">
+            <div class="footer-brand">
+                <h3>Cognality Learning</h3>
+                <p>Building the next generation of assessment for the AI era, one that looks beyond answers to understand how students think.</p>
+            </div>
+            <div class="footer-links">
+                <span class="footer-links-label">Company</span>
+                <a href="about.html">About Us</a>
+                <a href="mailto:support@cognalitylearning.com">Contact</a>
+                <a href="privacy.html">Privacy</a>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2025 Cognality Learning. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script>
+        const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+        const navMenu = document.getElementById('navMenu');
+
+        mobileMenuBtn.addEventListener('click', () => {
+            navMenu.classList.toggle('mobile-open');
+        });
+
+        navMenu.querySelectorAll('a').forEach(link => {
+            link.addEventListener('click', () => {
+                navMenu.classList.remove('mobile-open');
+            });
+        });
+    </script>
+</body>
+</html>
