@@ -132,3 +132,62 @@ model Participant {
   session     LiveSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
   @@index([sessionId])
 }
+
+// --- Content tables (task bank + collections) ---
+// These live in the production DB but predated this schema file; introspected via
+// `prisma db pull` and added here so `prisma db push` treats them as in-sync
+// rather than proposing to drop them. The running app reads the task bank from
+// src/data/tasks.json, not these tables.
+model Collection {
+  id          String           @id
+  slug        String           @unique
+  title       String
+  description String?
+  grade       String?
+  published   Boolean          @default(true)
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime
+  tasks       CollectionTask[]
+
+  @@index([grade])
+}
+
+model CollectionTask {
+  collectionId String
+  taskId       String
+  sortOrder    Int        @default(0)
+  collection   Collection @relation(fields: [collectionId], references: [id], onDelete: Cascade)
+  task         Task       @relation(fields: [taskId], references: [id], onDelete: Cascade)
+
+  @@id([collectionId, taskId])
+}
+
+model Task {
+  id                  String           @id
+  slug                String           @unique
+  title               String
+  grade               String
+  domain              String
+  ccssCode            String
+  cluster             String?
+  standardStatement   String?
+  studentPrompt       String?
+  misconceptions      Json?
+  patternRecognition  String?
+  generalization      String?
+  inferencePrediction String?
+  mappingData         Json?
+  teachingPrompt      String?
+  targetConcepts      Json?
+  aiIntro             String?
+  aiIntroEs           String?
+  sourceFile          String?
+  published           Boolean          @default(true)
+  createdAt           DateTime         @default(now())
+  updatedAt           DateTime
+  collections         CollectionTask[]
+
+  @@index([ccssCode])
+  @@index([domain])
+  @@index([grade])
+}
