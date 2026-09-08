@@ -16,6 +16,7 @@ import {
 import authRouter from './src/routes/auth.js';
 import classRouter from './src/routes/classes.js';
 import assignmentRouter from './src/routes/assignments.js';
+import liveRouter from './src/routes/live.js';
 
 const app = express();
 const PORT = process.env.PORT || 3002;
@@ -69,6 +70,7 @@ app.locals.prisma = prisma;
 app.use('/api/auth', authRouter);
 app.use('/api/classes', classRouter);
 app.use('/api/assignments', assignmentRouter);
+app.use('/api/live', liveRouter);
 
 // Health/diagnostic endpoint
 app.get('/api/health', async (req, res) => {

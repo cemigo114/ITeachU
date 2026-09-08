@@ -23,6 +23,8 @@ import StudentDashboard from './views/StudentDashboard';
 import ParentDashboard from './views/ParentDashboard';
 import FeedbackView from './views/FeedbackView';
 import TeachingSessionWrapper from './views/TeachingSessionWrapper';
+import JoinLiveSession from './views/JoinLiveSession';
+import DeployLiveSession from './views/DeployLiveSession';
 
 export default function AppRouter() {
   return (
@@ -31,8 +33,13 @@ export default function AppRouter() {
       <Route path="/signup" element={<SignupPage />} />
       <Route path="/login" element={<LoginPage />} />
 
+      {/* Public invite-code join flow (no account needed) */}
+      <Route path="/join" element={<JoinLiveSession />} />
+      <Route path="/j/:code" element={<JoinLiveSession />} />
+
       <Route element={<ProtectedRoute><AppShell /></ProtectedRoute>}>
         <Route path="/setup" element={<ClassSetupWizard />} />
+        <Route path="/deploy" element={<DeployLiveSession />} />
         <Route path="/dashboard" element={<TeacherDashboardWired />} />
         <Route path="/assign" element={<BrowseTasksWired />} />
         <Route path="/assign/detail" element={<TaskDetailWired />} />

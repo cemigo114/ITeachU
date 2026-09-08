@@ -64,7 +64,7 @@ export function AuthProvider({ children }) {
 
     if (!response.ok) {
       const err = await response.json().catch(() => ({ error: 'Login failed' }));
-      throw new Error(err.error || 'Login failed');
+      throw new Error(err.message || err.error || 'Login failed');
     }
 
     const data = await response.json();
@@ -80,6 +80,48 @@ export function AuthProvider({ children }) {
     return { user: data.user, token: data.token, existing: false };
   }, []);
 
+  const loginDemo = useCallback(async ({ role, action = 'login', name, email }) => {
+    const response = await fetch(`${API_BASE_URL}/api/auth/demo`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ role, action, name, email }),
+    });
+
+    if (!response.ok) {
+      const err = await response.json().catch(() => ({ error: 'Demo login failed' }));
+      throw new Error(err.message || err.error || 'Demo login failed');
+    }
+
+    const data = await response.json();
+    localStorage.setItem('iteachu_token', data.token);
+    setToken(data.token);
+    setUser(data.user);
+    return { user: data.user, token: data.token, existing: false };
+  }, []);
+
+  // Anonymous student join via a live-session invite code. No account: the
+  // backend mints a short-lived guest JWT that flows through the same Bearer
+  // stack as real users, so ProtectedRoute and the conversation engine are
+  // unchanged. Returns { user, taskId } so the caller can route into the chat.
+  const loginGuest = useCallback(async ({ code, name }) => {
+    const response = await fetch(`${API_BASE_URL}/api/live/join`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ code, name }),
+    });
+
+    if (!response.ok) {
+      const err = await response.json().catch(() => ({ error: 'Could not join.' }));
+      throw new Error(err.error || err.message || 'Could not join.');
+    }
+
+    const data = await response.json();
+    localStorage.setItem('iteachu_token', data.token);
+    setToken(data.token);
+    setUser(data.user);
+    return { user: data.user, taskId: data.taskId };
+  }, []);
+
   const logout = useCallback(() => {
     localStorage.removeItem('iteachu_token');
     setToken(null);
@@ -91,6 +133,8 @@ export function AuthProvider({ children }) {
     token,
     loading,
     login,
+    loginDemo,
+    loginGuest,
     logout,
   };
 
