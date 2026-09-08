@@ -1,0 +1,113 @@
+/*
+ * gap-finder look, ported from gap-finder/src/app/globals.css and scoped under
+ * `.gf-scope` so it does not override ITeachU's Tailwind / oklch design tokens.
+ * Wrap the JoinLiveSession / DeployLiveSession views in <div className="gf-scope">.
+ */
+@import url('https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&display=swap');
+
+.gf-scope {
+  --bg: #eef1f4;
+  --surface: #fff;
+  --border: #e3e8ee;
+  --text: #212b36;
+  --muted: #5b6b7a;
+  --primary: #0a4d8c;
+  --primary-hover: #083c6e;
+  --coral: #ff6b4a;
+  --teal: #00a896;
+  --font-body: 'Figtree';
+  --font-display: 'Bricolage Grotesque';
+
+  font-family: var(--font-body), system-ui, sans-serif;
+  color: var(--text);
+  -webkit-font-smoothing: antialiased;
+}
+
+.gf-scope h1,
+.gf-scope h2,
+.gf-scope h3 {
+  font-family: var(--font-display), system-ui, sans-serif;
+  letter-spacing: -0.02em;
+}
+
+.gf-scope .card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 22px;
+  box-shadow: 0 1px 2px rgba(31, 41, 51, 0.04);
+}
+.gf-scope .input {
+  width: 100%;
+  padding: 13px 16px;
+  font-size: 15px;
+  color: var(--text);
+  border: 1.5px solid var(--border);
+  border-radius: 12px;
+  outline: none;
+  background: #fbfcfd;
+  font-family: inherit;
+}
+.gf-scope .input:focus {
+  border-color: #bbd5ec;
+}
+.gf-scope .btn {
+  font-size: 15px;
+  font-weight: 600;
+  padding: 13px 22px;
+  border-radius: 12px;
+  cursor: pointer;
+  border: 1.5px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+}
+.gf-scope .btn:hover {
+  background: #f4f7f8;
+}
+.gf-scope .btn-primary {
+  color: #fff;
+  background: var(--primary);
+  border: none;
+  box-shadow: 0 4px 14px rgba(14, 138, 130, 0.28);
+}
+.gf-scope .btn-primary:hover {
+  background: var(--primary-hover);
+}
+.gf-scope .btn-coral {
+  color: #fff;
+  background: var(--coral);
+  border: none;
+  box-shadow: 0 5px 16px rgba(244, 119, 94, 0.32);
+}
+.gf-scope .btn-coral:hover {
+  background: #f0553a;
+}
+.gf-scope .btn:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+@keyframes gf-up {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes gf-spin {
+  to { transform: rotate(360deg); }
+}
+@keyframes gf-float {
+  0%, 100% { transform: translateY(0) rotate(-2.5deg); }
+  50% { transform: translateY(-16px) rotate(2.5deg); }
+}
+@keyframes gf-shadow {
+  0%, 100% { transform: translateX(-50%) scale(1); opacity: 0.26; }
+  50% { transform: translateX(-50%) scale(0.8); opacity: 0.14; }
+}
+.gf-scope .gf-spinner {
+  width: 15px;
+  height: 15px;
+  border: 2px solid rgba(255, 255, 255, 0.4);
+  border-top-color: #fff;
+  border-radius: 50%;
+  display: inline-block;
+  animation: gf-spin 0.7s linear infinite;
+}

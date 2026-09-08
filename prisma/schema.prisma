@@ -104,3 +104,31 @@ model Assignment {
   @@index([studentId])
   @@index([classId])
 }
+
+// A teacher-deployed live session. The `code` (e.g. "K7P-2QM") is the ephemeral
+// invite a student types on the join screen; it resolves to a pre-authored task.
+model LiveSession {
+  id         String        @id @default(cuid())
+  code       String        @unique
+  taskId     String
+  title      String?
+  teacherId  String
+  status     String        @default("live") // draft | live | closed
+  createdAt  DateTime      @default(now())
+  deployedAt DateTime?
+  participants Participant[]
+  @@index([status])
+}
+
+// An anonymous student who joined a live session by code. Backs a short-lived
+// guest JWT (`guestUserId`); no account, no password.
+model Participant {
+  id          String      @id @default(cuid())
+  sessionId   String
+  displayName String
+  guestUserId String
+  status      String      @default("in_progress") // in_progress | completed
+  joinedAt    DateTime    @default(now())
+  session     LiveSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  @@index([sessionId])
+}

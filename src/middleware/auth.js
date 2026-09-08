@@ -24,15 +24,17 @@ export function authMiddleware(req, res, next) {
 
 /**
  * Generate a signed JWT for the given user.
- * Token expires in 7 days.
+ * Defaults to a 7-day expiry; pass `expiresIn` to override (e.g. '8h' for
+ * short-lived anonymous guest tokens minted at live-session join).
  *
  * @param {{ id: string, email: string, role: string, name: string }} user
+ * @param {{ expiresIn?: string | number }} [opts]
  * @returns {string} Signed JWT
  */
-export function generateToken(user) {
+export function generateToken(user, { expiresIn = '7d' } = {}) {
   return jwt.sign(
     { id: user.id, email: user.email, role: user.role, name: user.name },
     JWT_SECRET,
-    { expiresIn: '7d' }
+    { expiresIn }
   );
 }
